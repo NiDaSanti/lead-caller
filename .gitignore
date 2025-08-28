@@ -1,0 +1,70 @@
+# Node modules
+server/node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Code coverage
+coverage/
+.nyc_output/
+
+# Local dev databases
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+
+# Local dev artifacts
+*.local
+*.test.*
+*.bak
+*.swp
+*.tmp
+*.orig
+
+# Sockets
+*.sock
+
+# REST client files
+*.http
+*.rest
+
+# Upload directories
+uploads/
+public/uploads/
+
+# Git
+.git/
+
+# Sensitive data file
+data/leads.json
