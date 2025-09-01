@@ -160,7 +160,7 @@ export const receiveTranscript = async (req, res) => {
     if (lead) {
       let aiReply = ''
       try {
-        ({ aiReply }) = await askAI([
+        ({ aiReply } = await askAI([
           {
             role: 'system',
             content: `You're a solar represenative qualifying a homeowner. Speak casually and emotionally.`
@@ -169,7 +169,7 @@ export const receiveTranscript = async (req, res) => {
             role: 'user',
             content: SpeechResult
           }
-        ])
+        ]))
       } catch(err) {
         console.error ('AI reply failed: ', err);
         aiReply = 'AI response unavailable'
