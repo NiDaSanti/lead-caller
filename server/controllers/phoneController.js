@@ -1,6 +1,7 @@
 import { askAI } from '../services/openaiClients.js';
 import { getLeadById, saveLeadUpdate } from '../services/leadDataService.js';
 import { initiateCall } from '../services/twilioService.js';
+import { readLeads, updateLeadById } from '../utils/leadUtils.js';
 import twilio from 'twilio';
 // ✅ ADD THIS if missing
 export const startPhoneCall = async (req, res) => {
@@ -24,9 +25,10 @@ export const continuePhoneCall = async (req, res) => {
   console.log('Recording Received: ', req.body)
   const { TranscriptionText: transcription, RecordingUrl: recordingUrl } = req.body;
   const { leadId } = req.query;
+  const id = Number(leadId);
 
   console.log("📞 /continue called");
-  console.log("Lead ID:", leadId);
+  console.log("Lead ID:", id);
   console.log("Transcription:", transcription || "⏳ Not received yet");
   console.log("Recording URL:", recordingUrl);
 
@@ -36,10 +38,10 @@ export const continuePhoneCall = async (req, res) => {
   }
 
   const leads = readLeads();
-  const lead = leads.find((l) => l.id === leadId);
+  const lead = leads.find((l) => l.id === id);
 
   if (!lead) {
-    console.error("❌ Lead not found:", leadId);
+    console.error("❌ Lead not found:", id);
     return res.status(404).send("Lead not found");
   }
 
@@ -65,12 +67,12 @@ export const continuePhoneCall = async (req, res) => {
       },
     ];
 
-    updateLeadById(lead.id, { callHistory: updatedHistory });
+    updateLeadById(id, { callHistory: updatedHistory });
 
     // Build TwiML response
     const twiml = new twilio.twiml.VoiceResponse();
     twiml.say({ voice: 'Polly.Matthew', language: 'en-US' }, aiReply);
-    twiml.redirect(`/api/phone/voice?leadId=${lead.id}`);
+    twiml.redirect(`/api/phone/voice?leadId=${id}`);
 
     return res.type('text/xml').send(twiml.toString());
   } catch (err) {
@@ -144,31 +146,41 @@ export const getVoiceScript = (req, res) => {
 
 
 // 🔹 New: Receive and store real-time transcript
-export const receiveTranscript = (req, res) => {
+export const receiveTranscript = async (req, res) => {
   const { SpeechResult, leadId } = req.body;
+  const id = Number(leadId)
   const timestamp = new Date().toISOString();
 
-  console.log(`📝 Transcript received for ${leadId}:`, SpeechResult);
+  console.log(`📝 Transcript received for ${id}:`, SpeechResult);
 
-  if (leadId && SpeechResult) {
+  if (!Number.isNaN(id) && SpeechResult) {
     // Append transcript to callHistory (mock implementation — adapt as needed)
     const leads = readLeads();
-    const lead = leads.find(l => l.id === leadId);
+    const lead = leads.find(l => l.id === id);
     if (lead) {
+      let aiReply = ''
+      try {
+        ({ aiReply }) = await askAI([
+          {
+            role: 'system',
+            content: `You're a solar represenative qualifying a homeowner. Speak casually and emotionally.`
+          },
+          {
+            role: 'user',
+            content: SpeechResult
+          }
+        ])
+      } catch(err) {
+        console.error ('AI reply failed: ', err);
+        aiReply = 'AI response unavailable'
+      }
       lead.callHistory = lead.callHistory || [];
       lead.callHistory.push({
         user: SpeechResult,
-        ai: "⏳ AI is processing...",  // You can replace this with real AI response logic
+        ai: aiReply,  // You can replace this with real AI response logic
         timestamp
       });
-      // I just added this here.
-      // got back to rework.
-      lead.callHistory.push({
-        role: 'assistant',
-        content: aiReply,
-        timestamp
-      })
-      updateLeadById(leadId, lead);
+      updateLeadById(id, lead);
     }
   }
 

@@ -17,7 +17,7 @@ export const simulateCall = async (req, res) => {
     const responses = [];
 
     for (const question of questions) {
-      const aiReply = await askAI([
+      const { aiReply } = await askAI([
         {
           role: 'system',
           content: `You're a solar consultant calling a homeowner to qualify them.
