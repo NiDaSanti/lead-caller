@@ -43,22 +43,29 @@ router.post('/status', express.urlencoded({ extended: false }), (req, res) => {
 });
 
 // 🔹 Real-time transcript updates from Twilio (e.g. via webhook)
-router.post('/transcript', express.urlencoded({ extended: false }), (req, res) => {
-  const { CallSid, SpeechResult } = req.body;
-  const leadId = req.query.leadId || 'unknown';
+router.post(
+  '/transcript',
+  express.urlencoded({ extended: false }),
+  async (req, res) => {
+    const { SpeechResult } = req.body;
+    const leadId = req.query.leadId || req.body.leadId || 'unknown';
 
-  console.log(`📡 Transcript received for ${leadId}:`, SpeechResult);
+    console.log(`📡 Transcript received for ${leadId}:`, SpeechResult);
 
-  // Emit to client
-  req.app.get('io')?.emit('transcript-update', {
-    leadId,
-    text: SpeechResult,
-  });
+    // Emit to client
+    req.app.get('io')?.emit('transcript-update', {
+      leadId,
+      text: SpeechResult,
+    });
 
-  res.status(200).end();
-});
+    // Ensure controller receives the leadId regardless of source
+    if (!req.body.leadId && req.query.leadId) {
+      req.body.leadId = req.query.leadId;
+    }
 
-router.post('/transcript', express.urlencoded({ extended: false }), receiveTranscript);
+    await receiveTranscript(req, res);
+  }
+);
 
 
 export default router;
