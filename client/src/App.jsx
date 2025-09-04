@@ -31,6 +31,7 @@ function getStatusData(leads) {
 function App() {
   const { colorMode, toggleColorMode } = useColorMode();
   const formRef = useRef(null);
+  const socketRef = useRef(null);
 
   const bg = useColorModeValue("#f9fafb", "#1a202c");
   const cardBg = useColorModeValue("white", "gray.800");
@@ -43,13 +44,18 @@ function App() {
   const [filter, setFilter] = useState(() => localStorage.getItem("leadFilter") || "All");
   const [modalView, setModalView] = useState(null);
 
-  const socket = io('http://localhost:3000', { transports: ['websocket'] });
-
   useEffect(() => {
+    const socket = io('http://localhost:3000', { transports: ['websocket'] });
+    socketRef.current = socket;
+
     socket.on('call-ended', ({ to }) => {
       setLeads(prev => prev.map(lead => lead.phone === to ? { ...lead, callInProgress: false } : lead));
     });
-    return () => socket.off('call-ended');
+
+    return () => {
+      socket.off('call-ended');
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
