@@ -21,7 +21,7 @@ const STATUS_LABELS = {
   New: "🆕 New",
 };
 
-export default function LeadList({ leads, onUpdateLead, scrollRef, onRealCall, filter = "All" }) {
+export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All" }) {
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const headerBg = useColorModeValue("gray.100", "gray.700");
 
@@ -91,7 +91,6 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, onRealCall, f
                     key={lead.id}
                     lead={lead}
                     onUpdateLead={onUpdateLead}
-                    onRealCall={onRealCall}
                     scrollRef={idx === grouped[status].length - 1 ? scrollRef : null}
                   />
                 ))}
