@@ -1,7 +1,7 @@
 // App.jsx
 import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
-  Collapse, useColorMode, useColorModeValue, Icon, Image, Divider,
+  Collapse, useColorMode, useColorModeValue, Image,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip
 } from "@chakra-ui/react";
@@ -81,21 +81,6 @@ function App() {
     setLeads(prev => prev.map(l => l.id === updated.id ? updated : l));
   };
 
-  const initiateRealCall = async (lead) => {
-    try {
-      const res = await fetch("http://localhost:3000/api/phone/call", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: lead.phone, leadId: lead.id }),
-      });
-      const data = await res.json();
-      if (res.ok) alert(`✅ Call initiated to ${lead.firstName}`);
-      else alert(`❌ Call failed: ${data.error}`);
-    } catch (err) {
-      alert("⚠️ Network error while initiating call.");
-    }
-  };
-
   return (
     <Box bg={bg} minH="100vh">
       {/* NAVBAR */}
@@ -156,7 +141,7 @@ function App() {
           </Stack>
 
           <Collapse in={showLeads}>
-            <LeadList leads={leads} onUpdateLead={updateLead} filter={filter} onRealCall={initiateRealCall} />
+            <LeadList leads={leads} onUpdateLead={updateLead} filter={filter} />
           </Collapse>
 
           {!showLeads && (
