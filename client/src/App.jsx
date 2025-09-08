@@ -6,6 +6,18 @@ import {
   SimpleGrid, Tooltip as ChakraTooltip
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { Icon } from "@chakra-ui/react";
+import {
+  FiBarChart2,
+  FiFileText,
+  FiSettings,
+  FiList,
+  FiCheckCircle,
+  FiPhoneCall,
+  FiCalendar,
+  FiXCircle,
+  FiStar
+} from "react-icons/fi";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import LeadForm from "./components/LeadForm";
@@ -87,11 +99,19 @@ function App() {
       <Flex justify="space-between" align="center" px={8} py={4} bg={useColorModeValue("white", "gray.900")} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
         <Image src="/public/faviLogo.png" alt="Logo" h="36px" />
         <HStack spacing={2}>
-          {["dashboard", "reports", "settings"].map(view => (
-            <Button key={view} size="sm" variant="ghost" onClick={() => setModalView(view)}>
-              {view === "dashboard" && "📊 Dashboard"}
-              {view === "reports" && "📋 Reports"}
-              {view === "settings" && "⚙️ Settings"}
+          {[
+            { view: "dashboard", label: "Dashboard", icon: FiBarChart2 },
+            { view: "reports", label: "Reports", icon: FiFileText },
+            { view: "settings", label: "Settings", icon: FiSettings }
+          ].map(({ view, label, icon }) => (
+            <Button
+              key={view}
+              size="sm"
+              variant="ghost"
+              leftIcon={<Icon as={icon} aria-label={label} />}
+              onClick={() => setModalView(view)}
+            >
+              {label}
             </Button>
           ))}
           <ChakraTooltip label={colorMode === "light" ? "Dark Mode" : "Light Mode"}>
@@ -103,20 +123,23 @@ function App() {
       <Container maxW="7xl" py={10}>
         {/* FILTERS */}
         <HStack spacing={3} mb={8} justify="center" wrap="wrap">
-          {["All", "Qualified", "Answered", "Scheduled", "Unqualified", "New"].map(status => (
+          {[
+            { status: "All", label: "All", icon: FiList },
+            { status: "Qualified", label: "Qualified", icon: FiCheckCircle },
+            { status: "Answered", label: "Answered", icon: FiPhoneCall },
+            { status: "Scheduled", label: "Scheduled", icon: FiCalendar },
+            { status: "Unqualified", label: "Unqualified", icon: FiXCircle },
+            { status: "New", label: "New", icon: FiStar }
+          ].map(({ status, label, icon }) => (
             <Button
               key={status}
               size="sm"
               colorScheme={filter === status ? "orange" : "gray"}
               variant={filter === status ? "solid" : "outline"}
               onClick={() => setFilter(status)}
+              leftIcon={<Icon as={icon} aria-label={label} />}
             >
-              {status === "All" && "📋 All"}
-              {status === "Qualified" && "✅ Qualified"}
-              {status === "Answered" && "🟡 Answered"}
-              {status === "Scheduled" && "📅 Scheduled"}
-              {status === "Unqualified" && "❌ Unqualified"}
-              {status === "New" && "🆕 New"}
+              {label}
             </Button>
           ))}
         </HStack>
