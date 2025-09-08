@@ -86,15 +86,18 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
                 </Tr>
               </Thead>
               <Tbody>
-                {grouped[status].map((lead, idx) => (
-                  <LeadCard
-                    key={lead.id}
-                    lead={lead}
-                    onUpdateLead={onUpdateLead}
-                    scrollRef={idx === grouped[status].length - 1 ? scrollRef : null}
-                    socket={socket}
-                  />
-                ))}
+                {grouped[status].map((lead, idx) => {
+                  const isLast = idx === grouped[status].length - 1;
+                  return (
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onUpdateLead={onUpdateLead}
+                      scrollRef={isLast ? scrollRef : undefined}
+                      socket={socket}
+                    />
+                  );
+                })}
               </Tbody>
             </Table>
           </Box>
