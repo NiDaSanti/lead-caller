@@ -28,6 +28,19 @@ node server.js
 The server will start on:
 📡 http://localhost:3000
 
+🛠️ Environment Variables
+
+Create a `.env` file (or configure your deployment environment) with the following variables before starting the server:
+
+```
+TWILIO_SID=<your Twilio account SID>
+TWILIO_AUTH=<your Twilio auth token>
+TWILIO_PHONE=<your Twilio phone number>
+SERVER_BASE_URL=<public base URL of this server>
+```
+
+`SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
+
 🔌 API Endpoints
 GET /api/leads
 Retrieve all existing leads.

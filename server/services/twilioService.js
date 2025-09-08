@@ -7,17 +7,15 @@ dotenv.config();
 const accountSid = process.env.TWILIO_SID;
 const authToken = process.env.TWILIO_AUTH;
 const twilioNumber = process.env.TWILIO_PHONE;
-
-console.log('🧪 TWILIO_ACCOUNT_SID:', accountSid);
-console.log('🧪 TWILIO_PHONE:', twilioNumber);
+const serverBaseUrl = process.env.SERVER_BASE_URL;
 
 const client = twilio(accountSid, authToken);
 
 export const initiateCall = async (phoneNumber, leadId) => {
   console.log("📞 initiateCall →", phoneNumber, leadId);
 
-  const voiceUrl = `https://dbcc434f8aa7.ngrok-free.app/api/phone/voice?leadId=${encodeURIComponent(leadId)}`;
-  const statusCallbackUrl = `https://dbcc434f8aa7.ngrok-free.app/api/phone/status-callback`;
+  const voiceUrl = `${serverBaseUrl}/api/phone/voice?leadId=${encodeURIComponent(leadId)}`;
+  const statusCallbackUrl = `${serverBaseUrl}/api/phone/status-callback`;
 
   const call = await client.calls.create({
     to: phoneNumber,
