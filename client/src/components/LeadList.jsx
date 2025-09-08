@@ -21,7 +21,7 @@ const STATUS_LABELS = {
   New: "🆕 New",
 };
 
-export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All" }) {
+export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All", socket }) {
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const headerBg = useColorModeValue("gray.100", "gray.700");
 
@@ -92,6 +92,7 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
                     lead={lead}
                     onUpdateLead={onUpdateLead}
                     scrollRef={idx === grouped[status].length - 1 ? scrollRef : null}
+                    socket={socket}
                   />
                 ))}
               </Tbody>
