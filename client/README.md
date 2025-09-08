@@ -142,6 +142,15 @@ POST /api/leads → Add a new lead
 
 PUT /api/leads/:id → Update lead with answers, notes, or status
 
+📥 CSV Upload Format
+You can bulk upload leads via a CSV file. Ensure the first row contains these headers:
+
+```
+firstName,lastName,phone,street,city,state,zip,note
+```
+
+Each subsequent row should provide the lead's details. The `note` column is optional.
+
 ✅ What’s Ready
 Fully functioning UI to manage, qualify, and report on leads
 

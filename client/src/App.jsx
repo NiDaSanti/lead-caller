@@ -23,6 +23,7 @@ import { io } from "socket.io-client";
 import LeadForm from "./components/LeadForm";
 import LeadList from "./components/LeadList";
 import LeadSummary from "./components/LeadSummary";
+import LeadCsvUpload from "./components/LeadCsvUpload";
 
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip,
@@ -153,7 +154,12 @@ function App() {
             </VStack>
             <IconButton icon={showForm ? <MinusIcon /> : <AddIcon />} size="sm" onClick={() => setShowForm(!showForm)} />
           </Stack>
-          <Collapse in={showForm}><LeadForm onNewLead={addLead} /></Collapse>
+          <Collapse in={showForm}>
+            <Stack spacing={8}>
+              <LeadForm onNewLead={addLead} />
+              <LeadCsvUpload onNewLead={addLead} />
+            </Stack>
+          </Collapse>
         </Box>
 
         {/* LEADS */}
