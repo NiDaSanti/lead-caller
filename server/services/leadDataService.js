@@ -4,9 +4,8 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// const leadsFile = path.join(__dirname, '../data/leads.json');
 
-const leadsFile = path.join(process.cwd(), 'data/leads.json');
+const leadsFile = path.join(__dirname, '../data/leads.json');
 
 export async function getLeadById(id = null, phone = null) {
   const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
