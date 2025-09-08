@@ -24,6 +24,7 @@ import LeadForm from "./components/LeadForm";
 import LeadList from "./components/LeadList";
 import LeadSummary from "./components/LeadSummary";
 import LeadCsvUpload from "./components/LeadCsvUpload";
+import AutoCallMenu from "./components/AutoCallMenu";
 
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip,
@@ -56,6 +57,13 @@ function App() {
   const [showLeads, setShowLeads] = useState(() => localStorage.getItem("showLeads") !== "false");
   const [filter, setFilter] = useState(() => localStorage.getItem("leadFilter") || "All");
   const [modalView, setModalView] = useState(null);
+
+  const navItems = [
+    { view: "dashboard", label: "Dashboard", icon: FiBarChart2 },
+    { view: "reports", label: "Reports", icon: FiFileText },
+    { view: "settings", label: "Settings", icon: FiSettings },
+    { view: "autoCall", label: "Auto Call Settings", icon: FiPhoneCall }
+  ];
 
   useEffect(() => {
     const socket = io('http://localhost:3000', { transports: ['websocket'] });
@@ -100,11 +108,7 @@ function App() {
       <Flex justify="space-between" align="center" px={8} py={4} bg={useColorModeValue("white", "gray.900")} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
         <Image src="/public/faviLogo.png" alt="Logo" h="36px" />
         <HStack spacing={2}>
-          {[
-            { view: "dashboard", label: "Dashboard", icon: FiBarChart2 },
-            { view: "reports", label: "Reports", icon: FiFileText },
-            { view: "settings", label: "Settings", icon: FiSettings }
-          ].map(({ view, label, icon }) => (
+          {navItems.map(({ view, label, icon }) => (
             <Button
               key={view}
               size="sm"
@@ -227,7 +231,9 @@ function App() {
         <Modal isOpen onClose={() => setModalView(null)} size="6xl" isCentered>
           <ModalOverlay />
           <ModalContent borderRadius="xl" p={{ base: 4, md: 8 }} bg={useColorModeValue("white", "gray.900")} shadow="xl" maxH="90vh" overflowY="auto">
-            <ModalHeader textTransform="capitalize" fontSize="2xl">{modalView}</ModalHeader>
+            <ModalHeader textTransform="capitalize" fontSize="2xl">
+              {navItems.find(item => item.view === modalView)?.label || modalView}
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody pt={6}>
               {modalView === "reports" ? (
@@ -240,6 +246,8 @@ function App() {
                 <Box textAlign="center">
                   <Text fontSize="lg" fontWeight="medium">⚙️ Settings</Text>
                 </Box>
+              ) : modalView === "autoCall" ? (
+                <AutoCallMenu />
               ) : (
                 <Text>This is the <strong>{modalView}</strong> section.</Text>
               )}
