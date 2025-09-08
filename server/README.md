@@ -112,6 +112,20 @@ Edit
     { "timestamp": "2025-07-08T01:45:00Z", "questions": [...] }
   ]
 }
+
+📞 Twilio Setup
+1. **Upgrade your account**  
+   - Trial accounts can only call verified numbers and play a trial notice.  
+   - Upgrade in the Twilio Console to remove these restrictions.
+2. **Purchase a phone number**  
+   - In the Twilio Console, go to *Phone Numbers → Buy* and select a voice-capable number.  
+   - This number becomes your caller ID.
+3. **Configure environment variables**  
+   - `TWILIO_SID` – Your Twilio Account SID.  
+   - `TWILIO_AUTH` – Your Twilio Auth Token.  
+   - `TWILIO_PHONE` – The purchased Twilio number in E.164 format (e.g., `+15551234567`).  
+   - `SERVER_BASE_URL` – Public URL of this server for Twilio webhooks.
+
 📊 Future Features & Roadmap
 ✅ Save live notes and updates
 🔄 Transition from JSON to PostgreSQL or MongoDB
