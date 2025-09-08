@@ -89,6 +89,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
       setCallStatus("✅ Call initiated");
     } catch (err) {
       setCallStatus("❌ Failed to connect");
+      setIsCalling(false);
     } finally {
       openCall();
     }
@@ -187,6 +188,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
               startCall(e);
             }}
             mr={2}
+            isLoading={isCalling}
           >
             📞 Call
           </Button>
