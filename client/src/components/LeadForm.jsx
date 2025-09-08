@@ -1,15 +1,23 @@
 import { useState } from 'react';
 import {
   Box,
-  Stack,
+  SimpleGrid,
+  GridItem,
   Input,
   Button,
   FormControl,
   FormLabel,
+  FormHelperText,
+  InputGroup,
+  InputLeftElement,
+  Icon,
   useToast,
   Textarea,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { PhoneIcon } from '@chakra-ui/icons';
+import { MdLocationOn } from 'react-icons/md';
+import PropTypes from 'prop-types';
 
 export default function LeadForm({ onNewLead }) {
   const [firstName, setFirstName] = useState('');
@@ -99,50 +107,110 @@ export default function LeadForm({ onNewLead }) {
       boxShadow="md"
     >
       <form onSubmit={handleSubmit}>
-        <Stack spacing={5}>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
           <FormControl isRequired>
             <FormLabel>First Name</FormLabel>
-            <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            <Input
+              placeholder="Jane"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <FormHelperText>The lead&apos;s given name.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Last Name</FormLabel>
-            <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            <Input
+              placeholder="Doe"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <FormHelperText>Family name of the lead.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Phone</FormLabel>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <PhoneIcon color="gray.300" />
+              </InputLeftElement>
+              <Input
+                placeholder="555-123-4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </InputGroup>
+            <FormHelperText>Include area code.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Street Address</FormLabel>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <Icon as={MdLocationOn} color="gray.300" />
+              </InputLeftElement>
+              <Input
+                placeholder="1234 Main St"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </InputGroup>
+            <FormHelperText>Street number and name.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>City</FormLabel>
-            <Input value={city} onChange={(e) => setCity(e.target.value)} />
+            <Input
+              placeholder="Los Angeles"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+            <FormHelperText>City of residence.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>State</FormLabel>
-            <Input value={state} onChange={(e) => setState(e.target.value)} />
+            <Input
+              placeholder="CA"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+            />
+            <FormHelperText>Two-letter state code.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>ZIP Code</FormLabel>
-            <Input value={zipcode} onChange={(e) => setZipcode(e.target.value)} />
+            <Input
+              placeholder="90001"
+              value={zipcode}
+              onChange={(e) => setZipcode(e.target.value)}
+            />
+            <FormHelperText>5-digit ZIP code.</FormHelperText>
           </FormControl>
 
-          <FormControl>
-            <FormLabel>Note</FormLabel>
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
-          </FormControl>
+          <GridItem colSpan={{ base: 1, md: 2 }}>
+            <FormControl>
+              <FormLabel>Note</FormLabel>
+              <Textarea
+                placeholder="Additional details about the lead"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <FormHelperText>Optional notes.</FormHelperText>
+            </FormControl>
+          </GridItem>
 
-          <Button type="submit" colorScheme="blue">Submit Lead</Button>
-        </Stack>
+          <GridItem colSpan={{ base: 1, md: 2 }}>
+            <Button w="full" type="submit" colorScheme="blue">
+              Submit Lead
+            </Button>
+          </GridItem>
+        </SimpleGrid>
       </form>
     </Box>
   );
 }
+
+LeadForm.propTypes = {
+  onNewLead: PropTypes.func.isRequired,
+};
