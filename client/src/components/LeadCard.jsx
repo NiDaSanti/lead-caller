@@ -2,7 +2,7 @@ import {
   Card, CardBody, Heading, Text, Stack, Box, Badge,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider
+  VStack, Button, IconButton, Avatar, Divider, Input
 } from '@chakra-ui/react';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
 import { FiFileText } from 'react-icons/fi';
@@ -32,6 +32,9 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
   const [isCalling, setIsCalling] = useState(false);
   const [callStatus, setCallStatus] = useState("Idle");
   const [transcript, setTranscript] = useState([]);
+  const [followUpDateInput, setFollowUpDateInput] = useState(
+    lead.followUpDate ? new Date(lead.followUpDate).toISOString().slice(0, 16) : ''
+  );
 
   const { isOpen: isReportOpen, onOpen: openReport, onClose: closeReport } = useDisclosure();
   const { isOpen: isCallOpen, onOpen: openCall, onClose: closeCall } = useDisclosure();
@@ -45,6 +48,12 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [scrollRef]);
+
+  useEffect(() => {
+    setFollowUpDateInput(
+      lead.followUpDate ? new Date(lead.followUpDate).toISOString().slice(0, 16) : ''
+    );
+  }, [lead.followUpDate]);
 
   const checkCallStatus = async () => {
     try {
@@ -92,6 +101,25 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
       setIsCalling(false);
     } finally {
       openCall();
+    }
+  };
+
+  const saveFollowUpDate = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          followUpDate: followUpDateInput
+            ? new Date(followUpDateInput).toISOString()
+            : null,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update lead');
+      const updated = await res.json();
+      onUpdateLead(updated);
+    } catch (err) {
+      console.error('Failed to schedule call:', err);
     }
   };
 
@@ -260,6 +288,19 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
                 {lead.status === "Qualified" && (
                   <Text fontSize="sm" color="green.500">✅ This lead is marked as Qualified.</Text>
                 )}
+              </Box>
+              <Divider />
+              <Box w="100%">
+                <Heading size="sm" mb={2}>📅 Schedule Follow-Up</Heading>
+                <Input
+                  type="datetime-local"
+                  size="sm"
+                  value={followUpDateInput}
+                  onChange={(e) => setFollowUpDateInput(e.target.value)}
+                />
+                <Button size="sm" mt={2} onClick={saveFollowUpDate}>
+                  Save
+                </Button>
               </Box>
             </VStack>
           </ModalBody>
