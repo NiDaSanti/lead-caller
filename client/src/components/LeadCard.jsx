@@ -1,10 +1,11 @@
+/* eslint-disable react/prop-types */
 import {
   Card, CardBody, Heading, Text, Stack, Box, Badge,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, useToast, Divider,Tr, Td,
+  VStack, Button, IconButton, Avatar, Divider,
 } from '@chakra-ui/react';
-import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
+import { PhoneIcon, CloseIcon, ViewIcon } from '@chakra-ui/icons';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
@@ -25,7 +26,6 @@ function SoundWave() {
 }
 
 export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
-  const toast = useToast();
   const reportRef = useRef();
   const pollingRef = useRef(null);
 
@@ -120,90 +120,64 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
 
   return (
     <>
-      {/* <Card bg={cardBg} border="1px solid" borderColor={useColorModeValue("gray.200", "gray.600")}
-        borderRadius="xl" boxShadow="sm" _hover={{ shadow: "lg", transform: "scale(1.01)" }}
-        transition="all 0.2s ease" cursor="pointer" onClick={openReport}>
+      <Card
+        ref={scrollRef}
+        bg={cardBg}
+        border="1px solid"
+        borderColor={useColorModeValue("gray.200", "gray.600")}
+        borderRadius="xl"
+        boxShadow="sm"
+        _hover={{ shadow: "lg", transform: "scale(1.01)" }}
+        transition="all 0.2s ease"
+        cursor="pointer"
+        onClick={openReport}
+      >
         <CardBody>
           <Stack spacing={2} fontSize="sm">
             <Heading size="sm" noOfLines={1} color={textColor}>
               🧍 {lead.firstName} {lead.lastName}
             </Heading>
             <Text fontSize="xs" color="gray.500">📞 {lead.phone}</Text>
-            <Badge fontSize="0.7em" colorScheme={lead.status === "Qualified" ? "green" : "yellow"}>
-              {lead.status}
+            <Badge
+              colorScheme={
+                lead.status === "Qualified"
+                  ? "green"
+                  : lead.status === "Unqualified"
+                  ? "red"
+                  : lead.status === "Answered"
+                  ? "yellow"
+                  : "gray"
+              }
+              variant="subtle"
+              fontSize="0.75em"
+              px={2}
+              py={1}
+              borderRadius="md"
+            >
+              {lead.status?.toUpperCase()}
             </Badge>
             <Stack direction="row" spacing={2} mt={3}>
-              <Button size="xs" variant="outline" leftIcon={<PhoneIcon />} onClick={startCall} isLoading={isCalling}>
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<PhoneIcon />}
+                onClick={startCall}
+                isLoading={isCalling}
+              >
                 Call
               </Button>
-              <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); openReport(); }}>
+              <Button
+                size="sm"
+                colorScheme="blue"
+                leftIcon={<ViewIcon />}
+                onClick={(e) => { e.stopPropagation(); openReport(); }}
+              >
                 View Report
               </Button>
             </Stack>
           </Stack>
         </CardBody>
-      </Card> */}
-      <Tr
-        ref={scrollRef}
-        onClick={openReport}
-        _hover={{ bg: useColorModeValue("gray.50", "gray.700"), cursor: "pointer" }}
-        transition="all 0.2s ease"
-      >
-        <Td fontWeight="medium">
-          🧍 <strong>{lead.firstName} {lead.lastName}</strong>
-        </Td>
-
-        <Td color="gray.600" fontSize="sm">
-          📞 <span>{lead.phone}</span>
-        </Td>
-
-        <Td>
-          <Badge
-            colorScheme={
-              lead.status === "Qualified"
-                ? "green"
-                : lead.status === "Unqualified"
-                ? "red"
-                : lead.status === "Answered"
-                ? "yellow"
-                : "gray"
-            }
-            variant="subtle"
-            fontSize="0.75em"
-            px={3}
-            py={1}
-            borderRadius="md"
-          >
-            {lead.status?.toUpperCase()}
-          </Badge>
-        </Td>
-
-        <Td>
-          <Button
-            size="sm"
-            variant="outline"
-            colorScheme="teal"
-            onClick={(e) => {
-              e.stopPropagation();
-              startCall(e);
-            }}
-            mr={2}
-            isLoading={isCalling}
-          >
-            📞 Call
-          </Button>
-          <Button
-            size="sm"
-            colorScheme="blue"
-            onClick={(e) => {
-              e.stopPropagation();
-              openReport();
-            }}
-          >
-            📄 View Report
-          </Button>
-        </Td>
-      </Tr>
+      </Card>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
         <ModalOverlay />

@@ -1,15 +1,12 @@
-// LeadList.jsx (Modern Professional Table List View)
+/* eslint-disable react/prop-types */
+// LeadList.jsx (Card Grid View)
 import {
   Text,
   Center,
   Stack,
   Heading,
   useColorModeValue,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
+  SimpleGrid,
   Box,
 } from "@chakra-ui/react";
 import LeadCard from "./LeadCard";
@@ -22,8 +19,8 @@ const STATUS_LABELS = {
 };
 
 export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All", socket }) {
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const headerBg = useColorModeValue("gray.100", "gray.700");
+
+  const headingColor = useColorModeValue("orange.600", "orange.300");
 
   const grouped = leads.reduce((acc, lead) => {
     const status = (lead.status || "New").trim();
@@ -53,7 +50,7 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
     return (
       <Center py={12}>
         <Text fontSize="md" color="gray.500">
-          🔍 No leads found for "{filter}" filter.
+          🔍 No leads found for {filter} filter.
         </Text>
       </Center>
     );
@@ -68,7 +65,7 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
               as="h3"
               fontSize="lg"
               mb={3}
-              color={useColorModeValue("orange.600", "orange.300")}
+              color={headingColor}
               borderLeft="4px solid"
               borderColor="orange.300"
               pl={3}
@@ -76,30 +73,20 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
               {STATUS_LABELS[status] || `🔖 ${status}`}
             </Heading>
 
-            <Table variant="simple" size="sm">
-              <Thead bg={headerBg}>
-                <Tr>
-                  <Th>👤 Name</Th>
-                  <Th>📞 Phone</Th>
-                  <Th>Status</Th>
-                  <Th>Actions</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {grouped[status].map((lead, idx) => {
-                  const isLast = idx === grouped[status].length - 1;
-                  return (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      onUpdateLead={onUpdateLead}
-                      scrollRef={isLast ? scrollRef : undefined}
-                      socket={socket}
-                    />
-                  );
-                })}
-              </Tbody>
-            </Table>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+              {grouped[status].map((lead, idx) => {
+                const isLast = idx === grouped[status].length - 1;
+                return (
+                  <LeadCard
+                    key={lead.id}
+                    lead={lead}
+                    onUpdateLead={onUpdateLead}
+                    scrollRef={isLast ? scrollRef : undefined}
+                    socket={socket}
+                  />
+                );
+              })}
+            </SimpleGrid>
           </Box>
         ) : null
       ))}
