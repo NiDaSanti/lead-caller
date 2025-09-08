@@ -94,6 +94,7 @@ export const handleCallStatus = async (req, res) => {
     if (lead) {
       lead.callInProgress = false;
       lead.lastContacted = new Date().toISOString(); // ✅ track last contact
+      lead.followUpDate = null;
       await saveLeadUpdate(lead.id, lead);
     }
   } catch (e) {
