@@ -59,7 +59,8 @@ export const addLead = (req, res) => {
 // PUT /api/leads/:id
 export const updateLead = (req, res) => {
   try {
-    const { id, note, tags, followUpDate, answers, ...rest } = req.body;
+    const id = Number(req.params.id);
+    const { id: _unusedId, note, tags, followUpDate, answers, ...rest } = req.body;
     const leads = readDataFile(leadsFile);
     const index = leads.findIndex(lead => lead.id === id);
 
