@@ -24,7 +24,7 @@ function SoundWave() {
   );
 }
 
-export default function LeadCard({ lead, onUpdateLead, socket }) {
+export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
   const toast = useToast();
   const reportRef = useRef();
   const pollingRef = useRef(null);
@@ -39,6 +39,12 @@ export default function LeadCard({ lead, onUpdateLead, socket }) {
   const cardBg = useColorModeValue("white", "gray.700");
   const modalBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.800", "gray.100");
+
+  useEffect(() => {
+    if (scrollRef?.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [scrollRef]);
 
   const checkCallStatus = async () => {
     try {
@@ -137,6 +143,7 @@ export default function LeadCard({ lead, onUpdateLead, socket }) {
         </CardBody>
       </Card> */}
       <Tr
+        ref={scrollRef}
         onClick={openReport}
         _hover={{ bg: useColorModeValue("gray.50", "gray.700"), cursor: "pointer" }}
         transition="all 0.2s ease"
