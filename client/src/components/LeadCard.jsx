@@ -3,8 +3,10 @@ import {
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
   VStack, Button, IconButton, Avatar, useToast, Divider,Tr, Td,
+  HStack, Icon
 } from '@chakra-ui/react';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
+import { FiFileText, FiUser, FiPhone } from 'react-icons/fi';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
@@ -150,11 +152,17 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
         transition="all 0.2s ease"
       >
         <Td fontWeight="medium">
-          🧍 <strong>{lead.firstName} {lead.lastName}</strong>
+          <HStack>
+            <Icon as={FiUser} aria-label="Name" />
+            <Text as="span" fontWeight="bold">{lead.firstName} {lead.lastName}</Text>
+          </HStack>
         </Td>
 
         <Td color="gray.600" fontSize="sm">
-          📞 <span>{lead.phone}</span>
+          <HStack>
+            <Icon as={FiPhone} aria-label="Phone" />
+            <Text as="span">{lead.phone}</Text>
+          </HStack>
         </Td>
 
         <Td>
@@ -189,8 +197,9 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
             }}
             mr={2}
             isLoading={isCalling}
+            leftIcon={<PhoneIcon />}
           >
-            📞 Call
+            Call
           </Button>
           <Button
             size="sm"
@@ -199,8 +208,9 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
               e.stopPropagation();
               openReport();
             }}
+            leftIcon={<Icon as={FiFileText} />}
           >
-            📄 View Report
+            View Report
           </Button>
         </Td>
       </Tr>
@@ -209,7 +219,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
         <ModalOverlay />
         <ModalContent borderRadius="2xl" bg={modalBg} p={6} position="relative">
           <IconButton icon={<CloseIcon />} position="absolute" top={2} right={2} size="sm"
-            variant="ghost" onClick={closeCall} />
+            variant="ghost" onClick={closeCall} aria-label="Close call" />
           <ModalHeader textAlign="center" fontSize="lg" fontWeight="bold" color={textColor}>
             📞 Calling {lead.firstName}
           </ModalHeader>

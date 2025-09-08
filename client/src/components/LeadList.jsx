@@ -11,14 +11,26 @@ import {
   Tr,
   Th,
   Box,
+  HStack,
+  Icon
 } from "@chakra-ui/react";
+import {
+  FiCheckCircle,
+  FiPhoneCall,
+  FiXCircle,
+  FiStar,
+  FiTag,
+  FiUser,
+  FiPhone,
+  FiMoreHorizontal
+} from "react-icons/fi";
 import LeadCard from "./LeadCard";
 
-const STATUS_LABELS = {
-  Qualified: "✅ Qualified",
-  Answered: "🟡 Answered",
-  Unqualified: "❌ Unqualified",
-  New: "🆕 New",
+const STATUS_ICONS = {
+  Qualified: FiCheckCircle,
+  Answered: FiPhoneCall,
+  Unqualified: FiXCircle,
+  New: FiStar,
 };
 
 export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All", socket }) {
@@ -73,16 +85,39 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
               borderColor="orange.300"
               pl={3}
             >
-              {STATUS_LABELS[status] || `🔖 ${status}`}
+              <HStack>
+                <Icon as={STATUS_ICONS[status] || FiTag} aria-label={`${status} leads`} />
+                <Text>{status}</Text>
+              </HStack>
             </Heading>
 
             <Table variant="simple" size="sm">
               <Thead bg={headerBg}>
                 <Tr>
-                  <Th>👤 Name</Th>
-                  <Th>📞 Phone</Th>
-                  <Th>Status</Th>
-                  <Th>Actions</Th>
+                  <Th>
+                    <HStack>
+                      <Icon as={FiUser} aria-label="Name" />
+                      <Text>Name</Text>
+                    </HStack>
+                  </Th>
+                  <Th>
+                    <HStack>
+                      <Icon as={FiPhone} aria-label="Phone" />
+                      <Text>Phone</Text>
+                    </HStack>
+                  </Th>
+                  <Th>
+                    <HStack>
+                      <Icon as={FiTag} aria-label="Status" />
+                      <Text>Status</Text>
+                    </HStack>
+                  </Th>
+                  <Th>
+                    <HStack>
+                      <Icon as={FiMoreHorizontal} aria-label="Actions" />
+                      <Text>Actions</Text>
+                    </HStack>
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
