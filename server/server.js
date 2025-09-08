@@ -11,6 +11,7 @@ import actionsRoutes from './routes/actions.js';
 import phoneRoutes from './routes/phoneRoutes.js';
 import simulationRoutes from './routes/simulationRoutes.js';
 import webhookRoutes from './routes/webhook.js';
+import schedulerRoutes from './routes/schedulerRoutes.js';
 import { startScheduler } from './services/callScheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +45,7 @@ app.use('/api/leads', leadsRoutes);
 app.use('/api/actions', actionsRoutes);
 app.use('/api/phone', phoneRoutes);
 app.use('/api/simulation', simulationRoutes);
+app.use('/api/scheduler', schedulerRoutes);
 
 // ✅ Start scheduled jobs
 startScheduler();
