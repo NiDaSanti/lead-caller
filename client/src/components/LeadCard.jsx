@@ -7,9 +7,6 @@ import {
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
-import io from 'socket.io-client';
-
-const socket = io(window.location.origin);
 
 function SoundWave() {
   const waveColor = useColorModeValue("#3182ce", "#90cdf4");
@@ -27,7 +24,7 @@ function SoundWave() {
   );
 }
 
-export default function LeadCard({ lead, onUpdateLead }) {
+export default function LeadCard({ lead, onUpdateLead, socket }) {
   const toast = useToast();
   const reportRef = useRef();
   const pollingRef = useRef(null);
@@ -92,15 +89,17 @@ export default function LeadCard({ lead, onUpdateLead }) {
   };
 
   useEffect(() => {
-    socket.on('transcript-update', ({ leadId, text }) => {
+    if (!socket) return;
+    const handler = ({ leadId, text }) => {
       if (leadId === lead.id) {
         setTranscript((prev) => [...prev, text]);
       }
-    });
-    return () => {
-      socket.off('transcript-update');
     };
-  }, [lead.id]);
+    socket.on('transcript-update', handler);
+    return () => {
+      socket.off('transcript-update', handler);
+    };
+  }, [lead.id, socket]);
 
   const downloadPDF = () => {
     html2pdf().from(reportRef.current).set({

@@ -141,7 +141,7 @@ function App() {
           </Stack>
 
           <Collapse in={showLeads}>
-            <LeadList leads={leads} onUpdateLead={updateLead} filter={filter} />
+            <LeadList leads={leads} onUpdateLead={updateLead} filter={filter} socket={socketRef.current} />
           </Collapse>
 
           {!showLeads && (
