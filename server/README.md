@@ -76,6 +76,29 @@ Edit
   "lastName": "Smith",
   "phone": "987-654-3210"
 }
+
+POST /api/leads/webhook
+Receive new lead data from external providers.
+
+Request Body:
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "phone": "+15551234567",
+  "address": {
+    "street": "123 Main St",
+    "city": "Springfield",
+    "state": "CA",
+    "zip": "90210"
+  },
+  "note": "Optional note about the lead"
+}
+```
+
+All fields are required except `note`.
+
 PUT /api/leads/:id
 Update an existing lead (notes, status, responses, etc.).
 
