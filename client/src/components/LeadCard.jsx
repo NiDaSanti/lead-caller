@@ -2,11 +2,10 @@ import {
   Card, CardBody, Heading, Text, Stack, Box, Badge,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, useToast, Divider,Tr, Td,
-  HStack, Icon
+  VStack, Button, IconButton, Avatar, Divider
 } from '@chakra-ui/react';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
-import { FiFileText, FiUser, FiPhone } from 'react-icons/fi';
+import { FiFileText } from 'react-icons/fi';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
@@ -27,7 +26,6 @@ function SoundWave() {
 }
 
 export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
-  const toast = useToast();
   const reportRef = useRef();
   const pollingRef = useRef(null);
 
@@ -122,9 +120,18 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
 
   return (
     <>
-      {/* <Card bg={cardBg} border="1px solid" borderColor={useColorModeValue("gray.200", "gray.600")}
-        borderRadius="xl" boxShadow="sm" _hover={{ shadow: "lg", transform: "scale(1.01)" }}
-        transition="all 0.2s ease" cursor="pointer" onClick={openReport}>
+      <Card
+        ref={scrollRef}
+        bg={cardBg}
+        border="1px solid"
+        borderColor={useColorModeValue("gray.200", "gray.600")}
+        borderRadius="xl"
+        boxShadow="sm"
+        _hover={{ shadow: "lg", transform: "scale(1.01)" }}
+        transition="all 0.2s ease"
+        cursor="pointer"
+        onClick={openReport}
+      >
         <CardBody>
           <Stack spacing={2} fontSize="sm">
             <Heading size="sm" noOfLines={1} color={textColor}>
@@ -135,85 +142,30 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
               {lead.status}
             </Badge>
             <Stack direction="row" spacing={2} mt={3}>
-              <Button size="xs" variant="outline" leftIcon={<PhoneIcon />} onClick={startCall} isLoading={isCalling}>
+              <Button
+                size="xs"
+                variant="outline"
+                leftIcon={<PhoneIcon />}
+                onClick={startCall}
+                isLoading={isCalling}
+              >
                 Call
               </Button>
-              <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); openReport(); }}>
+              <Button
+                size="xs"
+                colorScheme="blue"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openReport();
+                }}
+                leftIcon={<FiFileText />}
+              >
                 View Report
               </Button>
             </Stack>
           </Stack>
         </CardBody>
-      </Card> */}
-      <Tr
-        ref={scrollRef}
-        onClick={openReport}
-        _hover={{ bg: useColorModeValue("gray.50", "gray.700"), cursor: "pointer" }}
-        transition="all 0.2s ease"
-      >
-        <Td fontWeight="medium">
-          <HStack>
-            <Icon as={FiUser} aria-label="Name" />
-            <Text as="span" fontWeight="bold">{lead.firstName} {lead.lastName}</Text>
-          </HStack>
-        </Td>
-
-        <Td color="gray.600" fontSize="sm">
-          <HStack>
-            <Icon as={FiPhone} aria-label="Phone" />
-            <Text as="span">{lead.phone}</Text>
-          </HStack>
-        </Td>
-
-        <Td>
-          <Badge
-            colorScheme={
-              lead.status === "Qualified"
-                ? "green"
-                : lead.status === "Unqualified"
-                ? "red"
-                : lead.status === "Answered"
-                ? "yellow"
-                : "gray"
-            }
-            variant="subtle"
-            fontSize="0.75em"
-            px={3}
-            py={1}
-            borderRadius="md"
-          >
-            {lead.status?.toUpperCase()}
-          </Badge>
-        </Td>
-
-        <Td>
-          <Button
-            size="sm"
-            variant="outline"
-            colorScheme="teal"
-            onClick={(e) => {
-              e.stopPropagation();
-              startCall(e);
-            }}
-            mr={2}
-            isLoading={isCalling}
-            leftIcon={<PhoneIcon />}
-          >
-            Call
-          </Button>
-          <Button
-            size="sm"
-            colorScheme="blue"
-            onClick={(e) => {
-              e.stopPropagation();
-              openReport();
-            }}
-            leftIcon={<Icon as={FiFileText} />}
-          >
-            View Report
-          </Button>
-        </Td>
-      </Tr>
+      </Card>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
         <ModalOverlay />

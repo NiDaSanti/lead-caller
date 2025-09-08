@@ -1,16 +1,12 @@
-// LeadList.jsx (Modern Professional Table List View)
+// LeadList.jsx (Modern Professional Card Grid View)
 import {
   Text,
   Center,
   Stack,
   Heading,
   useColorModeValue,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
   Box,
+  SimpleGrid,
   HStack,
   Icon
 } from "@chakra-ui/react";
@@ -19,10 +15,7 @@ import {
   FiPhoneCall,
   FiXCircle,
   FiStar,
-  FiTag,
-  FiUser,
-  FiPhone,
-  FiMoreHorizontal
+  FiTag
 } from "react-icons/fi";
 import LeadCard from "./LeadCard";
 
@@ -34,9 +27,6 @@ const STATUS_ICONS = {
 };
 
 export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All", socket }) {
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const headerBg = useColorModeValue("gray.100", "gray.700");
-
   const grouped = leads.reduce((acc, lead) => {
     const status = (lead.status || "New").trim();
     if (!acc[status]) acc[status] = [];
@@ -91,50 +81,20 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
               </HStack>
             </Heading>
 
-            <Table variant="simple" size="sm">
-              <Thead bg={headerBg}>
-                <Tr>
-                  <Th>
-                    <HStack>
-                      <Icon as={FiUser} aria-label="Name" />
-                      <Text>Name</Text>
-                    </HStack>
-                  </Th>
-                  <Th>
-                    <HStack>
-                      <Icon as={FiPhone} aria-label="Phone" />
-                      <Text>Phone</Text>
-                    </HStack>
-                  </Th>
-                  <Th>
-                    <HStack>
-                      <Icon as={FiTag} aria-label="Status" />
-                      <Text>Status</Text>
-                    </HStack>
-                  </Th>
-                  <Th>
-                    <HStack>
-                      <Icon as={FiMoreHorizontal} aria-label="Actions" />
-                      <Text>Actions</Text>
-                    </HStack>
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {grouped[status].map((lead, idx) => {
-                  const isLast = idx === grouped[status].length - 1;
-                  return (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      onUpdateLead={onUpdateLead}
-                      scrollRef={isLast ? scrollRef : undefined}
-                      socket={socket}
-                    />
-                  );
-                })}
-              </Tbody>
-            </Table>
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+              {grouped[status].map((lead, idx) => {
+                const isLast = idx === grouped[status].length - 1;
+                return (
+                  <LeadCard
+                    key={lead.id}
+                    lead={lead}
+                    onUpdateLead={onUpdateLead}
+                    scrollRef={isLast ? scrollRef : undefined}
+                    socket={socket}
+                  />
+                );
+              })}
+            </SimpleGrid>
           </Box>
         ) : null
       ))}
