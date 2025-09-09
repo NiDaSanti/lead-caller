@@ -7,6 +7,10 @@ const __dirname = path.dirname(__filename);
 const leadsFile = path.join(__dirname, '../data/leads.json');
 
 export function readLeads() {
+  if (!fs.existsSync(leadsFile)) {
+    fs.writeFileSync(leadsFile, '[]', 'utf-8');
+    return [];
+  }
   const data = fs.readFileSync(leadsFile, 'utf-8');
   return JSON.parse(data);
 }
