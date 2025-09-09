@@ -30,7 +30,7 @@ The server will start on:
 
 🛠️ Environment Variables
 
-Create a `.env` file (or configure your deployment environment) with the following variables before starting the server:
+Create a `.env` file **one level above the `server` directory** (or configure your deployment environment) with the following variables before starting the server. The file must define `ADMIN_USERNAME` and either `ADMIN_PASSWORD_HASH` (SHA-256) or `ADMIN_PASSWORD`:
 
 ```
 TWILIO_SID=<your Twilio account SID>
@@ -39,6 +39,8 @@ TWILIO_PHONE=<your Twilio phone number>
 SERVER_BASE_URL=<public base URL of this server>
 ADMIN_USERNAME=<admin login name>
 ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
+# or
+ADMIN_PASSWORD=<admin password>
 ```
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
