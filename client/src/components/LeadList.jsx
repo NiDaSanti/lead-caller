@@ -45,7 +45,7 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
     return (
       <Center py={12}>
         <Text fontSize="md" color="gray.500">
-          🤷 No leads yet. Use the form above to add one!
+          No leads yet. Use the form above to add one.
         </Text>
       </Center>
     );
@@ -55,7 +55,7 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
     return (
       <Center py={12}>
         <Text fontSize="md" color="gray.500">
-          🔍 No leads found for "{filter}" filter.
+          No leads found for "{filter}" filter.
         </Text>
       </Center>
     );

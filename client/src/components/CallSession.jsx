@@ -89,9 +89,9 @@ export default function CallSession({ lead, onClose }) {
         <HStack spacing={4}>
           <Avatar name={`${lead.firstName} ${lead.lastName}`} />
           <Box>
-            <Text fontSize="lg" fontWeight="bold" color={textColor}>
-              ☎️ Call Session: {lead.firstName} {lead.lastName}
-            </Text>
+              <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                Call Session: {lead.firstName} {lead.lastName}
+              </Text>
             <Text fontSize="sm" color="gray.500">
               Phone: {lead.phone}
             </Text>
@@ -143,7 +143,7 @@ export default function CallSession({ lead, onClose }) {
         {responses.length > 0 && (
           <Box mt={10} p={6} bg={cardBg} borderRadius="xl" border="1px solid" borderColor={borderColor}>
             <Text fontWeight="bold" mb={4} fontSize="md" color={textColor}>
-              🧾 Live Summary
+              Live Summary
             </Text>
             <VStack spacing={3} align="stretch">
               {responses.map((entry, i) => (

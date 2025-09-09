@@ -48,11 +48,11 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("brand.50", "gray.900");
+  const bg = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
   const headingColor = useColorModeValue("brand.700", "brand.100");
-  const borderColor = useColorModeValue("brand.200", "gray.600");
-  const footerBg = useColorModeValue("gray.50", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const footerBg = useColorModeValue("gray.100", "gray.800");
   const modalBg = useColorModeValue("white", "gray.900");
 
   const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
@@ -165,7 +165,7 @@ function App({ onLogout }) {
   return (
     <Box bg={bg} minH="100vh">
       {/* NAVBAR */}
-      <Flex justify="space-between" align="center" px={8} py={4} bgGradient={useColorModeValue('linear(to-r, brand.500, accent.500)', 'gray.900')} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
+      <Flex justify="space-between" align="center" px={8} py={4} bg={useColorModeValue('brand.700', 'gray.900')} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
         <Text fontSize="lg" fontWeight="bold" color="white">Lead Caller</Text>
         <HStack spacing={2}>
         {navItems.map(({ view, label, icon }) => (
@@ -201,7 +201,7 @@ function App({ onLogout }) {
             <Button
               key={status}
               size="sm"
-              colorScheme={filter === status ? "orange" : "gray"}
+              colorScheme={filter === status ? "brand" : "gray"}
               variant={filter === status ? "solid" : "outline"}
               onClick={() => setFilter(status)}
               leftIcon={<Icon as={icon} aria-label={label} />}
@@ -215,7 +215,7 @@ function App({ onLogout }) {
         <Box bg={cardBg} borderRadius="xl" p={8} mb={10} ref={formRef} border="1px solid" borderColor={borderColor} shadow="sm">
           <Stack direction="row" justify="space-between" align="center" mb={4}>
             <VStack align="start" spacing={1}>
-              <Text fontSize="xl" fontWeight="bold" color={headingColor}>✍️ Add New Lead</Text>
+              <Text fontSize="xl" fontWeight="bold" color={headingColor}>Add New Lead</Text>
               <Text fontSize="sm" color="gray.500">Start the conversation</Text>
             </VStack>
             <IconButton icon={showForm ? <MinusIcon /> : <AddIcon />} size="sm" onClick={() => setShowForm(!showForm)} />
@@ -231,7 +231,7 @@ function App({ onLogout }) {
         {/* LEADS */}
         <Box bg={cardBg} borderRadius="xl" p={8} border="1px solid" borderColor={borderColor} shadow="sm">
           <Stack direction="row" justify="space-between" align="center" mb={4}>
-            <Text fontSize="xl" fontWeight="bold" color={headingColor}>📁 Leads</Text>
+            <Text fontSize="xl" fontWeight="bold" color={headingColor}>Leads</Text>
             <IconButton icon={showLeads ? <MinusIcon /> : <AddIcon />} size="sm" onClick={() => setShowLeads(!showLeads)} />
           </Stack>
 
@@ -247,11 +247,11 @@ function App({ onLogout }) {
 
           {!showLeads && (
             <Box mt={10}>
-              <Text fontSize="lg" fontWeight="bold" mb={4} color={headingColor}>📊 Lead Intelligence Snapshot</Text>
+              <Text fontSize="lg" fontWeight="bold" mb={4} color={headingColor}>Lead Intelligence Snapshot</Text>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10} mb={8}>
                 {/* Pie Chart */}
                 <Box bg={cardBg} borderRadius="xl" p={6} shadow="md" border="1px solid" borderColor={borderColor}>
-                  <Text fontSize="md" fontWeight="medium" mb={4}>🥧 Status Distribution</Text>
+                  <Text fontSize="md" fontWeight="medium" mb={4}>Status Distribution</Text>
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                       <Pie data={getStatusData(leads)} dataKey="value" nameKey="name" outerRadius={80} label>
@@ -266,7 +266,7 @@ function App({ onLogout }) {
 
                 {/* Bar Chart */}
                 <Box bg={cardBg} borderRadius="xl" p={6} shadow="md" border="1px solid" borderColor={borderColor}>
-                  <Text fontSize="md" fontWeight="medium" mb={4}>📦 Leads by Status</Text>
+                  <Text fontSize="md" fontWeight="medium" mb={4}>Leads by Status</Text>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={getStatusData(leads)} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -301,7 +301,7 @@ function App({ onLogout }) {
       {/* FOOTER */}
         <Box mt={20} py={10} borderTop="1px solid" borderColor={borderColor} bg={footerBg}>
         <Container maxW="6xl" textAlign="center">
-          <Text fontSize="sm" color="gray.600">🚀 Created by <strong>Nick Santiago</strong></Text>
+          <Text fontSize="sm" color="gray.600">Created by <strong>Nick Santiago</strong></Text>
           <Text fontSize="xs" mt={1} color="gray.500">Solar Consultant • Tech Builder • AI Sales Trainer</Text>
         </Container>
       </Box>
