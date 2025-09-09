@@ -3,6 +3,11 @@ import { Box, Button, FormControl, FormLabel, Heading, Input, VStack, useToast }
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+const loginBoxVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -36,9 +41,9 @@ export default function Login({ onLogin }) {
         borderWidth="1px"
         borderRadius="lg"
         boxShadow="md"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        variants={loginBoxVariants}
+        initial="hidden"
+        animate="visible"
       >
         <VStack spacing={4}>
           <Heading size="md">Sign In</Heading>
