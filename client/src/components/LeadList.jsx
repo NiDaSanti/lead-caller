@@ -26,7 +26,7 @@ const STATUS_ICONS = {
   New: FiStar,
 };
 
-export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All", socket }) {
+export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef, filter = "All", socket }) {
   const grouped = leads.reduce((acc, lead) => {
     const status = (lead.status || "New").trim();
     if (!acc[status]) acc[status] = [];
@@ -89,6 +89,7 @@ export default function LeadList({ leads, onUpdateLead, scrollRef, filter = "All
                     key={lead.id}
                     lead={lead}
                     onUpdateLead={onUpdateLead}
+                    onDeleteLead={onDeleteLead}
                     scrollRef={isLast ? scrollRef : undefined}
                     socket={socket}
                   />

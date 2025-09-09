@@ -2,7 +2,7 @@ import {
   Card, CardBody, Heading, Text, Stack, Box, Badge,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider, Input
+  VStack, Button, IconButton, Avatar, Divider, Input, useToast
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
@@ -28,7 +28,7 @@ function SoundWave() {
 
 const MotionBox = motion(Box);
 
-export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
+export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, socket }) {
   const reportRef = useRef();
   const pollingRef = useRef(null);
 
@@ -47,6 +47,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
   const cardBg = useColorModeValue("white", "gray.700");
   const modalBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.800", "gray.100");
+  const toast = useToast();
 
   useEffect(() => {
     if (scrollRef?.current) {
@@ -203,32 +204,51 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
             <Badge fontSize="0.7em" colorScheme={lead.status === "Qualified" ? "green" : "yellow"}>
               {lead.status}
             </Badge>
-            <Stack direction="row" spacing={2} mt={3}>
-              <Button
-                size="xs"
-                variant="outline"
-                leftIcon={<PhoneIcon />}
-                onClick={startCall}
-                isLoading={isCalling}
-              >
-                Call
-              </Button>
-              <Button
-                size="xs"
-                colorScheme="brand"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openReport();
-                }}
-                leftIcon={<FiFileText />}
-              >
-                View Report
-              </Button>
-            </Stack>
-            </Stack>
-          </CardBody>
-        </Card>
-      </MotionBox>
+          <Stack direction="row" spacing={2} mt={3}>
+            <Button
+              size="xs"
+              variant="outline"
+              leftIcon={<PhoneIcon />}
+              onClick={startCall}
+              isLoading={isCalling}
+            >
+              Call
+            </Button>
+            <Button
+              size="xs"
+              colorScheme="brand"
+              onClick={(e) => {
+                e.stopPropagation();
+                openReport();
+              }}
+              leftIcon={<FiFileText />}
+            >
+              View Report
+            </Button>
+            <Button
+              size="xs"
+              colorScheme="red"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm("Delete this lead?")) {
+                  onDeleteLead(lead.id);
+                  toast({
+                    title: "Lead removed",
+                    status: "info",
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </Stack>
+          </Stack>
+        </CardBody>
+      </Card>
+    </MotionBox>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
         <ModalOverlay />

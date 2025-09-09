@@ -126,6 +126,16 @@ function App({ onLogout }) {
     setLeads(prev => prev.map(l => l.id === updated.id ? updated : l));
   };
 
+  const deleteLead = async (id) => {
+    await fetch(`http://localhost:3000/api/leads/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
   const total = leads.length;
   const grouped = leads.reduce((acc, lead) => {
     const key = lead.status || "New";
@@ -221,7 +231,13 @@ function App({ onLogout }) {
           </Stack>
 
           <Collapse in={showLeads}>
-            <LeadList leads={leads} onUpdateLead={updateLead} filter={filter} socket={socketRef.current} />
+            <LeadList
+              leads={leads}
+              onUpdateLead={updateLead}
+              onDeleteLead={deleteLead}
+              filter={filter}
+              socket={socketRef.current}
+            />
           </Collapse>
 
           {!showLeads && (
