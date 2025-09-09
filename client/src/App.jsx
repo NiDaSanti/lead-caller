@@ -3,7 +3,8 @@ import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
   Collapse, useColorMode, useColorModeValue, Image, useToken,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-  SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText
+  SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText,
+  FormControl, FormLabel, Switch
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { Icon } from "@chakra-ui/react";
@@ -318,13 +319,66 @@ function App({ onLogout }) {
               {modalView === "reports" ? (
                 <LeadSummary leads={leads} />
               ) : modalView === "dashboard" ? (
-                <Box textAlign="center">
-                  <Text fontSize="lg" fontWeight="medium">📊 Dashboard metrics</Text>
-                </Box>
+                <VStack spacing={8} align="stretch">
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                    <Box>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie data={getStatusData(leads)} dataKey="value" nameKey="name" outerRadius={100} label>
+                            {getStatusData(leads).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </Box>
+                    <Box>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={getStatusData(leads)} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <RechartsTooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill={brand500} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </SimpleGrid>
+                  <SimpleGrid columns={{ base: 2, md: 3 }} spacing={6}>
+                    {metrics.map(({ label, value, help }) => (
+                      <Box key={label} bg={cardBg} borderRadius="xl" p={6} shadow="md" border="1px solid" borderColor={borderColor}>
+                        <Stat>
+                          <StatLabel fontWeight="medium">{label}</StatLabel>
+                          <StatNumber>{value}</StatNumber>
+                          {help && <StatHelpText>{help}</StatHelpText>}
+                        </Stat>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                </VStack>
               ) : modalView === "settings" ? (
-                <Box textAlign="center">
-                  <Text fontSize="lg" fontWeight="medium">⚙️ Settings</Text>
-                </Box>
+                <VStack spacing={4} align="stretch">
+                  <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="show-form-toggle" flex="1" mb="0">
+                      Show Lead Form
+                    </FormLabel>
+                    <Switch id="show-form-toggle" isChecked={showForm} onChange={(e) => setShowForm(e.target.checked)} />
+                  </FormControl>
+                  <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="show-leads-toggle" flex="1" mb="0">
+                      Show Lead List
+                    </FormLabel>
+                    <Switch id="show-leads-toggle" isChecked={showLeads} onChange={(e) => setShowLeads(e.target.checked)} />
+                  </FormControl>
+                  <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="color-mode-toggle" flex="1" mb="0">
+                      Dark Mode
+                    </FormLabel>
+                    <Switch id="color-mode-toggle" isChecked={colorMode === 'dark'} onChange={toggleColorMode} />
+                  </FormControl>
+                </VStack>
               ) : modalView === "autoCall" ? (
                 <AutoCallMenu />
               ) : (
