@@ -5,7 +5,7 @@ import {
   VStack, Button, IconButton, Avatar, Divider, Input
 } from '@chakra-ui/react';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiTrash } from 'react-icons/fi';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
@@ -25,7 +25,7 @@ function SoundWave() {
   );
 }
 
-export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
+export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, socket }) {
   const reportRef = useRef();
   const pollingRef = useRef(null);
 
@@ -198,6 +198,19 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
               >
                 View Report
               </Button>
+              {onDeleteLead && (
+                <Button
+                  size="xs"
+                  colorScheme="red"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteLead(lead.id);
+                  }}
+                  leftIcon={<FiTrash />}
+                >
+                  Delete
+                </Button>
+              )}
             </Stack>
           </Stack>
         </CardBody>
