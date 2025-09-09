@@ -9,16 +9,11 @@ import {
   VStack,
   useToast,
   InputGroup,
-  InputLeftElement
+  InputLeftElement,
+  Image
 } from '@chakra-ui/react';
-import { motion } from 'framer-motion';
 import { FiUser, FiLock } from 'react-icons/fi';
 import PropTypes from 'prop-types';
-
-// Define motion-enhanced components outside of the component to prevent
-// re-creation on every render, which caused the login form to remount and
-// interrupt typing.
-const MotionBox = motion(Box);
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -48,24 +43,22 @@ export default function Login({ onLogin }) {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bgGradient="linear(to-br, brand.500, accent.500)"
+      bg="gray.50"
       p={4}
     >
-      <MotionBox
+      <Box
         as="form"
         onSubmit={handleSubmit}
-        p={8}
+        p={10}
         maxW="md"
         w="full"
         bg="white"
         borderWidth="1px"
         borderRadius="lg"
         boxShadow="lg"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
       >
-          <VStack spacing={6}>
+          <VStack spacing={8}>
+            <Image src="/vite.svg" alt="Lead Caller Logo" boxSize="60px" />
             <Heading size="lg" color="brand.500">Lead Caller</Heading>
             <Heading size="md">Sign In</Heading>
           <FormControl>
@@ -78,6 +71,7 @@ export default function Login({ onLogin }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 borderRadius="md"
+                color="black"
               />
             </InputGroup>
           </FormControl>
@@ -92,6 +86,7 @@ export default function Login({ onLogin }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 borderRadius="md"
+                color="black"
               />
             </InputGroup>
           </FormControl>
@@ -100,12 +95,11 @@ export default function Login({ onLogin }) {
             colorScheme="brand"
             w="full"
             borderRadius="md"
-            _hover={{ bgGradient: 'linear(to-r, brand.600, accent.600)' }}
           >
             Login
           </Button>
         </VStack>
-      </MotionBox>
+      </Box>
     </Box>
   );
 }
