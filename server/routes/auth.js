@@ -9,9 +9,16 @@ const hash = (str) => crypto.createHash('sha256').update(str).digest('hex');
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
   const storedUser = process.env.ADMIN_USERNAME;
-  const storedHash = process.env.ADMIN_PASSWORD_HASH;
+  const storedHash = process.env.ADMIN_PASSWORD
+    ? hash(process.env.ADMIN_PASSWORD)
+    : process.env.ADMIN_PASSWORD_HASH;
 
-  if (!username || !password || username !== storedUser || hash(password) !== storedHash) {
+  if (
+    !username ||
+    !password ||
+    username !== storedUser ||
+    hash(password) !== storedHash
+  ) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
