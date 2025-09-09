@@ -35,11 +35,18 @@ export const addLead = (req, res) => {
   try {
     const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
 
+    const normalizePhone = (p) => String(p).replace(/\D/g, '');
+    const normalizedPhone = normalizePhone(phone);
+    const exists = leads.some(l => normalizePhone(l.phone) === normalizedPhone);
+    if (exists) {
+      return res.status(409).json({ error: 'Phone already exists' });
+    }
+
     const newLead = {
       id: Date.now(),
       firstName,
       lastName,
-      phone,
+      phone: normalizedPhone,
       address,
       note,
       status: "New",

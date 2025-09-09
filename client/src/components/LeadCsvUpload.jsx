@@ -24,6 +24,7 @@ export default function LeadCsvUpload({ onNewLead }) {
       complete: async (results) => {
         let success = 0;
         let errors = 0;
+        let duplicates = 0;
 
         for (const row of results.data) {
           if (Object.values(row).every((val) => val === undefined || val === '')) continue;
@@ -50,6 +51,12 @@ export default function LeadCsvUpload({ onNewLead }) {
               },
               body: JSON.stringify(lead),
             });
+
+            if (res.status === 409) {
+              duplicates += 1;
+              continue;
+            }
+
             const data = await res.json();
             if (data.success) {
               success += 1;
@@ -62,10 +69,14 @@ export default function LeadCsvUpload({ onNewLead }) {
           }
         }
 
+        const message =
+          `${success} leads added` +
+          `${duplicates ? `, ${duplicates} duplicates` : ''}` +
+          `${errors ? `, ${errors} failed` : ''}.`;
         toast({
           title: 'CSV Upload Complete',
-          description: `${success} leads added${errors ? `, ${errors} failed` : ''}.`,
-          status: errors ? 'warning' : 'success',
+          description: message,
+          status: duplicates || errors ? 'warning' : 'success',
           duration: 5000,
           isClosable: true,
         });

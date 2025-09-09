@@ -69,6 +69,17 @@ export default function LeadForm({ onNewLead }) {
 
       const data = await res.json();
 
+      if (res.status === 409) {
+        toast({
+          title: 'Phone already exists',
+          description: data.error,
+          status: 'warning',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
       if (data.success) {
         onNewLead(data.lead);
         setFirstName('');
