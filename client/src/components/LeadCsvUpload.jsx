@@ -24,9 +24,19 @@ export default function LeadCsvUpload({ onNewLead }) {
       complete: async (results) => {
         let success = 0;
         let errors = 0;
+        let duplicates = 0;
+        const phones = new Set();
 
         for (const row of results.data) {
           if (Object.values(row).every((val) => val === undefined || val === '')) continue;
+
+          const normalizedPhone = row.phone ? row.phone.replace(/\D/g, '') : '';
+          if (phones.has(normalizedPhone)) {
+            errors += 1;
+            duplicates += 1;
+            continue;
+          }
+          phones.add(normalizedPhone);
 
           const lead = {
             firstName: row.firstName,
@@ -64,7 +74,7 @@ export default function LeadCsvUpload({ onNewLead }) {
 
         toast({
           title: 'CSV Upload Complete',
-          description: `${success} leads added${errors ? `, ${errors} failed` : ''}.`,
+          description: `${success} leads added${errors ? `, ${errors} failed${duplicates ? ` (${duplicates} duplicates skipped)` : ''}` : ''}.`,
           status: errors ? 'warning' : 'success',
           duration: 5000,
           isClosable: true,
