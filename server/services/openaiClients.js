@@ -34,3 +34,38 @@ export const askAI = async (messages) => {
     throw new Error('Failed to generate AI response');
   }
 };
+
+export const summarizeLead = async (lead) => {
+  try {
+    const historyText = (lead.callHistory || [])
+      .map(entry => {
+        const ai = typeof entry.ai === 'object' ? entry.ai.aiReply : entry.ai;
+        return `Prospect: ${entry.user}\nAgent: ${ai}`;
+      })
+      .join('\n');
+
+    const messages = [
+      {
+        role: 'system',
+        content:
+          "You summarize conversations between solar reps and homeowners. Provide a short summary and suggest a follow-up step.",
+      },
+      {
+        role: 'user',
+        content: historyText || 'No conversation history.',
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages,
+      temperature: 0.7,
+      max_tokens: 120,
+    });
+
+    return response.choices[0].message.content.trim();
+  } catch (err) {
+    console.error('❌ OpenAI Summary Error:', err.message);
+    return 'Summary unavailable';
+  }
+};
