@@ -51,6 +51,7 @@ export default function LeadCsvUpload({ onNewLead }) {
               },
               body: JSON.stringify(lead),
             });
+            // Skip adding a lead if the phone number already exists
 
             if (res.status === 409) {
               duplicates += 1;
