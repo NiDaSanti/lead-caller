@@ -3,6 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { readDataFile, writeDataFile } from '../utils/fileHelpers.js';
 import { logAction } from '../utils/logger.js';
+import { summarizeLead } from '../services/openaiClients.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -149,4 +150,20 @@ export const getLeadById = (req, res) => {
   res.json(lead);
 };
 
+
+export const getLeadSummary = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
+    const lead = leads.find(l => l.id === id);
+    if (!lead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+    const summary = await summarizeLead(lead);
+    res.json({ summary });
+  } catch (err) {
+    console.error('Summary error:', err);
+    res.status(500).json({ error: 'Failed to generate summary' });
+  }
+};
 

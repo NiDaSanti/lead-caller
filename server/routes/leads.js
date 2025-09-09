@@ -4,6 +4,7 @@ import {
   addLead,
   updateLead,
   getLeadById, // ← You need this
+  getLeadSummary,
 } from '../controllers/leadController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -11,6 +12,8 @@ const router = express.Router();
 
 router.get('/', requireAuth, getLeads);
 router.post('/', requireAuth, addLead);
+
+router.get('/:id/summary', requireAuth, getLeadSummary);
 
 // ✅ Add this route
 router.get('/:id', requireAuth, getLeadById);

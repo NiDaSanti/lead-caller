@@ -38,6 +38,8 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
   const [followUpDateInput, setFollowUpDateInput] = useState(
     lead.followUpDate ? new Date(lead.followUpDate).toISOString().slice(0, 16) : ''
   );
+  const [aiSummary, setAiSummary] = useState('');
+  const [isSummaryLoading, setSummaryLoading] = useState(false);
 
   const { isOpen: isReportOpen, onOpen: openReport, onClose: closeReport } = useDisclosure();
   const { isOpen: isCallOpen, onOpen: openCall, onClose: closeCall } = useDisclosure();
@@ -155,6 +157,21 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     }).save();
+  };
+
+  const generateSummary = async () => {
+    setSummaryLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}/summary`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      setAiSummary(data.summary || 'No summary available');
+    } catch (err) {
+      console.error('Failed to fetch summary:', err);
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
   return (
@@ -288,6 +305,19 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
                   <Text>No AI interaction history.</Text>
                 )}
               </Box>
+
+              <Divider />
+
+              {aiSummary ? (
+                <Box>
+                  <Heading size="sm" mb={2}>🤖 AI Summary</Heading>
+                  <Text fontSize="sm" whiteSpace="pre-wrap">{aiSummary}</Text>
+                </Box>
+              ) : (
+                <Button size="sm" onClick={generateSummary} isLoading={isSummaryLoading}>
+                  Generate AI Summary
+                </Button>
+              )}
 
               {lead.notes && (
                 <>
