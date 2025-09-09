@@ -72,7 +72,7 @@ export default function LeadSummary({ leads }) {
       <VStack align="start" spacing={10}>
         {/* Status Grid */}
         <Box w="100%">
-          <Heading size="md" mb={4}>📊 Lead Status Overview</Heading>
+          <Heading size="md" mb={4}>Lead Status Overview</Heading>
           <SimpleGrid columns={{ base: 2, sm: 3, md: 3, lg: 4 }} spacing={6}>
             {statuses.map((stat, i) => (
               <SlideFade in={true} offsetY="10px" key={stat.label} delay={0.05 * i}>
@@ -94,7 +94,7 @@ export default function LeadSummary({ leads }) {
 
         {/* Insights */}
         <Box w="100%">
-          <Heading size="md" mb={4}>📈 Performance Insights</Heading>
+          <Heading size="md" mb={4}>Performance Insights</Heading>
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
             {insights.map((insight, i) => (
               <Box
