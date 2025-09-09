@@ -204,7 +204,7 @@ export default function LeadForm({ onNewLead }) {
           </GridItem>
 
           <GridItem colSpan={{ base: 1, md: 2 }}>
-            <Button w="full" type="submit" colorScheme="blue">
+            <Button w="full" type="submit" colorScheme="brand">
               Submit Lead
             </Button>
           </GridItem>

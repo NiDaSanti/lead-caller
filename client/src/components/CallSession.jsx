@@ -104,7 +104,7 @@ export default function CallSession({ lead, onClose }) {
         {/* Progress Bar */}
         <Progress
           value={(currentIndex / questions.length) * 100}
-          colorScheme="blue"
+          colorScheme="brand"
           size="sm"
           borderRadius="full"
           mb={6}
@@ -112,7 +112,7 @@ export default function CallSession({ lead, onClose }) {
 
         {/* Current Question Block */}
         <Box bg={cardBg} p={6} borderRadius="xl" border="1px solid" borderColor={borderColor}>
-          <Badge colorScheme="blue" fontSize="0.75rem" mb={2}>
+          <Badge colorScheme="brand" fontSize="0.75rem" mb={2}>
             Question {currentIndex + 1} of {questions.length}
           </Badge>
           <Text fontSize="md" fontWeight="semibold" color={textColor}>
@@ -131,7 +131,7 @@ export default function CallSession({ lead, onClose }) {
           <Button
             mt={4}
             onClick={handleNext}
-            colorScheme="blue"
+            colorScheme="brand"
             size="sm"
             alignSelf="flex-end"
           >

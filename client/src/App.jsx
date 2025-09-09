@@ -255,7 +255,7 @@ function App({ onLogout }) {
                   ))}
                 </SimpleGrid>
 
-                <Button size="sm" colorScheme="blue" onClick={() => setShowLeads(true)}>Open Lead Manager</Button>
+                <Button size="sm" colorScheme="brand" onClick={() => setShowLeads(true)}>Open Lead Manager</Button>
               </Box>
             )}
           </Box>
