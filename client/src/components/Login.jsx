@@ -16,6 +16,11 @@ import { motion } from 'framer-motion';
 import { FiUser, FiLock } from 'react-icons/fi';
 import PropTypes from 'prop-types';
 
+// Define motion-enhanced components outside of the component to prevent
+// re-creation on every render, which caused the login form to remount and
+// interrupt typing.
+const MotionBox = motion(Box);
+
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -37,8 +42,6 @@ export default function Login({ onLogin }) {
       toast({ title: 'Login failed', status: 'error', duration: 3000, isClosable: true });
     }
   };
-
-  const MotionBox = motion(Box);
 
   return (
     <Box
