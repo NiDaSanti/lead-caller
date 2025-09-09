@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, FormControl, FormLabel, Heading, Input, VStack, useToast } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
 export default function Login({ onLogin }) {
@@ -24,9 +25,21 @@ export default function Login({ onLogin }) {
     }
   };
 
+  const MotionBox = motion(Box);
+
   return (
     <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
-      <Box as="form" onSubmit={handleSubmit} p={8} borderWidth="1px" borderRadius="lg" boxShadow="md">
+      <MotionBox
+        as="form"
+        onSubmit={handleSubmit}
+        p={8}
+        borderWidth="1px"
+        borderRadius="lg"
+        boxShadow="md"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <VStack spacing={4}>
           <Heading size="md">Sign In</Heading>
           <FormControl>
@@ -39,7 +52,7 @@ export default function Login({ onLogin }) {
           </FormControl>
           <Button type="submit" colorScheme="blue" w="full">Login</Button>
         </VStack>
-      </Box>
+      </MotionBox>
     </Box>
   );
 }
