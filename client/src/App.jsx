@@ -3,7 +3,7 @@ import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
   Collapse, useColorMode, useColorModeValue, Image,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-  SimpleGrid, Tooltip as ChakraTooltip
+  SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { Icon } from "@chakra-ui/react";
@@ -107,6 +107,27 @@ function App({ onLogout }) {
     });
     setLeads(prev => prev.map(l => l.id === updated.id ? updated : l));
   };
+
+  const total = leads.length;
+  const grouped = leads.reduce((acc, lead) => {
+    const key = lead.status || "New";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+  const answered = grouped["Answered"] || 0;
+  const qualified = grouped["Qualified"] || 0;
+  const scheduled = grouped["Scheduled"] || 0;
+  const engagementRate = total ? Math.round(((answered + qualified + scheduled) / total) * 100) : 0;
+  const conversionRate = answered ? Math.round((scheduled / answered) * 100) : 0;
+
+  const metrics = [
+    { label: "Total Leads", value: total },
+    { label: "Qualified", value: qualified, help: total ? `${Math.round((qualified / total) * 100)}% of total` : "0%" },
+    { label: "Answered", value: answered, help: total ? `${Math.round((answered / total) * 100)}% of total` : "0%" },
+    { label: "Scheduled", value: scheduled, help: total ? `${Math.round((scheduled / total) * 100)}% of total` : "0%" },
+    { label: "Engagement Rate", value: `${engagementRate}%`, help: "Answered + Qualified + Scheduled" },
+    { label: "Conversion Rate", value: `${conversionRate}%`, help: "Scheduled ÷ Answered" }
+  ];
 
   return (
     <Box bg={bg} minH="100vh">
@@ -217,12 +238,24 @@ function App({ onLogout }) {
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>
-              </SimpleGrid>
+                </SimpleGrid>
 
-              <Button size="sm" colorScheme="blue" onClick={() => setShowLeads(true)}>Open Lead Manager</Button>
-            </Box>
-          )}
-        </Box>
+                <SimpleGrid columns={{ base: 2, md: 3 }} spacing={6} mb={8}>
+                  {metrics.map(({ label, value, help }) => (
+                    <Box key={label} bg={cardBg} borderRadius="xl" p={6} shadow="md" border="1px solid" borderColor={borderColor}>
+                      <Stat>
+                        <StatLabel fontWeight="medium">{label}</StatLabel>
+                        <StatNumber>{value}</StatNumber>
+                        {help && <StatHelpText>{help}</StatHelpText>}
+                      </Stat>
+                    </Box>
+                  ))}
+                </SimpleGrid>
+
+                <Button size="sm" colorScheme="blue" onClick={() => setShowLeads(true)}>Open Lead Manager</Button>
+              </Box>
+            )}
+          </Box>
       </Container>
 
       {/* FOOTER */}
