@@ -50,7 +50,7 @@ export default function Login({ onLogin }) {
             <FormLabel>Password</FormLabel>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </FormControl>
-          <Button type="submit" colorScheme="blue" w="full">Login</Button>
+          <Button type="submit" colorScheme="brand" w="full">Login</Button>
         </VStack>
       </MotionBox>
     </Box>

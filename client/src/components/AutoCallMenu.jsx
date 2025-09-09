@@ -85,7 +85,7 @@ export default function AutoCallMenu() {
             <NumberInputField name="callsPerHour" />
           </NumberInput>
         </FormControl>
-        <Button type="submit" colorScheme="blue">Save</Button>
+        <Button type="submit" colorScheme="brand">Save</Button>
         {message && (
           <Alert status={message.type}>
             <AlertIcon />

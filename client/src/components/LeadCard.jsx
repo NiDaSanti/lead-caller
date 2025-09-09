@@ -215,7 +215,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
               </Button>
               <Button
                 size="xs"
-                colorScheme="blue"
+                colorScheme="brand"
                 onClick={(e) => {
                   e.stopPropagation();
                   openReport();
@@ -359,7 +359,7 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
           </Box>
 
           <ModalFooter>
-            <Button colorScheme="blue" onClick={downloadPDF}>
+            <Button colorScheme="brand" onClick={downloadPDF}>
               Download PDF
             </Button>
           </ModalFooter>
