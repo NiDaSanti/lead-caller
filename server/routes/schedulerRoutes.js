@@ -1,14 +1,15 @@
 import express from 'express';
 import { readSchedulerConfig, writeSchedulerConfig } from '../utils/schedulerUtils.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/config', (req, res) => {
+router.get('/config', requireAuth, (req, res) => {
   const config = readSchedulerConfig();
   res.json(config);
 });
 
-router.put('/config', (req, res) => {
+router.put('/config', requireAuth, (req, res) => {
   const { startTime, stopTime, callsPerHour } = req.body;
   if (!startTime || !stopTime || typeof callsPerHour !== 'number') {
     return res.status(400).json({ error: 'Invalid config' });

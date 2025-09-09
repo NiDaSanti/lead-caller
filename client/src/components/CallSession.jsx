@@ -48,7 +48,10 @@ export default function CallSession({ lead, onClose }) {
     try {
       const res = await fetch(`http://localhost:3000/api/leads/${lead.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
         body: JSON.stringify(updatedLead),
       });
 

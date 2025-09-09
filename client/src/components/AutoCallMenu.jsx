@@ -17,7 +17,9 @@ export default function AutoCallMenu() {
   const [message, setMessage] = useState(null);
 
   const fetchConfig = async () => {
-    const res = await fetch('http://localhost:3000/api/scheduler/config');
+    const res = await fetch('http://localhost:3000/api/scheduler/config', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     const data = await res.json();
     setConfig(data);
   };
@@ -48,7 +50,10 @@ export default function AutoCallMenu() {
     try {
       const res = await fetch('http://localhost:3000/api/scheduler/config', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
         body: JSON.stringify({
           startTime: config.startTime,
           stopTime: config.stopTime,

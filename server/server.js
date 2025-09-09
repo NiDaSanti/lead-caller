@@ -12,6 +12,7 @@ import phoneRoutes from './routes/phoneRoutes.js';
 import simulationRoutes from './routes/simulationRoutes.js';
 import webhookRoutes from './routes/webhook.js';
 import schedulerRoutes from './routes/schedulerRoutes.js';
+import authRoutes from './routes/auth.js';
 import { startScheduler } from './services/callScheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,6 +41,7 @@ app.use(express.urlencoded({ extended: true })); // Parses application/x-www-for
 app.set('io', io);
 
 // ✅ Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/leads/webhook', webhookRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/actions', actionsRoutes);

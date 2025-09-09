@@ -5,16 +5,17 @@ import {
   updateLead,
   getLeadById, // ← You need this
 } from '../controllers/leadController.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', getLeads);
-router.post('/', addLead);
+router.get('/', requireAuth, getLeads);
+router.post('/', requireAuth, addLead);
 
 // ✅ Add this route
-router.get('/:id', getLeadById);
+router.get('/:id', requireAuth, getLeadById);
 
 // ✅ Make sure this route already exists
-router.put('/:id', updateLead);
+router.put('/:id', requireAuth, updateLead);
 
 export default router;
