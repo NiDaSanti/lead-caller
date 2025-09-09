@@ -4,6 +4,7 @@ import {
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
   VStack, Button, IconButton, Avatar, Divider, Input
 } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
 import { FiFileText } from 'react-icons/fi';
 import { useRef, useEffect, useState } from 'react';
@@ -24,6 +25,8 @@ function SoundWave() {
     </Box>
   );
 }
+
+const MotionBox = motion(Box);
 
 export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
   const reportRef = useRef();
@@ -156,20 +159,26 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
 
   return (
     <>
-      <Card
+      <MotionBox
         ref={scrollRef}
-        bg={cardBg}
-        border="1px solid"
-        borderColor={useColorModeValue("gray.200", "gray.600")}
-        borderRadius="xl"
-        boxShadow="sm"
-        _hover={{ shadow: "lg", transform: "scale(1.01)" }}
-        transition="all 0.2s ease"
-        cursor="pointer"
-        onClick={openReport}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.02 }}
+        transition={{ duration: 0.3 }}
+        w="100%"
       >
-        <CardBody>
-          <Stack spacing={2} fontSize="sm">
+        <Card
+          bg={cardBg}
+          border="1px solid"
+          borderColor={useColorModeValue("gray.200", "gray.600")}
+          borderRadius="xl"
+          boxShadow="sm"
+          _hover={{ shadow: "lg" }}
+          cursor="pointer"
+          onClick={openReport}
+        >
+          <CardBody>
+            <Stack spacing={2} fontSize="sm">
             <Heading size="sm" noOfLines={1} color={textColor}>
               🧍 {lead.firstName} {lead.lastName}
             </Heading>
@@ -199,9 +208,10 @@ export default function LeadCard({ lead, onUpdateLead, scrollRef, socket }) {
                 View Report
               </Button>
             </Stack>
-          </Stack>
-        </CardBody>
-      </Card>
+            </Stack>
+          </CardBody>
+        </Card>
+      </MotionBox>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
         <ModalOverlay />
