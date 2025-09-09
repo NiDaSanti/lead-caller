@@ -32,7 +32,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 
-const COLORS = ["#38A169", "#3182CE", "#D69E2E", "#E53E3E", "#805AD5", "#ECC94B"];
+const COLORS = ["#f97316", "#f59e0b", "#fcd34d", "#fb7185", "#fca5a5", "#fbbf24"];
 
 function getStatusData(leads) {
   const grouped = leads.reduce((acc, lead) => {
@@ -48,10 +48,12 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("#f9fafb", "#1a202c");
+  const bg = useColorModeValue("brand.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
-  const headingColor = useColorModeValue("gray.800", "gray.100");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const headingColor = useColorModeValue("brand.700", "brand.100");
+  const borderColor = useColorModeValue("brand.200", "gray.600");
+  const footerBg = useColorModeValue("gray.50", "gray.800");
+  const modalBg = useColorModeValue("white", "gray.900");
 
   const [leads, setLeads] = useState([]);
   const [showForm, setShowForm] = useState(() => localStorage.getItem("showForm") !== "false");
@@ -111,7 +113,7 @@ function App({ onLogout }) {
   return (
     <Box bg={bg} minH="100vh">
       {/* NAVBAR */}
-      <Flex justify="space-between" align="center" px={8} py={4} bg={useColorModeValue("white", "gray.900")} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
+      <Flex justify="space-between" align="center" px={8} py={4} bgGradient={useColorModeValue('linear(to-r, brand.500, accent.500)', 'gray.900')} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
         <Image src="/public/faviLogo.png" alt="Logo" h="36px" />
         <HStack spacing={2}>
         {navItems.map(({ view, label, icon }) => (
@@ -121,14 +123,15 @@ function App({ onLogout }) {
             variant="ghost"
             leftIcon={<Icon as={icon} aria-label={label} />}
             onClick={() => setModalView(view)}
+            color="white"
           >
             {label}
           </Button>
         ))}
         <ChakraTooltip label={colorMode === "light" ? "Dark Mode" : "Light Mode"}>
-            <IconButton size="sm" variant="ghost" onClick={toggleColorMode} icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />} />
+            <IconButton size="sm" variant="ghost" onClick={toggleColorMode} icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />} color="white" />
         </ChakraTooltip>
-        <Button size="sm" onClick={onLogout}>Logout</Button>
+        <Button size="sm" onClick={onLogout} color="white" variant="ghost">Logout</Button>
         </HStack>
       </Flex>
 
@@ -226,7 +229,7 @@ function App({ onLogout }) {
       </Container>
 
       {/* FOOTER */}
-      <Box mt={20} py={10} borderTop="1px solid" borderColor={borderColor} bg={useColorModeValue("gray.50", "gray.800")}>
+        <Box mt={20} py={10} borderTop="1px solid" borderColor={borderColor} bg={footerBg}>
         <Container maxW="6xl" textAlign="center">
           <Text fontSize="sm" color="gray.600">🚀 Created by <strong>Nick Santiago</strong></Text>
           <Text fontSize="xs" mt={1} color="gray.500">Solar Consultant • Tech Builder • AI Sales Trainer</Text>
@@ -237,7 +240,7 @@ function App({ onLogout }) {
       {modalView && (
         <Modal isOpen onClose={() => setModalView(null)} size="6xl" isCentered>
           <ModalOverlay />
-          <ModalContent borderRadius="xl" p={{ base: 4, md: 8 }} bg={useColorModeValue("white", "gray.900")} shadow="xl" maxH="90vh" overflowY="auto">
+            <ModalContent borderRadius="xl" p={{ base: 4, md: 8 }} bg={modalBg} shadow="xl" maxH="90vh" overflowY="auto">
             <ModalHeader textTransform="capitalize" fontSize="2xl">
               {navItems.find(item => item.view === modalView)?.label || modalView}
             </ModalHeader>
