@@ -41,7 +41,11 @@ ADMIN_USERNAME=<admin login name>
 ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
 # or
 ADMIN_PASSWORD=<admin password>
+RATE_LIMIT_MAX_REQUESTS=100
 ```
+
+`RATE_LIMIT_MAX_REQUESTS` controls how many requests per minute each IP may make (default `100`).
+Authenticated `/bulk-upload` routes are excluded from rate limiting when a valid `Authorization` header is present.
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
 
