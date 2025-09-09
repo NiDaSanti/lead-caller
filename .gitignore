@@ -46,7 +46,6 @@ coverage/
 
 # Local dev artifacts
 *.local
-*.test.*
 *.bak
 *.swp
 *.tmp
