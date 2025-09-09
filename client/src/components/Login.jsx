@@ -58,7 +58,7 @@ export default function Login({ onLogin }) {
         boxShadow="lg"
       >
           <VStack spacing={8}>
-            <Image src="/vite.svg" alt="Lead Caller Logo" boxSize="60px" />
+            <Image src="/sunrun.svg" alt="Sunrun Logo" boxSize="60px" />
             <Heading size="lg" color="brand.500">Lead Caller</Heading>
             <Heading size="md">Sign In</Heading>
           <FormControl>
