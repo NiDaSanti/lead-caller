@@ -4,6 +4,7 @@ import {
   addLead,
   updateLead,
   getLeadById, // ← You need this
+  softDeleteLead
 } from '../controllers/leadController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -17,5 +18,8 @@ router.get('/:id', requireAuth, getLeadById);
 
 // ✅ Make sure this route already exists
 router.put('/:id', requireAuth, updateLead);
+
+// Delete a lead (soft delete)
+router.delete('/:id', requireAuth, softDeleteLead);
 
 export default router;
