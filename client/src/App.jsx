@@ -25,6 +25,7 @@ import LeadList from "./components/LeadList";
 import LeadSummary from "./components/LeadSummary";
 import LeadCsvUpload from "./components/LeadCsvUpload";
 import AutoCallMenu from "./components/AutoCallMenu";
+import PropTypes from 'prop-types';
 
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip,
@@ -42,7 +43,7 @@ function getStatusData(leads) {
   return Object.entries(grouped).map(([status, count]) => ({ name: status, value: count }));
 }
 
-function App() {
+function App({ onLogout }) {
   const { colorMode, toggleColorMode } = useColorMode();
   const formRef = useRef(null);
   const socketRef = useRef(null);
@@ -80,7 +81,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/leads").then(res => res.json()).then(setLeads);
+    fetch("http://localhost:3000/api/leads", {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    }).then(res => res.json()).then(setLeads);
   }, []);
 
   useEffect(() => {
@@ -96,7 +99,10 @@ function App() {
   const updateLead = async (updated) => {
     await fetch(`http://localhost:3000/api/leads/${updated.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
       body: JSON.stringify(updated),
     });
     setLeads(prev => prev.map(l => l.id === updated.id ? updated : l));
@@ -108,20 +114,21 @@ function App() {
       <Flex justify="space-between" align="center" px={8} py={4} bg={useColorModeValue("white", "gray.900")} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
         <Image src="/public/faviLogo.png" alt="Logo" h="36px" />
         <HStack spacing={2}>
-          {navItems.map(({ view, label, icon }) => (
-            <Button
-              key={view}
-              size="sm"
-              variant="ghost"
-              leftIcon={<Icon as={icon} aria-label={label} />}
-              onClick={() => setModalView(view)}
-            >
-              {label}
-            </Button>
-          ))}
-          <ChakraTooltip label={colorMode === "light" ? "Dark Mode" : "Light Mode"}>
+        {navItems.map(({ view, label, icon }) => (
+          <Button
+            key={view}
+            size="sm"
+            variant="ghost"
+            leftIcon={<Icon as={icon} aria-label={label} />}
+            onClick={() => setModalView(view)}
+          >
+            {label}
+          </Button>
+        ))}
+        <ChakraTooltip label={colorMode === "light" ? "Dark Mode" : "Light Mode"}>
             <IconButton size="sm" variant="ghost" onClick={toggleColorMode} icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />} />
-          </ChakraTooltip>
+        </ChakraTooltip>
+        <Button size="sm" onClick={onLogout}>Logout</Button>
         </HStack>
       </Flex>
 
@@ -258,5 +265,9 @@ function App() {
     </Box>
   );
 }
+
+App.propTypes = {
+  onLogout: PropTypes.func.isRequired,
+};
 
 export default App;

@@ -3,16 +3,17 @@ import {
   startPhoneCall,
   continuePhoneCall,
   getVoiceScript,
-  handleCallStatus, 
+  handleCallStatus,
   receiveTranscript,
 } from '../controllers/phoneController.js';
 
 import { updateLeadById, readLeads } from '../utils/leadUtils.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // 🔹 Route: Initiate call from frontend
-router.post('/call', express.json(), startPhoneCall);
+router.post('/call', requireAuth, express.json(), startPhoneCall);
 
 // 🔹 Route: Respond to Twilio 'Gather' action (keypress)
 router.post('/continue', express.urlencoded({ extended: false }), continuePhoneCall);

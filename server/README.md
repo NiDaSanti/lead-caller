@@ -37,11 +37,39 @@ TWILIO_SID=<your Twilio account SID>
 TWILIO_AUTH=<your Twilio auth token>
 TWILIO_PHONE=<your Twilio phone number>
 SERVER_BASE_URL=<public base URL of this server>
+ADMIN_USERNAME=<admin login name>
+ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
 ```
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
 
+Generate `ADMIN_PASSWORD_HASH` with:
+
+```
+node -e "console.log(require('crypto').createHash('sha256').update('yourpassword').digest('hex'))"
+```
+
+All API routes (except `/api/auth/*` and `/api/leads/webhook`) require an `Authorization: Bearer <token>` header obtained via `POST /api/auth/login`.
+
 🔌 API Endpoints
+POST /api/auth/login
+Authenticate and receive a bearer token.
+
+Request Body:
+
+```json
+{ "username": "admin", "password": "secret" }
+```
+
+Response:
+
+```json
+{ "token": "..." }
+```
+
+POST /api/auth/logout
+Invalidate the current token. Requires `Authorization` header.
+
 GET /api/leads
 Retrieve all existing leads.
 
