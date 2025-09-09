@@ -35,7 +35,8 @@ import {
 const COLORS = ["#e60082", "#00bcd4", "#F6AD55", "#38A169", "#805AD5", "#FFB800"];
 
 function getStatusData(leads) {
-  const grouped = leads.reduce((acc, lead) => {
+  const safeLeads = Array.isArray(leads) ? leads : [];
+  const grouped = safeLeads.reduce((acc, lead) => {
     const key = lead.status || "New";
     acc[key] = (acc[key] || 0) + 1;
     return acc;
@@ -83,9 +84,24 @@ function App({ onLogout }) {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/leads", {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    }).then(res => res.json()).then(setLeads);
+    const fetchLeads = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/leads", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (!res.ok) {
+          console.error('Failed to fetch leads:', res.status);
+          setLeads([]);
+          return;
+        }
+        const data = await res.json();
+        setLeads(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching leads:', err);
+        setLeads([]);
+      }
+    };
+    fetchLeads();
   }, []);
 
   useEffect(() => {
