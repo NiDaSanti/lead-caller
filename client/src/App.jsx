@@ -1,7 +1,7 @@
 // App.jsx
 import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
-  Collapse, useColorMode, useColorModeValue, Image,
+  Collapse, useColorMode, useColorModeValue, Image, useToken,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText
 } from "@chakra-ui/react";
@@ -32,8 +32,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 
-const COLORS = ["#e60082", "#00bcd4", "#F6AD55", "#38A169", "#805AD5", "#FFB800"];
-
 function getStatusData(leads) {
   const safeLeads = Array.isArray(leads) ? leads : [];
   const grouped = safeLeads.reduce((acc, lead) => {
@@ -55,6 +53,12 @@ function App({ onLogout }) {
   const borderColor = useColorModeValue("brand.200", "gray.600");
   const footerBg = useColorModeValue("gray.50", "gray.800");
   const modalBg = useColorModeValue("white", "gray.900");
+
+  const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
+    'brand.500', 'accent.500', 'brand.300', 'accent.300', 'brand.700', 'accent.700'
+  ]);
+
+  const COLORS = [brand500, accent500, brand300, accent300, brand700, accent700];
 
   const [leads, setLeads] = useState([]);
   const [showForm, setShowForm] = useState(() => localStorage.getItem("showForm") !== "false");
@@ -253,7 +257,7 @@ function App({ onLogout }) {
                       <YAxis />
                       <RechartsTooltip />
                       <Legend />
-                      <Bar dataKey="value" fill="#3182CE" />
+                      <Bar dataKey="value" fill={brand500} />
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>
