@@ -11,7 +11,7 @@ import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
 function SoundWave() {
-  const waveColor = useColorModeValue("#3182ce", "#90cdf4");
+  const waveColor = useColorModeValue('brand.600', 'brand.300');
   return (
     <Box display="flex" justifyContent="center" gap="6px" alignItems="flex-end" h="30px" mt={2}>
       {[...Array(5)].map((_, i) => (
