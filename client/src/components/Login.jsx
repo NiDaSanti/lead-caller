@@ -1,6 +1,19 @@
 import { useState } from 'react';
-import { Box, Button, FormControl, FormLabel, Heading, Input, VStack, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  VStack,
+  useToast,
+  InputGroup,
+  InputLeftElement,
+  Image,
+} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
+import { FiUser, FiLock } from 'react-icons/fi';
 import PropTypes from 'prop-types';
 
 export default function Login({ onLogin }) {
@@ -28,29 +41,67 @@ export default function Login({ onLogin }) {
   const MotionBox = motion(Box);
 
   return (
-    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bgGradient="linear(to-br, brand.500, accent.500)"
+      p={4}
+    >
       <MotionBox
         as="form"
         onSubmit={handleSubmit}
         p={8}
+        maxW="md"
+        w="full"
+        bg="white"
         borderWidth="1px"
         borderRadius="lg"
-        boxShadow="md"
+        boxShadow="lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <VStack spacing={4}>
+        <VStack spacing={6}>
+          <Image src="/faviLogo.png" alt="Lead Caller Logo" boxSize="60px" />
           <Heading size="md">Sign In</Heading>
           <FormControl>
             <FormLabel>Username</FormLabel>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none" color="gray.400">
+                <FiUser />
+              </InputLeftElement>
+              <Input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                borderRadius="md"
+              />
+            </InputGroup>
           </FormControl>
           <FormControl>
             <FormLabel>Password</FormLabel>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <InputGroup>
+              <InputLeftElement pointerEvents="none" color="gray.400">
+                <FiLock />
+              </InputLeftElement>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                borderRadius="md"
+              />
+            </InputGroup>
           </FormControl>
-          <Button type="submit" colorScheme="brand" w="full">Login</Button>
+          <Button
+            type="submit"
+            colorScheme="brand"
+            w="full"
+            borderRadius="md"
+            _hover={{ bgGradient: 'linear(to-r, brand.600, accent.600)' }}
+          >
+            Login
+          </Button>
         </VStack>
       </MotionBox>
     </Box>
