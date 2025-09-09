@@ -1,7 +1,7 @@
 // App.jsx
 import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
-  Collapse, useColorMode, useColorModeValue, Image, useToken,
+  Collapse, useColorMode, useColorModeValue, useToken,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText,
   FormControl, FormLabel, Switch
@@ -166,7 +166,7 @@ function App({ onLogout }) {
     <Box bg={bg} minH="100vh">
       {/* NAVBAR */}
       <Flex justify="space-between" align="center" px={8} py={4} bgGradient={useColorModeValue('linear(to-r, brand.500, accent.500)', 'gray.900')} borderBottom="1px solid" borderColor={borderColor} shadow="sm">
-        <Image src="/public/faviLogo.png" alt="Logo" h="36px" />
+        <Text fontSize="lg" fontWeight="bold" color="white">Lead Caller</Text>
         <HStack spacing={2}>
         {navItems.map(({ view, label, icon }) => (
           <Button
@@ -292,7 +292,7 @@ function App({ onLogout }) {
                   ))}
                 </SimpleGrid>
 
-                <Button size="sm" colorScheme="brand" onClick={() => setShowLeads(true)}>Open Lead Manager</Button>
+                  <Button size="sm" colorScheme="brand" onClick={() => setShowLeads(true)}>Open Lead Caller</Button>
               </Box>
             )}
           </Box>
