@@ -1,4 +1,4 @@
-☀️ AI-Powered Solar Lead Manager – Frontend
+☀️ AI-Powered Solar Lead Caller – Frontend
 Welcome to the frontend of the Solar Lead Call Manager — a purpose-built app for qualifying, engaging, and managing solar prospects with future support for Twilio-powered automated calls and OpenAI-enhanced voice scripting.
 
 This interface was designed to be fast, intuitive, and conversion-focused, supporting lead data input, interaction tracking, reporting, and team training — all from one elegant dashboard.
@@ -26,8 +26,8 @@ Edit
   │   ├── ReportsView.jsx      # Lead summaries + PDF export
   │   └── SettingsPanel.jsx    # App controls (theme, automation)
   ├── App.css
-  └── assets/
-      └── leadManager.png
+  └── public/
+      └── favicon.svg
 🔑 Features
 🔹 Lead Management
 Add new leads (name, phone)

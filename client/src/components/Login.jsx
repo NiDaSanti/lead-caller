@@ -9,8 +9,7 @@ import {
   VStack,
   useToast,
   InputGroup,
-  InputLeftElement,
-  Image,
+  InputLeftElement
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { FiUser, FiLock } from 'react-icons/fi';
@@ -66,9 +65,9 @@ export default function Login({ onLogin }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <VStack spacing={6}>
-          <Image src="/faviLogo.png" alt="Lead Caller Logo" boxSize="60px" />
-          <Heading size="md">Sign In</Heading>
+          <VStack spacing={6}>
+            <Heading size="lg" color="brand.500">Lead Caller</Heading>
+            <Heading size="md">Sign In</Heading>
           <FormControl>
             <FormLabel>Username</FormLabel>
             <InputGroup>
