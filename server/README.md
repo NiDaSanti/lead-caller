@@ -1,5 +1,5 @@
 ☀️ Solar Lead Call Manager – Backend
-This is the backend of the Solar Lead Call Manager. It handles all logic and storage behind the scenes to power the frontend React app. This server provides API endpoints for adding, updating, and retrieving solar lead data. It uses a simple JSON file (leads.json) for local storage and is designed to be easily upgraded to a real database in the future.
+This is the backend of the Solar Lead Call Manager. It handles all logic and storage behind the scenes to power the frontend React app. This server provides API endpoints for adding, updating, and retrieving solar lead data. It uses environment-specific JSON files (e.g., `data/dev/leads.json`) for local storage and is designed to be easily upgraded to a real database in the future.
 
 📁 Directory Structure
 graphql
@@ -9,7 +9,7 @@ backend/
 ├── controllers/
 │   └── leadsController.js      # Logic for handling lead data (GET, POST, PUT)
 ├── data/
-│   └── leads.json              # JSON file containing all lead records
+│   └── {env}/leads.json        # JSON file containing all lead records for the given environment
 ├── routes/
 │   └── leadsRoutes.js          # Defines REST API routes
 ├── server.js                   # Main Express server entry point

@@ -10,7 +10,10 @@ export const writeDataFile = (filePath, data) => {
 };
 
 export const backupLeadsFile = () => {
-  const leadsPath = path.join(process.cwd(), 'server/data/leads.json');
+  const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+  const leadsPath = process.env.LEADS_FILE
+    ? path.resolve(process.env.LEADS_FILE)
+    : path.join(process.cwd(), `server/data/${env}/leads.json`);
   const backupDir = path.join(process.cwd(), 'server/data/backups');
 
   if (!fs.existsSync(backupDir)) {
