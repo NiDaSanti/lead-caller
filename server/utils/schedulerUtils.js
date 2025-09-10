@@ -12,10 +12,24 @@ const configFile = process.env.SCHEDULER_FILE
 
 export function readSchedulerConfig() {
   if (!fs.existsSync(configFile)) {
-    return { startTime: '09:00', stopTime: '17:00', callsPerHour: 60 };
+    return {
+      startTime: '09:00',
+      stopTime: '17:00',
+      callsPerHour: 60,
+      enabled: false,
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    };
   }
   const data = fs.readFileSync(configFile, 'utf-8');
-  return JSON.parse(data);
+  const parsed = JSON.parse(data);
+  return {
+    startTime: '09:00',
+    stopTime: '17:00',
+    callsPerHour: 60,
+    enabled: false,
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    ...parsed
+  };
 }
 
 export function writeSchedulerConfig(config) {

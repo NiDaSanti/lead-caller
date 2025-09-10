@@ -1,5 +1,7 @@
 {
   "startTime": "09:00",
   "stopTime": "17:00",
-  "callsPerHour": 60
+  "callsPerHour": 60,
+  "enabled": false,
+  "days": ["Mon", "Tue", "Wed", "Thu", "Fri"]
 }
