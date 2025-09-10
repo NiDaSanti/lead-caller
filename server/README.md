@@ -216,6 +216,9 @@ Edit
    - Status callback URL: `${SERVER_BASE_URL}/api/phone/status-callback`
    - Set these under your Twilio phone number's **Voice & Fax** settings.
 
+📜 Phone Script
+Edit `data/dev/phoneScript.json` (and `data/prod/phoneScript.json` in production) to change the greeting and initial prompt spoken at the start of each call. No code changes are required; updates are loaded automatically.
+
 📊 Future Features & Roadmap
 ✅ Save live notes and updates
 🔄 Transition from JSON to PostgreSQL or MongoDB

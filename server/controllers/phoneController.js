@@ -3,6 +3,26 @@ import { getLeadById, saveLeadUpdate } from '../services/leadDataService.js';
 import { initiateCall } from '../services/twilioService.js';
 import { readLeads, updateLeadById } from '../utils/leadUtils.js';
 import twilio from 'twilio';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, `../data/${env}`);
+const scriptPath = path.join(dataDir, 'phoneScript.json');
+
+const loadPrompt = () => {
+  try {
+    const data = JSON.parse(fs.readFileSync(scriptPath, 'utf-8'));
+    return data.greeting || "Hey there. What's your average electric bill? Just say it after the beep.";
+  } catch {
+    return "Hey there. What's your average electric bill? Just say it after the beep.";
+  }
+};
 // ✅ ADD THIS if missing
 export const startPhoneCall = async (req, res) => {
   const { phoneNumber, leadId } = req.body;
@@ -114,6 +134,7 @@ export const getVoiceScript = (req, res) => {
   const { leadId = 'unknown' } = req.query;
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
+  const prompt = loadPrompt();
 
   // Ask question
   twiml.say(
@@ -121,7 +142,7 @@ export const getVoiceScript = (req, res) => {
       voice: 'Polly.Matthew',
       language: 'en-US'
     },
-    `Hey there. What’s your average electric bill? Just say it after the beep.`
+    prompt
   );
 
   // Record caller
