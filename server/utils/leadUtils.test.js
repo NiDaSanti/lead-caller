@@ -3,11 +3,14 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readLeads, updateLeadById, findLeadByPhone } from './leadUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const leadsFile = path.join(__dirname, '../data/leads.json');
+
+// Point utilities to the test data file before importing them
+process.env.LEADS_FILE = path.join(__dirname, '../data/leads.json');
+const { readLeads, updateLeadById, findLeadByPhone } = await import('./leadUtils.js');
+const leadsFile = process.env.LEADS_FILE;
 
 test('updateLeadById updates status and persists to file', () => {
   const originalData = fs.readFileSync(leadsFile, 'utf-8');

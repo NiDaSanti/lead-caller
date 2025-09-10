@@ -4,7 +4,11 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const configFile = path.join(__dirname, '../data/scheduler.json');
+
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+const configFile = process.env.SCHEDULER_FILE
+  ? path.resolve(process.env.SCHEDULER_FILE)
+  : path.join(__dirname, `../data/${env}/scheduler.json`);
 
 export function readSchedulerConfig() {
   if (!fs.existsSync(configFile)) {

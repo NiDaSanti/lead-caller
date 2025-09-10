@@ -18,8 +18,11 @@ import { startScheduler } from './services/callScheduler.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Load environment variables
-dotenv.config({ path: path.join(__dirname, '../.env') });
+// ✅ Load environment variables based on NODE_ENV
+const envFile = process.env.NODE_ENV === 'production'
+  ? '.env.production'
+  : '.env.development';
+dotenv.config({ path: path.join(__dirname, '..', envFile) });
 
 const app = express();
 const server = http.createServer(app);
