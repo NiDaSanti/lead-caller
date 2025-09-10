@@ -35,7 +35,8 @@ Create a `.env` file **one level above the `server` directory** (or configure yo
 ```
 TWILIO_SID=<your Twilio account SID>
 TWILIO_AUTH=<your Twilio auth token>
-TWILIO_PHONE=<your Twilio phone number>
+TWILIO_PHONE_DEV=<Twilio phone number for development>
+TWILIO_PHONE_PROD=<Twilio phone number for production>
 SERVER_BASE_URL=<public base URL of this server>
 ADMIN_USERNAME=<admin login name>
 ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
@@ -184,17 +185,21 @@ Edit
 }
 
 📞 Twilio Setup
-1. **Upgrade your account**  
-   - Trial accounts can only call verified numbers and play a trial notice.  
+1. **Upgrade your account**
+   - Trial accounts can only call verified numbers and play a trial notice.
    - Upgrade in the Twilio Console to remove these restrictions.
-2. **Purchase a phone number**  
-   - In the Twilio Console, go to *Phone Numbers → Buy* and select a voice-capable number.  
-   - This number becomes your caller ID.
-3. **Configure environment variables**  
-   - `TWILIO_SID` – Your Twilio Account SID.  
-   - `TWILIO_AUTH` – Your Twilio Auth Token.  
-   - `TWILIO_PHONE` – The purchased Twilio number in E.164 format (e.g., `+15551234567`).  
-   - `SERVER_BASE_URL` – Public URL of this server for Twilio webhooks.
+2. **Purchase a phone number**
+   - In the Twilio Console, go to *Phone Numbers → Buy* and select a voice-capable number.
+   - Use a separate number for development and production if needed.
+3. **Collect credentials & set environment variables**
+   - In the Twilio Console dashboard, copy your **Account SID** and **Auth Token**.
+   - Set them as `TWILIO_SID` and `TWILIO_AUTH` in your `.env` file.
+   - Assign your phone number to `TWILIO_PHONE_DEV` or `TWILIO_PHONE_PROD` depending on the environment.
+   - `SERVER_BASE_URL` should be the public URL of this server for Twilio webhooks.
+4. **Configure webhooks**
+   - Voice URL: `${SERVER_BASE_URL}/api/phone/voice`
+   - Status callback URL: `${SERVER_BASE_URL}/api/phone/status-callback`
+   - Set these under your Twilio phone number's **Voice & Fax** settings.
 
 📊 Future Features & Roadmap
 ✅ Save live notes and updates
