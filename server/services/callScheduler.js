@@ -13,8 +13,13 @@ export function startScheduler() {
   // Run job every minute
   cron.schedule('* * * * *', async () => {
     const config = readSchedulerConfig();
-    const { startTime, stopTime, callsPerHour } = config;
+    const { startTime, stopTime, callsPerHour, enabled, days } = config;
     const now = new Date();
+
+    if (!enabled) return;
+    const dayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = dayMap[now.getDay()];
+    if (Array.isArray(days) && !days.includes(today)) return;
 
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [stopHour, stopMinute] = stopTime.split(':').map(Number);

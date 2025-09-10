@@ -10,8 +10,8 @@ router.get('/config', requireAuth, (req, res) => {
 });
 
 router.put('/config', requireAuth, (req, res) => {
-  const { startTime, stopTime, callsPerHour } = req.body;
-  if (!startTime || !stopTime || typeof callsPerHour !== 'number') {
+  const { startTime, stopTime, callsPerHour, enabled, days } = req.body;
+  if (!startTime || !stopTime || typeof callsPerHour !== 'number' || !Array.isArray(days)) {
     return res.status(400).json({ error: 'Invalid config' });
   }
   if (startTime >= stopTime) {
@@ -20,7 +20,7 @@ router.put('/config', requireAuth, (req, res) => {
   if (callsPerHour <= 0) {
     return res.status(400).json({ error: 'callsPerHour must be greater than 0' });
   }
-  const config = { startTime, stopTime, callsPerHour };
+  const config = { startTime, stopTime, callsPerHour, enabled: Boolean(enabled), days };
   writeSchedulerConfig(config);
   res.json(config);
 });
