@@ -32,3 +32,13 @@ test('findLeadByPhone returns matching lead', () => {
   assert.ok(lead);
   assert.strictEqual(lead.phone, '+19199314345');
 });
+
+test('updateLeadById returns null for unknown id', () => {
+  const result = updateLeadById('non-existent-id', { status: 'Tested' });
+  assert.strictEqual(result, null);
+});
+
+test('findLeadByPhone returns undefined for missing phone', () => {
+  const result = findLeadByPhone('+10000000000');
+  assert.strictEqual(result, undefined);
+});
