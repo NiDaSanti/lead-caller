@@ -6,17 +6,37 @@ dotenv.config();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const MODEL_NAME = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+const TEMP_VAL = parseFloat(process.env.OPENAI_TEMPERATURE);
+const TEMPERATURE = Number.isFinite(TEMP_VAL) ? TEMP_VAL : 0.7;
+
+const MAX_DEV_CALLS = parseInt(process.env.OPENAI_DEV_MAX_CALLS || '50', 10);
+let devCallCount = 0;
+const askCache = new Map();
+const summarizeCache = new Map();
+
+const checkQuota = () => {
+  if (process.env.NODE_ENV === 'development') {
+    if (devCallCount >= MAX_DEV_CALLS) {
+      throw new Error('OpenAI development quota exceeded');
+    }
+    devCallCount += 1;
+  }
+};
+
 export const askAI = async (messages) => {
   try {
-    // TEMP fallback:
-    const fallback = "This is a temporary fallback while you're out of tokens.";
-    // const aiReply = fallback;
+    const cacheKey = JSON.stringify(messages);
+    if (process.env.NODE_ENV === 'development' && askCache.has(cacheKey)) {
+      return askCache.get(cacheKey);
+    }
 
-    // Uncomment for production use:
+    checkQuota();
+
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: MODEL_NAME,
       messages,
-      temperature: 0.7,
+      temperature: TEMPERATURE,
       max_tokens: 150,
     });
     const aiReply = response.choices[0].message.content.trim();
@@ -27,8 +47,11 @@ export const askAI = async (messages) => {
     if (/yes|interested|sounds good|sure|okay|can you|do you offer/i.test(aiReply)) {
       status = "Qualified";
     }
-
-    return { aiReply, timestamp, status };
+    const result = { aiReply, timestamp, status };
+    if (process.env.NODE_ENV === 'development') {
+      askCache.set(cacheKey, result);
+    }
+    return result;
   } catch (err) {
     console.error('❌ OpenAI Error:', err.message);
     throw new Error('Failed to generate AI response');
@@ -56,14 +79,25 @@ export const summarizeLead = async (lead) => {
       },
     ];
 
+    const cacheKey = JSON.stringify(lead);
+    if (process.env.NODE_ENV === 'development' && summarizeCache.has(cacheKey)) {
+      return summarizeCache.get(cacheKey);
+    }
+
+    checkQuota();
+
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: MODEL_NAME,
       messages,
-      temperature: 0.7,
+      temperature: TEMPERATURE,
       max_tokens: 120,
     });
 
-    return response.choices[0].message.content.trim();
+    const summary = response.choices[0].message.content.trim();
+    if (process.env.NODE_ENV === 'development') {
+      summarizeCache.set(cacheKey, summary);
+    }
+    return summary;
   } catch (err) {
     console.error('❌ OpenAI Summary Error:', err.message);
     return 'Summary unavailable';
