@@ -43,12 +43,27 @@ ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
 # or
 ADMIN_PASSWORD=<admin password>
 RATE_LIMIT_MAX_REQUESTS=100
+OPENAI_API_KEY=<your OpenAI API key>
+# optional overrides
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_TEMPERATURE=0.7
+# limit calls during development
+OPENAI_DEV_MAX_CALLS=50
 ```
 
 `RATE_LIMIT_MAX_REQUESTS` controls how many requests per minute each IP may make (default `100`).
 Authenticated `/bulk-upload` routes are excluded from rate limiting when a valid `Authorization` header is present.
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
+
+### OpenAI setup
+
+1. Create an account at [OpenAI](https://platform.openai.com/).
+2. Generate a key under **API Keys** and place it in `OPENAI_API_KEY`.
+3. (Optional) Set `OPENAI_MODEL` and `OPENAI_TEMPERATURE` to adjust the model and temperature used for completions.
+4. (Optional) Use `OPENAI_DEV_MAX_CALLS` to cap the number of requests in development.
+
+As of 2024, `gpt-3.5-turbo` costs roughly **$0.50 per 1M input tokens** and **$1.50 per 1M output tokens** (see [pricing](https://openai.com/pricing) for updates). You can monitor your usage and remaining quota at [Usage](https://platform.openai.com/account/usage).
 
 Generate `ADMIN_PASSWORD_HASH` with:
 
