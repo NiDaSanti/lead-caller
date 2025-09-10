@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Point utilities to the test data file before importing them
-process.env.LEADS_FILE = path.join(__dirname, '../data/leads.json');
+process.env.LEADS_FILE = path.join(__dirname, '../data/dev/leads.json');
 const { readLeads, updateLeadById, findLeadByPhone } = await import('./leadUtils.js');
 const leadsFile = process.env.LEADS_FILE;
 
