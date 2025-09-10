@@ -176,7 +176,7 @@ LeadCard.jsx – Updates answers, status, and notes via PUT /api/leads/:id
 Reports Modal – Pulls and displays JSON data for summaries
 
 📦 Data Model
-Stored inside data/leads.json as an array of objects.
+Stored inside data/<env>/leads.json as an array of objects.
 
 Example Lead Structure:
 json

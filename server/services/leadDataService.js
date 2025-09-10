@@ -1,14 +1,7 @@
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const leadsFile = path.join(__dirname, '../data/leads.json');
+import { readLeads, writeLeads } from '../utils/leadUtils.js';
 
 export async function getLeadById(id = null, phone = null) {
-  const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
+  const leads = readLeads();
 
   if (id) {
     return leads.find(l => l.id === id || l.id === Number(id));
@@ -24,7 +17,7 @@ export async function getLeadById(id = null, phone = null) {
 
 
 export const saveLeadUpdate = async (leadId, updates) => {
-  const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
+  const leads = readLeads();
 
   const index = leads.findIndex(lead =>
     lead.id === leadId || lead.id === Number(leadId)
@@ -40,6 +33,6 @@ export const saveLeadUpdate = async (leadId, updates) => {
     ...updates
   };
 
-  fs.writeFileSync(leadsFile, JSON.stringify(leads, null, 2));
+  writeLeads(leads);
 };
 

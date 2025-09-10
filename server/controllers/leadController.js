@@ -7,7 +7,11 @@ import { summarizeLead } from '../services/openaiClients.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const leadsFile = path.join(__dirname, '../data/leads.json');
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, `../data/${env}`);
+const leadsFile = path.join(dataDir, 'leads.json');
 
   // server/controllers/leadController.js
   export const getLeads = (req, res) => {
@@ -122,7 +126,7 @@ export const softDeleteLead = (req, res) => {
   try {
     const leadId = Number(req.params.id);
     const leads = readDataFile(leadsFile);
-    const deletedPath = path.join(__dirname, '../data/deleted.json');
+    const deletedPath = path.join(dataDir, 'deleted.json');
     const index = leads.findIndex(lead => lead.id === leadId);
 
     if (index === -1) return res.status(404).json({ error: 'Lead not found' });
