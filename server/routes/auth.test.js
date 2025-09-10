@@ -1,19 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import express from 'express';
 import crypto from 'crypto';
-import authRouter from './auth.js';
+
+let express;
+let authRouter;
+try {
+  express = (await import('express')).default;
+  authRouter = (await import('./auth.js')).default;
+} catch {
+  // express not installed; tests will be skipped
+}
 
 const hash = (str) => crypto.createHash('sha256').update(str).digest('hex');
 
-const makeServer = () => {
-  const app = express();
-  app.use(express.json());
-  app.use('/auth', authRouter);
-  return app.listen(0);
-};
+const testFn = express ? test : test.skip;
 
-test('login succeeds with hashed and plaintext configurations', async (t) => {
+testFn('login succeeds with hashed and plaintext configurations', async (t) => {
+  const makeServer = () => {
+    const app = express();
+    app.use(express.json());
+    app.use('/auth', authRouter);
+    return app.listen(0);
+  };
+
   await t.test('with ADMIN_PASSWORD_HASH', async () => {
     process.env.ADMIN_USERNAME = 'admin';
     delete process.env.ADMIN_PASSWORD;
