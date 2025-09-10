@@ -43,6 +43,7 @@ ADMIN_PASSWORD_HASH=<sha256 hash of admin password>
 # or
 ADMIN_PASSWORD=<admin password>
 RATE_LIMIT_MAX_REQUESTS=100
+TOKEN_IDLE_TIMEOUT_MS=1800000
 OPENAI_API_KEY=<your OpenAI API key>
 # optional overrides
 OPENAI_MODEL=gpt-3.5-turbo
@@ -52,6 +53,7 @@ OPENAI_DEV_MAX_CALLS=50
 ```
 
 `RATE_LIMIT_MAX_REQUESTS` controls how many requests per minute each IP may make (default `100`).
+`TOKEN_IDLE_TIMEOUT_MS` sets how long (in milliseconds) an auth token may remain idle before expiring (default `1800000`).
 Authenticated `/bulk-upload` routes are excluded from rate limiting when a valid `Authorization` header is present.
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
