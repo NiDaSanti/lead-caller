@@ -1,15 +1,12 @@
 // server/controllers/aiController.js
 
 import { getNextAIResponse } from '../services/openaiClients.js';
-import fs from 'fs';
-import path from 'path';
-
-const leadsPath = path.join(process.cwd(), 'server/data/leads.json');
+import { readLeads, writeLeads } from '../utils/leadUtils.js';
 
 export const handleVoiceScript = async (req, res) => {
   const { leadId } = req.params;
 
-  const leads = JSON.parse(fs.readFileSync(leadsPath, 'utf-8'));
+  const leads = readLeads();
   const lead = leads.find(l => l.id === Number(leadId));
 
   if (!lead) {
@@ -26,7 +23,7 @@ export const handleVoiceScript = async (req, res) => {
 
   // Save it to call history
   lead.callHistory.push({ role: 'assistant', message: aiResponse });
-  fs.writeFileSync(leadsPath, JSON.stringify(leads, null, 2));
+  writeLeads(leads);
 
   res.set('Content-Type', 'text/xml');
   res.send(`<Response><Say>${aiResponse}</Say><Pause length="2"/><Redirect>/api/phone/voice-script/${leadId}</Redirect></Response>`);

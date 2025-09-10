@@ -7,10 +7,10 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Point utilities to the test data file before importing them
-process.env.LEADS_FILE = path.join(__dirname, '../data/leads.json');
+// Point utilities to the test data directory before importing them
+process.env.DATA_DIR = path.join(__dirname, '../data/dev');
 const { readLeads, updateLeadById, findLeadByPhone } = await import('./leadUtils.js');
-const leadsFile = process.env.LEADS_FILE;
+const leadsFile = path.join(process.env.DATA_DIR, 'leads.json');
 
 test('updateLeadById updates status and persists to file', () => {
   const originalData = fs.readFileSync(leadsFile, 'utf-8');

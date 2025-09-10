@@ -4,8 +4,11 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const leadsFile = path.join(__dirname, '../data/leads.json');
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, `../data/${env}`);
+const leadsFile = path.join(dataDir, 'leads.json');
 
 const isRealResponse = (resp) =>
   typeof resp.q === 'string' &&
