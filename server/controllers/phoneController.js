@@ -22,19 +22,37 @@ export const startPhoneCall = async (req, res) => {
 
 
 export const continuePhoneCall = async (req, res) => {
-  console.log('Recording Received: ', req.body)
-  const { TranscriptionText: transcription, RecordingUrl: recordingUrl } = req.body;
+  console.log('Recording Received: ', req.body);
+  const {
+    SpeechResult,
+    TranscriptionText,
+    RecordingUrl: recordingUrl
+  } = req.body;
+  const transcription = SpeechResult || TranscriptionText;
   const { leadId } = req.query;
   const id = Number(leadId);
 
   console.log("📞 /continue called");
   console.log("Lead ID:", id);
   console.log("Transcription:", transcription || "⏳ Not received yet");
-  console.log("Recording URL:", recordingUrl);
+  if (recordingUrl) {
+    console.log("Recording URL:", recordingUrl);
+  }
 
-  // Early exit if only recording webhook (no transcription yet)
+  // If nothing was captured, prompt again then hang up if still silent
   if (!transcription) {
-    return res.status(200).type('text/xml').send('<Response></Response>');
+    const twiml = new twilio.twiml.VoiceResponse();
+    const gather = twiml.gather({
+      input: 'speech',
+      action: `/api/phone/continue?leadId=${id}`,
+      speechTimeout: 'auto',
+      bargeIn: true,
+      language: 'en-US'
+    });
+    gather.say({ voice: 'Polly.Matthew', language: 'en-US' }, "Sorry, I didn't catch that. Could you repeat?");
+    twiml.say("No problem, I'll try again later. Goodbye.");
+    twiml.hangup();
+    return res.type('text/xml').send(twiml.toString());
   }
 
   const leads = readLeads();
@@ -46,7 +64,7 @@ export const continuePhoneCall = async (req, res) => {
   }
 
   try {
-    const{ aiReply } = await askAI([
+    const { aiReply } = await askAI([
       {
         role: 'system',
         content: `You're a solar represenative qualifying a homeowner. Speak casually and emotionally.`
@@ -55,7 +73,7 @@ export const continuePhoneCall = async (req, res) => {
         role: 'user',
         content: transcription
       }
-    ])
+    ]);
 
     // Save response to call history
     const updatedHistory = [
@@ -69,10 +87,18 @@ export const continuePhoneCall = async (req, res) => {
 
     updateLeadById(id, { callHistory: updatedHistory });
 
-    // Build TwiML response
+    // Build TwiML response that feels conversational
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say({ voice: 'Polly.Matthew', language: 'en-US' }, aiReply);
-    twiml.redirect(`/api/phone/voice?leadId=${id}`);
+    const gather = twiml.gather({
+      input: 'speech',
+      action: `/api/phone/continue?leadId=${id}`,
+      speechTimeout: 'auto',
+      bargeIn: true,
+      language: 'en-US'
+    });
+    gather.say({ voice: 'Polly.Matthew', language: 'en-US' }, aiReply);
+    twiml.say('Thanks for your time. Goodbye!');
+    twiml.hangup();
 
     return res.type('text/xml').send(twiml.toString());
   } catch (err) {
@@ -115,30 +141,24 @@ export const getVoiceScript = (req, res) => {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  // Ask question
-  twiml.say(
+  // Start a natural conversation without a dial tone
+  const gather = twiml.gather({
+    input: 'speech',
+    action: `/api/phone/continue?leadId=${leadId}`,
+    speechTimeout: 'auto',
+    bargeIn: true,
+    language: 'en-US'
+  });
+  gather.say(
     {
       voice: 'Polly.Matthew',
       language: 'en-US'
     },
-    `Hey there. What’s your average electric bill? Just say it after the beep.`
+    "Hi there, this is Alex from Solar Savings. Thanks for taking my call. I'm looking to help folks lower their electric bills. About how much do you pay each month?"
   );
 
-  // Record caller
-  twiml.record({
-    action: `/api/phone/continue?leadId=${leadId}`,
-    method: 'POST',
-    maxLength: 30,
-    timeout: 5,
-    transcribe: true,
-    transcribeCallback: `/api/phone/continue?leadId=${leadId}`,
-    recordingStatusCallback: `/api/phone/status-callback`,
-    playBeep: true,
-    trim: 'trim-silence',
-  });
-
-  // Fallback if nothing captured
-  twiml.say("Sorry we didn’t catch that. We'll follow up later.");
+  // If nothing is said, gracefully end the call
+  twiml.say("Alright, I'll try again another time. Have a great day!");
   twiml.hangup();
 
   res.type('text/xml');
