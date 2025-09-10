@@ -4,7 +4,11 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const leadsFile = path.join(__dirname, '../data/leads.json');
+
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+const leadsFile = process.env.LEADS_FILE
+  ? path.resolve(process.env.LEADS_FILE)
+  : path.join(__dirname, `../data/${env}/leads.json`);
 
 export function readLeads() {
   const data = fs.readFileSync(leadsFile, 'utf-8');
