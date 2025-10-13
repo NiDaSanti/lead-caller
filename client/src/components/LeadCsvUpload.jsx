@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Input, Button, Stack, useToast } from '@chakra-ui/react';
+import { Box, Input, Button, Stack, useToast, useColorModeValue, Text, Icon, HStack } from '@chakra-ui/react';
+import { FiUploadCloud } from 'react-icons/fi';
 import Papa from 'papaparse';
 import PropTypes from 'prop-types';
 
@@ -86,15 +87,36 @@ export default function LeadCsvUpload({ onNewLead }) {
     });
   };
 
+  const containerBg = useColorModeValue('brand.50', 'brand.800');
+  const borderColor = useColorModeValue('brand.200', 'brand.700');
+
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
-        <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} />
-        <Button type="submit" colorScheme="green">
-          Upload CSV
-        </Button>
+    <Box
+      as="form"
+      onSubmit={handleSubmit}
+      mt={4}
+      bg={containerBg}
+      border="1px dashed"
+      borderColor={borderColor}
+      borderRadius="2xl"
+      p={6}
+    >
+      <Stack spacing={4} align="flex-start">
+        <HStack spacing={3} color={useColorModeValue('brand.600', 'brand.200')}>
+          <Icon as={FiUploadCloud} boxSize={6} color={useColorModeValue('accent.500', 'accent.300')} />
+          <Text fontWeight="semibold">Bulk upload homeowners</Text>
+        </HStack>
+        <Text fontSize="sm" color={useColorModeValue('brand.500', 'brand.300')}>
+          Import a spreadsheet of homeowners to populate the pipeline instantly. Use the provided template to ensure headers match your CRM.
+        </Text>
+        <Stack direction={{ base: 'column', md: 'row' }} spacing={4} w="full">
+          <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} bg={useColorModeValue('white', 'brand.900')} />
+          <Button type="submit" colorScheme="accent" borderRadius="full">
+            Upload CSV
+          </Button>
+        </Stack>
       </Stack>
-    </form>
+    </Box>
   );
 }
 

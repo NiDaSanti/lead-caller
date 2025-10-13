@@ -14,6 +14,11 @@ import {
   useToast,
   Textarea,
   useColorModeValue,
+  Stack,
+  HStack,
+  Badge,
+  Text,
+  Divider,
 } from '@chakra-ui/react';
 import { PhoneIcon } from '@chakra-ui/icons';
 import { MdLocationOn } from 'react-icons/md';
@@ -111,116 +116,157 @@ export default function LeadForm({ onNewLead }) {
     }
   };
 
+  const containerBg = useColorModeValue('white', 'brand.900');
+  const borderColor = useColorModeValue('brand.200', 'brand.700');
+  const sectionBg = useColorModeValue('brand.50', 'brand.800');
+  const helperColor = useColorModeValue('brand.500', 'brand.300');
+
   return (
     <Box
-      bg={useColorModeValue("brand.800", "brand.900")}
+      bg={containerBg}
       border="1px solid"
-      borderColor={useColorModeValue("brand.700", "brand.700")}
-      borderRadius="xl"
-      p={6}
-      boxShadow="md"
+      borderColor={borderColor}
+      borderRadius="2xl"
+      p={{ base: 6, md: 8 }}
+      boxShadow={useColorModeValue('xl', 'md')}
     >
-      <form onSubmit={handleSubmit}>
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
-          <FormControl isRequired>
-            <FormLabel>First Name</FormLabel>
-            <Input
-              placeholder="Jane"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <FormHelperText color="brand.300">The lead&apos;s given name.</FormHelperText>
-          </FormControl>
+      <Stack spacing={8}>
+        <Stack spacing={3}>
+          <HStack spacing={3}>
+            <Badge colorScheme="accent" px={3} py={1} borderRadius="full">
+              New homeowner
+            </Badge>
+            <Badge colorScheme="highlight" variant="subtle" px={3} py={1} borderRadius="full">
+              Takes ~2 minutes
+            </Badge>
+          </HStack>
+          <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight="semibold">
+            Capture lead details while the conversation is fresh.
+          </Text>
+          <Text fontSize="sm" color={helperColor} maxW="2xl">
+            Quick notes on every contact help your team personalize follow-ups, schedule site surveys, and close with confidence.
+          </Text>
+        </Stack>
 
-          <FormControl isRequired>
-            <FormLabel>Last Name</FormLabel>
-            <Input
-              placeholder="Doe"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <FormHelperText color="brand.300">Family name of the lead.</FormHelperText>
-          </FormControl>
+        <Divider />
 
-          <FormControl isRequired>
-            <FormLabel>Phone</FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <PhoneIcon color="brand.400" />
-              </InputLeftElement>
+        <form onSubmit={handleSubmit}>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+            <FormControl isRequired>
+              <FormLabel>First Name</FormLabel>
               <Input
-                placeholder="555-123-4567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Jane"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                bg={sectionBg}
               />
-            </InputGroup>
-            <FormHelperText color="brand.300">Include area code.</FormHelperText>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Street Address</FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <Icon as={MdLocationOn} color="brand.400" />
-              </InputLeftElement>
-              <Input
-                placeholder="1234 Main St"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </InputGroup>
-            <FormHelperText color="brand.300">Street number and name.</FormHelperText>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>City</FormLabel>
-            <Input
-              placeholder="Los Angeles"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-            <FormHelperText color="brand.300">City of residence.</FormHelperText>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>State</FormLabel>
-            <Input
-              placeholder="CA"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
-            <FormHelperText color="brand.300">Two-letter state code.</FormHelperText>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>ZIP Code</FormLabel>
-            <Input
-              placeholder="90001"
-              value={zipcode}
-              onChange={(e) => setZipcode(e.target.value)}
-            />
-            <FormHelperText color="brand.300">5-digit ZIP code.</FormHelperText>
-          </FormControl>
-
-          <GridItem colSpan={{ base: 1, md: 2 }}>
-            <FormControl>
-              <FormLabel>Note</FormLabel>
-              <Textarea
-                placeholder="Additional details about the lead"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-              <FormHelperText color="brand.300">Optional notes.</FormHelperText>
+              <FormHelperText color={helperColor}>The lead&apos;s given name.</FormHelperText>
             </FormControl>
-          </GridItem>
 
-          <GridItem colSpan={{ base: 1, md: 2 }}>
-            <Button w="full" type="submit" colorScheme="brand">
-              Submit Lead
-            </Button>
-          </GridItem>
-        </SimpleGrid>
-      </form>
+            <FormControl isRequired>
+              <FormLabel>Last Name</FormLabel>
+              <Input
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                bg={sectionBg}
+              />
+              <FormHelperText color={helperColor}>Family name of the lead.</FormHelperText>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>Phone</FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <PhoneIcon color="accent.500" />
+                </InputLeftElement>
+                <Input
+                  placeholder="555-123-4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  bg={sectionBg}
+                />
+              </InputGroup>
+              <FormHelperText color={helperColor}>Include area code.</FormHelperText>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>Street Address</FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={MdLocationOn} color="accent.500" />
+                </InputLeftElement>
+                <Input
+                  placeholder="1234 Main St"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  bg={sectionBg}
+                />
+              </InputGroup>
+              <FormHelperText color={helperColor}>Street number and name.</FormHelperText>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>City</FormLabel>
+              <Input
+                placeholder="Los Angeles"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                bg={sectionBg}
+              />
+              <FormHelperText color={helperColor}>City of residence.</FormHelperText>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>State</FormLabel>
+              <Input
+                placeholder="CA"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                bg={sectionBg}
+              />
+              <FormHelperText color={helperColor}>Two-letter state code.</FormHelperText>
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>ZIP Code</FormLabel>
+              <Input
+                placeholder="90001"
+                value={zipcode}
+                onChange={(e) => setZipcode(e.target.value)}
+                bg={sectionBg}
+              />
+              <FormHelperText color={helperColor}>5-digit ZIP code.</FormHelperText>
+            </FormControl>
+
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <FormControl>
+                <FormLabel>Note</FormLabel>
+                <Textarea
+                  placeholder="Additional details about the lead"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  bg={sectionBg}
+                />
+                <FormHelperText color={helperColor}>Optional notes.</FormHelperText>
+              </FormControl>
+            </GridItem>
+
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <Button
+                w="full"
+                type="submit"
+                colorScheme="accent"
+                size="lg"
+                borderRadius="xl"
+                boxShadow="0 12px 24px rgba(44, 122, 123, 0.2)"
+              >
+                Submit Lead
+              </Button>
+            </GridItem>
+          </SimpleGrid>
+        </form>
+      </Stack>
     </Box>
   );
 }

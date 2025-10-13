@@ -15,7 +15,11 @@ import {
   HStack,
   Heading,
   Divider,
-  useColorModeValue
+  useColorModeValue,
+  Text,
+  FormHelperText,
+  Tag,
+  SimpleGrid
 } from '@chakra-ui/react';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -103,46 +107,76 @@ export default function AutoCallMenu() {
     }
   };
 
-  const cardBg = useColorModeValue('brand.800', 'brand.800');
+  const cardBg = useColorModeValue('white', 'brand.900');
+  const borderColor = useColorModeValue('brand.200', 'brand.700');
+  const helperColor = useColorModeValue('brand.500', 'brand.300');
 
   return (
-    <Box as="form" onSubmit={handleSubmit} maxW="md" mx="auto" bg={cardBg} p={6} borderRadius="xl" shadow="md" border="1px solid" borderColor={useColorModeValue('brand.700', 'brand.700')}>
+    <Box
+      as="form"
+      onSubmit={handleSubmit}
+      maxW="lg"
+      mx="auto"
+      bg={cardBg}
+      p={{ base: 6, md: 8 }}
+      borderRadius="2xl"
+      shadow={useColorModeValue('xl', 'md')}
+      border="1px solid"
+      borderColor={borderColor}
+    >
       <VStack spacing={6} align="stretch">
-        <Heading size="md" textAlign="center" color="highlight.200">Auto Call Settings</Heading>
+        <VStack spacing={1} align="stretch">
+          <Heading size="md" textAlign="left" color={useColorModeValue('brand.800', 'highlight.200')}>
+            Auto Call Settings
+          </Heading>
+          <Text fontSize="sm" color={helperColor}>
+            Define a respectful calling cadence so your team connects with homeowners when they&apos;re most likely to answer.
+          </Text>
+        </VStack>
         <FormControl display="flex" alignItems="center">
           <FormLabel flex="1" mb="0">Enable Auto Calls</FormLabel>
-          <Switch isChecked={config.enabled} onChange={handleEnabledChange} />
+          <Switch isChecked={config.enabled} onChange={handleEnabledChange} colorScheme="accent" />
         </FormControl>
         <Divider />
-        <FormControl>
-          <FormLabel>Start Time</FormLabel>
-          <Input type="time" name="startTime" value={config.startTime} onChange={handleChange} />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Stop Time</FormLabel>
-          <Input type="time" name="stopTime" value={config.stopTime} onChange={handleChange} />
-        </FormControl>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          <FormControl>
+            <FormLabel>Start Time</FormLabel>
+            <Input type="time" name="startTime" value={config.startTime} onChange={handleChange} bg={useColorModeValue('brand.50', 'brand.800')} />
+            <FormHelperText color={helperColor}>Local time to begin dialing.</FormHelperText>
+          </FormControl>
+          <FormControl>
+            <FormLabel>Stop Time</FormLabel>
+            <Input type="time" name="stopTime" value={config.stopTime} onChange={handleChange} bg={useColorModeValue('brand.50', 'brand.800')} />
+            <FormHelperText color={helperColor}>Last call will start before this time.</FormHelperText>
+          </FormControl>
+        </SimpleGrid>
         <FormControl>
           <FormLabel>Calls Per Hour</FormLabel>
           <NumberInput min={1} value={config.callsPerHour} onChange={handleCallsChange}>
-            <NumberInputField name="callsPerHour" />
+            <NumberInputField name="callsPerHour" bg={useColorModeValue('brand.50', 'brand.800')} />
           </NumberInput>
+          <FormHelperText color={helperColor}>Balance agent focus with prompt responses.</FormHelperText>
         </FormControl>
         <FormControl>
           <FormLabel>Active Days</FormLabel>
           <HStack spacing={2} flexWrap="wrap">
             {DAYS.map(day => (
-              <Checkbox
+              <Tag
                 key={day}
-                isChecked={config.days.includes(day)}
-                onChange={() => toggleDay(day)}
+                size="lg"
+                variant={config.days.includes(day) ? 'solid' : 'subtle'}
+                colorScheme={config.days.includes(day) ? 'accent' : 'gray'}
+                cursor="pointer"
+                onClick={() => toggleDay(day)}
               >
                 {day}
-              </Checkbox>
+              </Tag>
             ))}
           </HStack>
         </FormControl>
-        <Button type="submit" alignSelf="flex-end">Save</Button>
+        <Button type="submit" alignSelf="flex-end" colorScheme="accent" borderRadius="full">
+          Save schedule
+        </Button>
         {message && (
           <Alert status={message.type}>
             <AlertIcon />

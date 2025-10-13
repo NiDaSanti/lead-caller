@@ -10,7 +10,10 @@ import {
   useToast,
   InputGroup,
   InputLeftElement,
-  Image
+  Image,
+  useColorModeValue,
+  Text,
+  Stack
 } from '@chakra-ui/react';
 import { FiUser, FiLock } from 'react-icons/fi';
 import PropTypes from 'prop-types';
@@ -37,65 +40,75 @@ export default function Login({ onLogin }) {
     }
   };
 
+  const pageBg = useColorModeValue('linear-gradient(135deg, #F5F9FF 0%, #E8FFFB 100%)', 'brand.900');
+  const cardBg = useColorModeValue('white', 'brand.800');
+  const borderColor = useColorModeValue('brand.200', 'brand.700');
+  const textMuted = useColorModeValue('brand.500', 'brand.200');
+
   return (
     <Box
       minH="100vh"
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bg="brand.900"
+      bg={pageBg}
       p={4}
     >
       <Box
         as="form"
         onSubmit={handleSubmit}
-        p={10}
+        p={{ base: 8, md: 10 }}
         maxW="md"
         w="full"
-        bg="brand.800"
+        bg={cardBg}
         borderWidth="1px"
-        borderColor="brand.700"
-        borderRadius="lg"
-        boxShadow="lg"
+        borderColor={borderColor}
+        borderRadius="2xl"
+        boxShadow={useColorModeValue('xl', 'lg')}
       >
-          <VStack spacing={8}>
+        <VStack spacing={8} align="stretch">
+          <VStack spacing={3}>
             <Image src="/sunrun.svg" alt="Sunrun Logo" boxSize="60px" />
-            <Heading size="lg" color="highlight.200">Lead Caller</Heading>
-            <Heading size="md" color="brand.200">Sign In</Heading>
-          <FormControl>
-            <FormLabel>Username</FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none" color="brand.400">
-                <FiUser />
-              </InputLeftElement>
-              <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                borderRadius="md"
-                color="highlight.50"
-              />
-            </InputGroup>
-          </FormControl>
-          <FormControl>
-            <FormLabel>Password</FormLabel>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none" color="brand.400">
-                <FiLock />
-              </InputLeftElement>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                borderRadius="md"
-                color="highlight.50"
-              />
-            </InputGroup>
-          </FormControl>
+            <Heading size="lg" color={useColorModeValue('brand.800', 'highlight.200')}>Lead Caller</Heading>
+            <Text fontSize="sm" color={textMuted}>Sign in to manage your outreach queue and nurture every homeowner relationship.</Text>
+          </VStack>
+          <Stack spacing={4}>
+            <FormControl>
+              <FormLabel>Username</FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none" color={textMuted}>
+                  <FiUser />
+                </InputLeftElement>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  borderRadius="lg"
+                  bg={useColorModeValue('brand.50', 'brand.900')}
+                />
+              </InputGroup>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Password</FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none" color={textMuted}>
+                  <FiLock />
+                </InputLeftElement>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  borderRadius="lg"
+                  bg={useColorModeValue('brand.50', 'brand.900')}
+                />
+              </InputGroup>
+            </FormControl>
+          </Stack>
           <Button
             type="submit"
             colorScheme="accent"
             w="full"
-            borderRadius="md"
+            borderRadius="full"
+            size="lg"
           >
             Login
           </Button>
