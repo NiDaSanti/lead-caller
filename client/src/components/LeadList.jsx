@@ -105,7 +105,7 @@ export default function LeadList({
               </HStack>
             </Heading>
 
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+            <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
               {grouped[status].map((lead, idx) => {
                 const isLast = idx === grouped[status].length - 1;
                 return (

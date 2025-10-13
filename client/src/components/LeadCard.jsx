@@ -2,7 +2,8 @@ import {
   Card, CardBody, Heading, Text, Stack, Box, Badge, HStack, Wrap, Tag,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider, Input, useToast, SimpleGrid
+  VStack, Button, IconButton, Avatar, Divider, Input, useToast, SimpleGrid,
+  AvatarGroup, Flex, Spacer, Tooltip
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
@@ -209,7 +210,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.3 }}
         w="100%"
+        display="flex"
+        justifyContent="center"
       >
+  <Box w="full" maxW={{ base: '100%', md: '2000px', lg: '2400px' }} px={{ base: 2, md: 8, lg: 12 }}>
         <Card
           bg={cardBg}
           border="1px solid"
@@ -223,32 +227,37 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
           _hover={{ shadow: '2xl', transform: 'translateY(-4px)' }}
         >
           <CardBody p={0}>
-            <Box
-              bgGradient={headerGradient}
-              color={headerTextColor}
-              px={6}
-              py={5}
-              borderBottom="1px solid"
-              borderColor={borderColor}
-            >
-              <Stack
-                direction={{ base: 'column', sm: 'row' }}
-                spacing={4}
-                align={{ base: 'flex-start', sm: 'center' }}
-                justify="space-between"
-                flexWrap="wrap"
+              <Box
+                bgGradient={headerGradient}
+                color={headerTextColor}
+                px={4}
+                py={3}
+                borderBottom="1px solid"
+                borderColor={borderColor}
               >
-                <HStack align="center" spacing={4} w="full" flexWrap="wrap">
-                  <Avatar
-                    name={`${lead.firstName} ${lead.lastName}`}
-                    size="md"
-                    bg={useColorModeValue('accent.200', 'accent.700')}
-                    color={headerTextColor}
-                  />
-                  <Box flex="1" minW={0}>
+                <Flex align="center" gap={4}>
+                  <AvatarGroup size={{ base: 'sm', md: 'md' }} max={3}>
+                    {/* Primary lead avatar */}
+                    <Tooltip label="Lead" placement="top">
+                          <Avatar
+                            name={`${lead.firstName} ${lead.lastName}`}
+                            bg={useColorModeValue('accent.200', 'accent.700')}
+                            color={headerTextColor}
+                            boxSize={{ base: '44px', md: '48px' }}
+                          />
+                    </Tooltip>
+                    {/* Avatars for tags (show first 2 tags as avatars) */}
+                    {(lead.tags || []).slice(0, 2).map((tag) => (
+                      <Tooltip key={tag} label={tag} placement="top">
+                        <Avatar name={tag} bg={useColorModeValue('brand.100', 'brand.700')} />
+                      </Tooltip>
+                    ))}
+                  </AvatarGroup>
+
+                  <Box flex="1" minW={0} ml={{ base: 2, md: 4 }}>
                     <Heading
                       size="sm"
-                      noOfLines={{ base: 2, sm: 1 }}
+                      noOfLines={{ base: 1 }}
                       color={headerTextColor}
                       wordBreak="break-word"
                     >
@@ -257,164 +266,116 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                     <Text
                       fontSize="xs"
                       color={useColorModeValue('brand.600', 'highlight.100')}
-                      wordBreak="break-word"
+                      wordBreak="normal"
+                      whiteSpace="nowrap"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
                     >
                       {lead.phone}
                     </Text>
                   </Box>
-                </HStack>
-                <Badge
-                  colorScheme={badgeColor}
-                  variant={statusVariant}
-                  borderRadius="full"
-                  px={3}
-                  py={1}
-                  fontSize="0.7em"
-                  textTransform="capitalize"
-                  flexShrink={0}
-                  flexWrap="wrap"
-                  whiteSpace="normal"
-                  textAlign="center"
-                  justifyContent="center"
-                  alignContent="center"
-                >
-                  {lead.status || 'New'}
-                </Badge>
-              </Stack>
-            </Box>
 
-            <Stack spacing={6} px={{ base: 5, md: 6 }} py={6} fontSize="sm">
-              <Box
-                borderRadius="xl"
-                border="1px solid"
-                borderColor={borderColor}
-                bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
-                p={{ base: 4, md: 5 }}
-              >
-                <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={4}>
-                  <Box>
-                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                      Phone
-                    </Text>
-                    <Text fontWeight="semibold" color={metaValueColor} wordBreak="break-word">
-                      {lead.phone}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                      Follow-up
-                    </Text>
-                    <Badge
-                      mt={1}
-                      colorScheme={lead.followUpDate ? 'accent' : 'brand'}
-                      variant={statusVariant}
-                      borderRadius="full"
-                      px={3}
-                      py={1}
-                      textTransform="none"
-                      whiteSpace="normal"
-                      flexWrap="wrap"
-                      wordBreak="break-word"
-                      display="inline-flex"
-                      justifyContent="center"
-                      textAlign="center"
-                    >
-                      {followUpDisplay}
-                    </Badge>
-                  </Box>
-                  <Box>
-                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                      Last contact
-                    </Text>
-                    <Text fontWeight="semibold" color={metaValueColor} wordBreak="break-word">
-                      {lastContactDisplay}
-                    </Text>
-                  </Box>
-                </SimpleGrid>
+                  <Badge
+                    colorScheme={badgeColor}
+                    variant={statusVariant}
+                    borderRadius="full"
+                    px={3}
+                    py={1}
+                    fontSize="0.7em"
+                    textTransform="capitalize"
+                  >
+                    {lead.status || 'New'}
+                  </Badge>
+                </Flex>
               </Box>
 
-              {lead.tags?.length ? (
-                <Box>
-                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor} mb={2}>
-                    Tags
-                  </Text>
-                  <Wrap shouldWrapChildren spacing={2}>
-                    {lead.tags.map((tag) => (
-                      <Tag
-                        key={tag}
-                        size="sm"
-                        borderRadius="full"
-                        colorScheme="accent"
-                        variant={statusVariant}
-                        px={3}
-                        py={1}
-                        whiteSpace="normal"
-                        wordBreak="break-word"
-                        flexWrap="wrap"
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </Wrap>
+            <Flex direction={{ base: 'column', md: 'row' }} gap={4} px={{ base: 4, md: 6 }} py={4} align="center">
+              <Box flexBasis={{ base: '100%', md: '20%' }}>
+                <Box
+                  borderRadius="xl"
+                  border="1px solid"
+                  borderColor={borderColor}
+                  bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
+                  p={{ base: 3, md: 4 }}
+                >
+                  <VStack align="start" spacing={2}>
+                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                      Contact
+                    </Text>
+                    <Text fontWeight="semibold" color={metaValueColor} wordBreak="break-word">
+                      {lead.phone}
+                    </Text>
+                    <Text fontSize="xs" color={metaLabelColor}>Follow-up</Text>
+                    <Badge mt={1} colorScheme={lead.followUpDate ? 'accent' : 'brand'} variant={statusVariant}>{followUpDisplay}</Badge>
+                    <Text fontSize="xs" color={metaLabelColor}>Last contact</Text>
+                    <Text fontWeight="semibold" color={metaValueColor}>{lastContactDisplay}</Text>
+                  </VStack>
                 </Box>
-              ) : null}
+              </Box>
 
-              <Divider borderColor={borderColor} />
+              <Box flexBasis={{ base: '100%', md: '62%' }}>
+                <Box p={2}>
+                  {lead.tags?.length ? (
+                    <Wrap mb={2}>
+                      {lead.tags.map((tag) => (
+                        <Tag key={tag} size="sm" borderRadius="full" colorScheme="accent" variant={statusVariant}>{tag}</Tag>
+                      ))}
+                    </Wrap>
+                  ) : null}
 
-              <Stack direction={{ base: 'column', md: 'row' }} spacing={3} align="stretch">
-                <Button
-                  size="md"
-                  bgGradient="linear(to-r, accent.500, accent.600)"
-                  color="white"
-                  _hover={{ bgGradient: 'linear(to-r, accent.600, accent.700)' }}
-                  leftIcon={<PhoneIcon />}
-                  onClick={startCall}
-                  isLoading={isCalling}
-                  w="full"
-                >
-                  Call lead
-                </Button>
-                <Button
-                  size="md"
-                  variant="outline"
-                  borderColor={useColorModeValue('brand.200', 'brand.600')}
-                  color={useColorModeValue('brand.700', 'highlight.100')}
-                  _hover={{ bg: useColorModeValue('brand.50', 'whiteAlpha.300') }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openReport();
-                  }}
-                  leftIcon={<FiFileText />}
-                  w="full"
-                >
-                  View report
-                </Button>
-                <Button
-                  size="md"
-                  variant="ghost"
-                  color={useColorModeValue('accent.600', 'accent.200')}
-                  _hover={{ bg: useColorModeValue('accent.50', 'whiteAlpha.300') }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm("Delete this lead?")) {
-                      onDeleteLead(lead.id);
-                      toast({
-                        title: "Lead removed",
-                        status: "info",
-                        duration: 3000,
-                        isClosable: true,
-                      });
-                    }
-                  }}
-                  leftIcon={<FiTrash2 />}
-                  w="full"
-                >
-                  Delete
-                </Button>
-              </Stack>
+                  <Divider borderColor={borderColor} my={2} />
+
+                  <Text fontSize="sm" noOfLines={3} color={metaValueColor}>{lead.notes || 'No notes available.'}</Text>
+                </Box>
+              </Box>
+
+              {/* compact action column removed to avoid duplicate buttons; actions are available below as full-width buttons */}
+            </Flex>
+
+            {/* Full-width action buttons for quick access (keeps original behavior) */}
+            <Stack direction={{ base: 'column', md: 'row' }} spacing={3} px={{ base: 5, md: 6 }} pb={6}>
+              <Button
+                size="md"
+                bgGradient="linear(to-r, accent.500, accent.600)"
+                color="white"
+                _hover={{ bgGradient: 'linear(to-r, accent.600, accent.700)' }}
+                leftIcon={<PhoneIcon />}
+                onClick={(e) => { e.stopPropagation(); startCall(e); }}
+                isLoading={isCalling}
+                w="full"
+              >
+                Call lead
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                borderColor={useColorModeValue('brand.200', 'brand.600')}
+                color={useColorModeValue('brand.700', 'highlight.100')}
+                _hover={{ bg: useColorModeValue('brand.50', 'whiteAlpha.300') }}
+                onClick={(e) => { e.stopPropagation(); openReport(); }}
+                leftIcon={<FiFileText />}
+                w="full"
+              >
+                View report
+              </Button>
+              <Button
+                size="md"
+                variant="ghost"
+                color={useColorModeValue('accent.600', 'accent.200')}
+                _hover={{ bg: useColorModeValue('accent.50', 'whiteAlpha.300') }}
+                onClick={(e) => { e.stopPropagation(); if (window.confirm("Delete this lead?")) { onDeleteLead(lead.id); toast({ title: "Lead removed", status: "info", duration: 3000, isClosable: true }); } }}
+                leftIcon={<FiTrash2 />}
+                w="full"
+              >
+                Delete
+              </Button>
             </Stack>
+            <Box px={{ base: 5, md: 6 }} pb={4}>
+              <Text fontSize="xs" color={metaLabelColor} textAlign="center">{lead.callHistory?.length || 0} exchanges</Text>
+            </Box>
           </CardBody>
         </Card>
+        </Box>
       </MotionBox>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>

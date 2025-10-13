@@ -126,5 +126,23 @@
       }
     ],
     "deletedAt": "2025-10-13T00:24:57.508Z"
+  },
+  {
+    "id": 1760314139093,
+    "firstName": "Nick",
+    "lastName": "Santiago",
+    "phone": "9199314346",
+    "address": {
+      "street": "12323 S Berth Ave",
+      "city": "Los Angeles ",
+      "state": "CA",
+      "zip": "90001"
+    },
+    "note": "",
+    "status": "New",
+    "tags": [],
+    "callHistory": [],
+    "createdAt": "2025-10-13T00:08:59.093Z",
+    "deletedAt": "2025-10-13T03:49:17.712Z"
   }
 ]
