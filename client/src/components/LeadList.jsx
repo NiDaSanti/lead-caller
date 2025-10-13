@@ -25,22 +25,47 @@ const STATUS_ICONS = {
   New: FiStar,
 };
 
-export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef, filter = "All", socket }) {
-  const grouped = leads.reduce((acc, lead) => {
+export default function LeadList({
+  leads,
+  onUpdateLead,
+  onDeleteLead,
+  scrollRef,
+  filter = "All",
+  searchQuery = "",
+  socket
+}) {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const safeLeads = Array.isArray(leads) ? leads : [];
+
+  const filteredLeads = safeLeads.filter((lead) => {
+    const status = (lead.status || "New").trim();
+    const matchesStatus = filter === "All" || status === filter;
+
+    if (!normalizedQuery) {
+      return matchesStatus;
+    }
+
+    const serialized = JSON.stringify(lead, (_, value) => value ?? "")
+      .toString()
+      .toLowerCase();
+
+    return matchesStatus && serialized.includes(normalizedQuery);
+  });
+
+  const grouped = filteredLeads.reduce((acc, lead) => {
     const status = (lead.status || "New").trim();
     if (!acc[status]) acc[status] = [];
     acc[status].push(lead);
     return acc;
   }, {});
 
-  const allStatuses = Object.keys(grouped);
   const visibleStatuses = filter === "All"
-    ? allStatuses
-    : allStatuses.filter((status) => status === filter);
+    ? Object.keys(grouped)
+    : Object.keys(grouped).filter((status) => status === filter);
 
   const hasVisibleLeads = visibleStatuses.some((status) => grouped[status]?.length > 0);
 
-  if (leads.length === 0) {
+  if (safeLeads.length === 0) {
     return (
       <Center py={12}>
         <Text fontSize="md" color="brand.200">
@@ -54,7 +79,7 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
     return (
       <Center py={12}>
         <Text fontSize="md" color="brand.200">
-          No leads found for "{filter}" filter.
+          No leads found for the current filters.
         </Text>
       </Center>
     );
