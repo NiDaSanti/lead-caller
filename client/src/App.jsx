@@ -4,7 +4,8 @@ import {
   Collapse, useColorMode, useColorModeValue, useToken,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText,
-  FormControl, FormLabel, Switch, GridItem, Wrap, WrapItem, Badge, Divider
+  FormControl, FormLabel, Switch, GridItem, Wrap, WrapItem, Badge, Divider,
+  Input, InputGroup, InputLeftElement
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { Icon } from "@chakra-ui/react";
@@ -17,7 +18,8 @@ import {
   FiPhoneCall,
   FiCalendar,
   FiXCircle,
-  FiStar
+  FiStar,
+  FiSearch
 } from "react-icons/fi";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
@@ -72,6 +74,7 @@ function App({ onLogout }) {
   const [showForm, setShowForm] = useState(() => localStorage.getItem("showForm") !== "false");
   const [showLeads, setShowLeads] = useState(() => localStorage.getItem("showLeads") !== "false");
   const [filter, setFilter] = useState(() => localStorage.getItem("leadFilter") || "All");
+  const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem("leadSearch") || "");
   const [modalView, setModalView] = useState(null);
 
   const navItems = [
@@ -123,6 +126,7 @@ function App({ onLogout }) {
   }, [showForm, showLeads]);
 
   useEffect(() => localStorage.setItem("leadFilter", filter), [filter]);
+  useEffect(() => localStorage.setItem("leadSearch", searchQuery), [searchQuery]);
 
   const addLead = (newLead) => setLeads(prev => [...prev, newLead]);
 
@@ -380,6 +384,23 @@ function App({ onLogout }) {
                     Segment leads to spotlight the families ready for solar savings and personalize your follow-up.
                   </Text>
                   <Wrap spacing={3}>
+                    <WrapItem w={{ base: "100%", md: "auto" }}>
+                      <InputGroup size="sm" maxW={{ base: "100%", md: "sm" }}>
+                        <InputLeftElement pointerEvents="none">
+                          <Icon as={FiSearch} color={mutedColor} />
+                        </InputLeftElement>
+                        <Input
+                          value={searchQuery}
+                          onChange={(event) => setSearchQuery(event.target.value)}
+                          placeholder="Search all lead details"
+                          bg={useColorModeValue('white', 'brand.900')}
+                          borderColor={borderColor}
+                          _hover={{ borderColor: accentText }}
+                          _focusVisible={{ borderColor: accentText, boxShadow: `0 0 0 1px ${accentText}` }}
+                          _placeholder={{ color: mutedColor }}
+                        />
+                      </InputGroup>
+                    </WrapItem>
                     {[
                       { status: "All", label: "All", icon: FiList },
                       { status: "Qualified", label: "Qualified", icon: FiCheckCircle },
@@ -484,6 +505,7 @@ function App({ onLogout }) {
                     onUpdateLead={updateLead}
                     onDeleteLead={deleteLead}
                     filter={filter}
+                    searchQuery={searchQuery}
                     socket={socketRef.current}
                   />
                 </Collapse>
