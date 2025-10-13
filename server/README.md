@@ -56,6 +56,22 @@ Authenticated `/bulk-upload` routes are excluded from rate limiting when a valid
 
 `SERVER_BASE_URL` is used to construct webhook URLs (e.g., Twilio voice and status callbacks).
 
+### Deployment readiness check
+
+Before shipping to staging or production you can verify that all AI and Twilio prerequisites are satisfied:
+
+```bash
+npm run check:deploy -- --env production
+```
+
+The script loads your `.env` file (pass a custom one with `--env-file path/to/.env`) and confirms that:
+
+- OpenAI credentials and any optional tuning variables are present so the assistant can generate replies.
+- Twilio credentials, phone numbers, and a public `SERVER_BASE_URL` are available for outbound calls and webhooks.
+- Scheduler and lead datastore files exist or are flagged if they still need to be created for the chosen environment.
+
+Address any reported errors before deploying to ensure automated calls and AI responses work end-to-end.
+
 ### OpenAI setup
 
 1. Create an account at [OpenAI](https://platform.openai.com/).
