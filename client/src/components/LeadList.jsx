@@ -87,42 +87,74 @@ export default function LeadList({
 
   return (
     <Stack spacing={10} w="100%">
-      {visibleStatuses.map((status) => (
-        grouped[status]?.length > 0 ? (
-          <Box key={status}>
-            <Heading
-              as="h3"
-              fontSize="lg"
-              mb={3}
-              color="highlight.200"
-              borderLeft="4px solid"
-              borderColor="accent.500"
-              pl={3}
-            >
-              <HStack>
-                <Icon as={STATUS_ICONS[status] || FiTag} aria-label={`${status} leads`} />
-                <Text>{status}</Text>
-              </HStack>
-            </Heading>
+      {filter !== 'All' ? (
+        // When a specific filter is active render a single universal grid
+        <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
+          {filteredLeads.map((lead, idx) => (
+            <LeadCard
+              key={lead.id}
+              lead={lead}
+              onUpdateLead={onUpdateLead}
+              onDeleteLead={onDeleteLead}
+              scrollRef={idx === filteredLeads.length - 1 ? scrollRef : undefined}
+              socket={socket}
+            />
+          ))}
+        </SimpleGrid>
+      ) : (
+        // Default: grouped view with headings
+        visibleStatuses.map((status) => (
+          grouped[status]?.length > 0 ? (
+            <Box key={status}>
+              <Heading
+                as="h3"
+                fontSize="lg"
+                mb={3}
+                color="highlight.200"
+                borderLeft="4px solid"
+                borderColor="accent.500"
+                pl={3}
+              >
+                <HStack>
+                  <Icon as={STATUS_ICONS[status] || FiTag} aria-label={`${status} leads`} />
+                  <Text>{status}</Text>
+                </HStack>
+              </Heading>
 
-            <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
-              {grouped[status].map((lead, idx) => {
-                const isLast = idx === grouped[status].length - 1;
-                return (
-                  <LeadCard
-                    key={lead.id}
-                    lead={lead}
-                    onUpdateLead={onUpdateLead}
-                    onDeleteLead={onDeleteLead}
-                    scrollRef={isLast ? scrollRef : undefined}
-                    socket={socket}
-                  />
-                );
-              })}
-            </SimpleGrid>
-          </Box>
-        ) : null
-      ))}
+              {status === 'New' ? (
+                <Stack spacing={4}>
+                  {grouped[status].map((lead, idx) => (
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onUpdateLead={onUpdateLead}
+                      onDeleteLead={onDeleteLead}
+                      scrollRef={idx === grouped[status].length - 1 ? scrollRef : undefined}
+                      socket={socket}
+                    />
+                  ))}
+                </Stack>
+              ) : (
+                <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
+                  {grouped[status].map((lead, idx) => {
+                    const isLast = idx === grouped[status].length - 1;
+                    return (
+                      <LeadCard
+                        key={lead.id}
+                        lead={lead}
+                        onUpdateLead={onUpdateLead}
+                        onDeleteLead={onDeleteLead}
+                        scrollRef={isLast ? scrollRef : undefined}
+                        socket={socket}
+                      />
+                    );
+                  })}
+                </SimpleGrid>
+              )}
+            </Box>
+          ) : null
+        ))
+      )}
     </Stack>
   );
 }
