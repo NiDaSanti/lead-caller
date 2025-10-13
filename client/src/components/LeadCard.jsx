@@ -2,11 +2,11 @@ import {
   Card, CardBody, Heading, Text, Stack, Box, Badge, HStack, Wrap, Tag,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider, Input, useToast
+  VStack, Button, IconButton, Avatar, Divider, Input, useToast, SimpleGrid
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiTrash2 } from 'react-icons/fi';
 import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
@@ -266,83 +266,100 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
               </Stack>
             </Box>
 
-            <Stack spacing={5} px={{ base: 5, md: 6 }} py={5} fontSize="sm">
-              <Stack direction={{ base: 'column', md: 'row' }} spacing={{ base: 4, md: 8 }}>
-                <Box>
-                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                    Phone
-                  </Text>
-                  <Text fontWeight="semibold" color={metaValueColor}>
-                    {lead.phone}
-                  </Text>
-                </Box>
-                <Box>
-                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                    Follow-up
-                  </Text>
-                  <Text fontWeight="semibold" color={metaValueColor}>
-                    {followUpDisplay}
-                  </Text>
-                </Box>
-                <Box>
-                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
-                    Last contact
-                  </Text>
-                  <Text fontWeight="semibold" color={metaValueColor}>
-                    {lastContactDisplay}
-                  </Text>
-                </Box>
-              </Stack>
+            <Stack spacing={6} px={{ base: 5, md: 6 }} py={6} fontSize="sm">
+              <Box
+                borderRadius="xl"
+                border="1px solid"
+                borderColor={borderColor}
+                bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
+                p={{ base: 4, md: 5 }}
+              >
+                <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={4}>
+                  <Box>
+                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                      Phone
+                    </Text>
+                    <Text fontWeight="semibold" color={metaValueColor}>
+                      {lead.phone}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                      Follow-up
+                    </Text>
+                    <Badge
+                      mt={1}
+                      colorScheme={lead.followUpDate ? 'accent' : 'brand'}
+                      variant={statusVariant}
+                      borderRadius="full"
+                      px={3}
+                      py={1}
+                      textTransform="none"
+                    >
+                      {followUpDisplay}
+                    </Badge>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                      Last contact
+                    </Text>
+                    <Text fontWeight="semibold" color={metaValueColor}>
+                      {lastContactDisplay}
+                    </Text>
+                  </Box>
+                </SimpleGrid>
+              </Box>
 
               {lead.tags?.length ? (
-                <Stack spacing={2}>
-                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                <Box>
+                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor} mb={2}>
                     Tags
                   </Text>
                   <Wrap shouldWrapChildren spacing={2}>
                     {lead.tags.map((tag) => (
-                      <Tag key={tag} size="sm" borderRadius="full" colorScheme="accent" variant={statusVariant}>
+                      <Tag key={tag} size="sm" borderRadius="full" colorScheme="accent" variant={statusVariant} px={3} py={1}>
                         {tag}
                       </Tag>
                     ))}
                   </Wrap>
-                </Stack>
+                </Box>
               ) : null}
 
               <Divider borderColor={borderColor} />
 
-              <Stack direction={{ base: 'column', sm: 'row' }} spacing={3}>
+              <Stack direction={{ base: 'column', md: 'row' }} spacing={3} align="stretch">
                 <Button
-                  size="sm"
-                  bg="accent.600"
+                  size="md"
+                  bgGradient="linear(to-r, accent.500, accent.600)"
                   color="white"
-                  _hover={{ bg: 'accent.500' }}
+                  _hover={{ bgGradient: 'linear(to-r, accent.600, accent.700)' }}
                   leftIcon={<PhoneIcon />}
                   onClick={startCall}
                   isLoading={isCalling}
+                  w="full"
                 >
                   Call lead
                 </Button>
                 <Button
-                  size="sm"
-                  variant="ghost"
+                  size="md"
+                  variant="outline"
+                  borderColor={useColorModeValue('brand.200', 'brand.600')}
                   color={useColorModeValue('brand.700', 'highlight.100')}
-                  bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
-                  _hover={{ bg: useColorModeValue('blackAlpha.100', 'whiteAlpha.200') }}
+                  _hover={{ bg: useColorModeValue('brand.50', 'whiteAlpha.300') }}
                   onClick={(e) => {
                     e.stopPropagation();
                     openReport();
                   }}
                   leftIcon={<FiFileText />}
+                  w="full"
                 >
                   View report
                 </Button>
                 <Button
-                  size="sm"
-                  variant="outline"
-                  borderColor="accent.500"
+                  size="md"
+                  variant="ghost"
                   color={useColorModeValue('accent.600', 'accent.200')}
-                  _hover={{ bg: 'accent.500', color: 'white' }}
+                  _hover={{ bg: useColorModeValue('accent.50', 'whiteAlpha.300') }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (window.confirm("Delete this lead?")) {
@@ -355,6 +372,8 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                       });
                     }
                   }}
+                  leftIcon={<FiTrash2 />}
+                  w="full"
                 >
                   Delete
                 </Button>
