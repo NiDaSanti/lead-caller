@@ -11,7 +11,7 @@ import { useRef, useEffect, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
 function SoundWave() {
-  const waveColor = useColorModeValue('brand.600', 'brand.300');
+  const waveColor = useColorModeValue('accent.400', 'highlight.200');
   return (
     <Box display="flex" justifyContent="center" gap="6px" alignItems="flex-end" h="30px" mt={2}>
       {[...Array(5)].map((_, i) => (
@@ -44,9 +44,18 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const { isOpen: isReportOpen, onOpen: openReport, onClose: closeReport } = useDisclosure();
   const { isOpen: isCallOpen, onOpen: openCall, onClose: closeCall } = useDisclosure();
 
-  const cardBg = useColorModeValue("white", "gray.700");
-  const modalBg = useColorModeValue("white", "gray.800");
-  const textColor = useColorModeValue("gray.800", "gray.100");
+  const cardBg = useColorModeValue("brand.800", "brand.800");
+  const modalBg = useColorModeValue("brand.900", "brand.900");
+  const textColor = useColorModeValue("highlight.50", "highlight.50");
+  const borderColor = useColorModeValue("brand.700", "brand.700");
+  const badgeColor = ({
+    Qualified: 'highlight',
+    Scheduled: 'accent',
+    Answered: 'accent',
+    "Call In Progress": 'accent',
+    Unqualified: 'accent',
+    New: 'brand',
+  })[lead.status] || 'brand';
   const toast = useToast();
 
   useEffect(() => {
@@ -188,7 +197,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
         <Card
           bg={cardBg}
           border="1px solid"
-          borderColor={useColorModeValue("gray.200", "gray.600")}
+          borderColor={borderColor}
           borderRadius="xl"
           boxShadow="sm"
           _hover={{ shadow: "lg" }}
@@ -200,14 +209,16 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             <Heading size="sm" noOfLines={1} color={textColor}>
               {lead.firstName} {lead.lastName}
             </Heading>
-            <Text fontSize="xs" color="gray.500">{lead.phone}</Text>
-            <Badge fontSize="0.7em" colorScheme={lead.status === "Qualified" ? "green" : "yellow"}>
+            <Text fontSize="xs" color="brand.300">{lead.phone}</Text>
+            <Badge fontSize="0.7em" colorScheme={badgeColor}>
               {lead.status}
             </Badge>
           <Stack direction="row" spacing={2} mt={3}>
             <Button
               size="xs"
-              variant="outline"
+              bg="accent.600"
+              color="white"
+              _hover={{ bg: 'accent.500' }}
               leftIcon={<PhoneIcon />}
               onClick={startCall}
               isLoading={isCalling}
@@ -216,7 +227,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             </Button>
             <Button
               size="xs"
-              colorScheme="brand"
+              variant="outline"
+              borderColor="highlight.400"
+              color="highlight.200"
+              _hover={{ bg: 'highlight.400', color: 'brand.900' }}
               onClick={(e) => {
                 e.stopPropagation();
                 openReport();
@@ -227,8 +241,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             </Button>
             <Button
               size="xs"
-              colorScheme="red"
               variant="outline"
+              borderColor="accent.500"
+              color="accent.300"
+              _hover={{ bg: 'accent.500', color: 'white' }}
               onClick={(e) => {
                 e.stopPropagation();
                 if (window.confirm("Delete this lead?")) {
@@ -262,12 +278,12 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             <VStack spacing={4}>
               <Avatar name={lead.firstName} size="xl" />
               <SoundWave />
-              <Text fontSize="sm" fontWeight="medium" color="gray.500">
+              <Text fontSize="sm" fontWeight="medium" color="brand.200">
                 Status: {callStatus}
               </Text>
-              <Box maxH="150px" w="100%" overflowY="auto" bg="gray.50" p={2} borderRadius="md">
+              <Box maxH="150px" w="100%" overflowY="auto" bg="brand.800" p={2} borderRadius="md" border="1px solid" borderColor={borderColor}>
                 {transcript.map((line, idx) => (
-                  <Text key={idx} fontSize="xs" color="gray.600">{line}</Text>
+                  <Text key={idx} fontSize="xs" color="highlight.200">{line}</Text>
                 ))}
               </Box>
             </VStack>
@@ -278,9 +294,9 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
       <Modal isOpen={isReportOpen} onClose={closeReport} size="6xl" isCentered>
         <ModalOverlay />
         <ModalContent p={4} bg={modalBg} ref={reportRef}>
-          <Box textAlign="center" borderBottom="1px solid #ccc" pb={4} mb={4}>
+          <Box textAlign="center" borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
             <Text fontSize="2xl" fontWeight="bold">Solar Lead Report</Text>
-            <Text fontSize="sm" color="gray.500">Generated by Solar Lead AI</Text>
+            <Text fontSize="sm" color="brand.200">Generated by Solar Lead AI</Text>
           </Box>
 
           <ModalHeader>Lead Report</ModalHeader>
@@ -315,7 +331,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                         <Text fontSize="sm"><strong>You:</strong> {entry.user || "N/A"}</Text>
                         <Text fontSize="sm"><strong>AI:</strong> {aiReply || "No reply"}</Text>
                         {timestamp && (
-                          <Text fontSize="xs" color="gray.500">{new Date(timestamp).toLocaleString()}</Text>
+                          <Text fontSize="xs" color="brand.200">{new Date(timestamp).toLocaleString()}</Text>
                         )}
                         <Divider mt={2} />
                       </Box>
@@ -354,7 +370,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 <Heading size="sm" mb={2}>Call Summary</Heading>
                 <Text fontSize="sm">Exchanges: {lead.callHistory?.length || 0}</Text>
                 {lead.status === "Qualified" && (
-                  <Text fontSize="sm" color="green.500">This lead is marked as Qualified.</Text>
+                  <Text fontSize="sm" color="highlight.200">This lead is marked as Qualified.</Text>
                 )}
               </Box>
               <Divider />
@@ -373,13 +389,13 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             </VStack>
           </ModalBody>
 
-          <Box borderTop="1px solid #ccc" mt={6} pt={3} textAlign="center" fontSize="xs" color="gray.500">
+          <Box borderTop="1px solid" borderColor={borderColor} mt={6} pt={3} textAlign="center" fontSize="xs" color="brand.200">
             <Text>© {new Date().getFullYear()} Nick Santiago • Solar Consultant</Text>
             <Text>Built with Solar Lead AI • Not for public distribution</Text>
           </Box>
 
           <ModalFooter>
-            <Button colorScheme="brand" onClick={downloadPDF}>
+            <Button bg="accent.600" color="white" _hover={{ bg: 'accent.500' }} onClick={downloadPDF}>
               Download PDF
             </Button>
           </ModalFooter>

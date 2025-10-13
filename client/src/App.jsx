@@ -48,12 +48,13 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("gray.50", "gray.900");
-  const cardBg = useColorModeValue("white", "gray.800");
-  const headingColor = useColorModeValue("brand.700", "brand.100");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const footerBg = useColorModeValue("gray.100", "gray.800");
-  const modalBg = useColorModeValue("white", "gray.900");
+  const bg = useColorModeValue("brand.900", "brand.900");
+  const cardBg = useColorModeValue("brand.800", "brand.800");
+  const headingColor = useColorModeValue("highlight.200", "highlight.200");
+  const borderColor = useColorModeValue("brand.700", "brand.700");
+  const footerBg = useColorModeValue("brand.900", "brand.900");
+  const modalBg = useColorModeValue("brand.800", "brand.800");
+  const mutedColor = useColorModeValue("brand.200", "brand.200");
 
   const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
     'brand.500', 'accent.500', 'brand.300', 'accent.300', 'brand.700', 'accent.700'
@@ -166,33 +167,33 @@ function App({ onLogout }) {
   const ratioMetrics = metrics.slice(4);
 
   return (
-    <Box bg={bg} minH="100vh">
+    <Box bg={bg} minH="100vh" color="highlight.50">
       {/* NAVBAR */}
       <Flex
         justify="space-between"
         align="center"
         px={{ base: 6, md: 10 }}
         py={4}
-        bgGradient={useColorModeValue('linear(to-r, brand.700, accent.600)', 'linear(to-r, gray.900, brand.700)')}
+        bg="brand.900"
         borderBottom="1px solid"
-        borderColor={useColorModeValue('brand.600', 'gray.700')}
-        shadow="lg"
+        borderColor="brand.700"
+        shadow="xl"
       >
         <HStack spacing={4}>
           <Box
             w={10}
             h={10}
             borderRadius="full"
-            bg="whiteAlpha.300"
+            bg="accent.700"
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
-            <Icon as={FiBarChart2} color="white" />
+            <Icon as={FiBarChart2} color="highlight.200" />
           </Box>
           <Box>
-            <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="white">Lead Caller</Text>
-            <Text fontSize="xs" color="whiteAlpha.800">Solar conversations that convert</Text>
+            <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="highlight.100">Lead Caller</Text>
+            <Text fontSize="xs" color="brand.200">A disciplined solar outreach desk</Text>
           </Box>
         </HStack>
         <HStack spacing={2}>
@@ -201,9 +202,9 @@ function App({ onLogout }) {
               key={view}
               size="sm"
               variant="ghost"
-              color="white"
-              leftIcon={<Icon as={icon} aria-label={label} />}
-              _hover={{ bg: "whiteAlpha.200" }}
+              color="brand.200"
+              leftIcon={<Icon as={icon} aria-label={label} color="highlight.300" />}
+              _hover={{ bg: "whiteAlpha.100", color: "highlight.100" }}
               onClick={() => setModalView(view)}
             >
               {label}
@@ -215,17 +216,18 @@ function App({ onLogout }) {
               variant="ghost"
               onClick={toggleColorMode}
               icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              color="white"
-              _hover={{ bg: "whiteAlpha.200" }}
+              color="highlight.200"
+              _hover={{ bg: "whiteAlpha.100" }}
               aria-label="Toggle color mode"
             />
           </ChakraTooltip>
           <Button
             size="sm"
             onClick={onLogout}
-            color="white"
-            bg="whiteAlpha.300"
-            _hover={{ bg: "whiteAlpha.400" }}
+            variant="outline"
+            borderColor="accent.500"
+            color="highlight.200"
+            _hover={{ bg: "accent.500", color: "white" }}
           >
             Logout
           </Button>
@@ -234,24 +236,15 @@ function App({ onLogout }) {
 
       <Container maxW="7xl" py={{ base: 10, md: 16 }}>
         <Box
-          bgGradient={useColorModeValue('linear(to-r, brand.500, accent.500)', 'linear(to-r, brand.400, accent.500)')}
-          color="white"
+          bg={useColorModeValue('brand.800', 'brand.800')}
+          color="highlight.50"
           borderRadius="3xl"
           p={{ base: 8, md: 12 }}
           mb={{ base: 12, lg: 16 }}
-          position="relative"
-          overflow="hidden"
+          border="1px solid"
+          borderColor="brand.700"
         >
-          <Box
-            position="absolute"
-            top="-16"
-            right="-10"
-            w="56"
-            h="56"
-            bg="whiteAlpha.400"
-            filter="blur(80px)"
-          />
-          <Stack spacing={8} position="relative">
+          <Stack spacing={8}>
             <Stack
               direction={{ base: "column", md: "row" }}
               justify="space-between"
@@ -259,20 +252,21 @@ function App({ onLogout }) {
               spacing={{ base: 6, md: 10 }}
             >
               <VStack align="flex-start" spacing={4} maxW="3xl">
-                <Badge colorScheme="blackAlpha" bg="whiteAlpha.300" color="white" px={3} py={1} borderRadius="full">
-                  Homeowner-first solar playbook
+                <Badge colorScheme="accent" bg="accent.600" color="white" px={3} py={1} borderRadius="full">
+                  Mafia-grade solar desk
                 </Badge>
                 <Text fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }} fontWeight="extrabold" lineHeight="shorter">
-                  Ignite homeowner excitement with a polished, high-trust experience.
+                  Run every outreach with precision, restraint, and authority.
                 </Text>
-                <Text fontSize={{ base: "sm", md: "md" }} color="whiteAlpha.800" maxW="2xl">
-                  Position every call as the effortless path to lower utility bills. Track momentum, surface quick wins, and step into each conversation with confidence.
+                <Text fontSize={{ base: "sm", md: "md" }} color="brand.200" maxW="2xl">
+                  Keep the pipeline sharp, the messaging disciplined, and every homeowner interaction worthy of a marquee brand.
                 </Text>
                 <HStack spacing={4} flexWrap="wrap">
                   <Button
                     size="sm"
-                    colorScheme="whiteAlpha"
-                    variant="solid"
+                    bg="highlight.400"
+                    color="brand.900"
+                    _hover={{ bg: 'highlight.300' }}
                     onClick={() => setShowLeads(true)}
                   >
                     View lead pipeline
@@ -280,9 +274,9 @@ function App({ onLogout }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    borderColor="whiteAlpha.700"
-                    color="white"
-                    _hover={{ bg: "whiteAlpha.200" }}
+                    borderColor="highlight.400"
+                    color="highlight.200"
+                    _hover={{ bg: "highlight.400", color: "brand.900" }}
                     onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
                   >
                     Add a homeowner
@@ -292,20 +286,21 @@ function App({ onLogout }) {
               <VStack
                 align="flex-start"
                 spacing={4}
-                bg="whiteAlpha.200"
+                bg="brand.900"
                 borderRadius="2xl"
                 p={6}
-                backdropFilter="blur(6px)"
                 maxW="sm"
+                border="1px solid"
+                borderColor="brand.700"
               >
-                <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color="whiteAlpha.700">
+                <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color="brand.300">
                   today's focus
                 </Text>
-                <Text fontSize="lg" fontWeight="bold">
-                  Lead every family from curiosity to a confident consultation.
+                <Text fontSize="lg" fontWeight="bold" color="highlight.100">
+                  Lead families from curiosity to confident consultations.
                 </Text>
-                <Text fontSize="sm" color="whiteAlpha.800">
-                  Use the live metrics and insights below to highlight savings and peace of mind.
+                <Text fontSize="sm" color="brand.200">
+                  Use the live metrics to reinforce urgency, savings, and trust.
                 </Text>
               </VStack>
             </Stack>
@@ -313,22 +308,21 @@ function App({ onLogout }) {
               {primaryMetrics.map(({ label, value, help }) => (
                 <Box
                   key={label}
-                  bg="whiteAlpha.200"
+                  bg="brand.900"
                   borderRadius="xl"
                   p={4}
                   border="1px solid"
-                  borderColor="whiteAlpha.300"
-                  backdropFilter="blur(4px)"
+                  borderColor="brand.700"
                 >
                   <Stat>
-                    <StatLabel color="whiteAlpha.800" fontSize="xs" textTransform="uppercase">
+                    <StatLabel color="brand.200" fontSize="xs" textTransform="uppercase">
                       {label}
                     </StatLabel>
                     <StatNumber fontSize={{ base: "lg", md: "2xl" }}>
                       {value}
                     </StatNumber>
                     {help && (
-                      <StatHelpText color="whiteAlpha.900" fontSize="xs">
+                      <StatHelpText color="highlight.200" fontSize="xs">
                         {help}
                       </StatHelpText>
                     )}
@@ -351,13 +345,13 @@ function App({ onLogout }) {
                 shadow="lg"
               >
                 <Stack spacing={4}>
-                  <Badge colorScheme="orange" variant="subtle" alignSelf="flex-start">
+                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start">
                     Lead filters
                   </Badge>
                   <Text fontSize="xl" fontWeight="bold" color={headingColor}>
                     Focus your homeowner outreach
                   </Text>
-                  <Text fontSize="sm" color="gray.500">
+                  <Text fontSize="sm" color={mutedColor}>
                     Segment leads to spotlight the families ready for solar savings and personalize your follow-up.
                   </Text>
                   <Wrap spacing={3}>
@@ -372,13 +366,17 @@ function App({ onLogout }) {
                       <WrapItem key={status}>
                         <Button
                           size="sm"
-                          colorScheme={filter === status ? "orange" : "gray"}
-                          variant={filter === status ? "solid" : "outline"}
+                          variant={filter === status ? "solid" : "ghost"}
+                          colorScheme="accent"
+                          bg={filter === status ? 'accent.500' : 'transparent'}
+                          color={filter === status ? 'white' : 'brand.200'}
+                          borderColor={filter === status ? undefined : 'brand.700'}
+                          borderWidth={filter === status ? 0 : 1}
                           onClick={() => setFilter(status)}
                           leftIcon={<Icon as={icon} aria-label={label} />}
                           borderRadius="full"
                           px={4}
-                          _hover={{ shadow: "md" }}
+                          _hover={{ bg: filter === status ? 'accent.400' : 'brand.800', color: 'highlight.100' }}
                         >
                           {label}
                         </Button>
@@ -396,35 +394,24 @@ function App({ onLogout }) {
                 border="1px solid"
                 borderColor={borderColor}
                 shadow="xl"
-                position="relative"
-                overflow="hidden"
               >
-                <Box
-                  position="absolute"
-                  top="-24"
-                  right="-12"
-                  w="56"
-                  h="56"
-                  bg={useColorModeValue('orange.100', 'whiteAlpha.200')}
-                  filter="blur(90px)"
-                />
                 <Stack
                   direction={{ base: "column", md: "row" }}
                   justify="space-between"
                   align={{ base: "flex-start", md: "center" }}
                   mb={6}
                   spacing={4}
-                  position="relative"
                 >
                   <VStack align="start" spacing={1}>
-                    <Badge colorScheme="brand" variant="subtle">Capture interest</Badge>
+                    <Badge colorScheme="accent" variant="subtle">Capture interest</Badge>
                     <Text fontSize="2xl" fontWeight="bold" color={headingColor}>Add New Lead</Text>
-                    <Text fontSize="sm" color="gray.500">Collect homeowner details while their excitement is high.</Text>
+                    <Text fontSize="sm" color={mutedColor}>Collect homeowner details while their excitement is high.</Text>
                   </VStack>
                   <IconButton
                     icon={showForm ? <MinusIcon /> : <AddIcon />}
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
+                    color="highlight.200"
                     onClick={() => setShowForm(!showForm)}
                     aria-label="Toggle lead form"
                   />
@@ -444,35 +431,24 @@ function App({ onLogout }) {
                 border="1px solid"
                 borderColor={borderColor}
                 shadow="xl"
-                position="relative"
-                overflow="hidden"
               >
-                <Box
-                  position="absolute"
-                  bottom="-32"
-                  left="-12"
-                  w="60"
-                  h="60"
-                  bg={useColorModeValue('brand.100', 'whiteAlpha.100')}
-                  filter="blur(100px)"
-                />
                 <Stack
                   direction={{ base: "column", md: "row" }}
                   justify="space-between"
                   align={{ base: "flex-start", md: "center" }}
                   mb={6}
                   spacing={4}
-                  position="relative"
                 >
                   <VStack align="start" spacing={1}>
-                    <Badge colorScheme="green" variant="subtle">Active pipeline</Badge>
+                    <Badge colorScheme="highlight" variant="subtle">Active pipeline</Badge>
                     <Text fontSize="2xl" fontWeight="bold" color={headingColor}>Lead pipeline</Text>
-                    <Text fontSize="sm" color="gray.500">Track conversations and spotlight ready-to-convert homeowners.</Text>
+                    <Text fontSize="sm" color={mutedColor}>Track conversations and spotlight ready-to-convert homeowners.</Text>
                   </VStack>
                   <IconButton
                     icon={showLeads ? <MinusIcon /> : <AddIcon />}
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
+                    color="highlight.200"
                     onClick={() => setShowLeads(!showLeads)}
                     aria-label="Toggle lead list"
                   />
@@ -487,7 +463,7 @@ function App({ onLogout }) {
                   />
                 </Collapse>
                 {!showLeads && (
-                  <Text mt={6} fontSize="sm" color="gray.500" position="relative">
+                  <Text mt={6} fontSize="sm" color={mutedColor}>
                     Lead list hidden. Reopen it to re-engage homeowners while interest is warm.
                   </Text>
                 )}
@@ -498,28 +474,26 @@ function App({ onLogout }) {
           <GridItem colSpan={{ base: 1, xl: 1 }}>
             <VStack spacing={8} align="stretch">
               <Box
-                bgGradient={useColorModeValue('linear(to-br, orange.300, brand.500)', 'linear(to-br, brand.400, accent.400)')}
-                color="white"
+                bg={cardBg}
                 borderRadius="2xl"
                 p={{ base: 6, md: 8 }}
+                border="1px solid"
+                borderColor={borderColor}
                 shadow="xl"
               >
                 <Stack spacing={4}>
-                  <Badge colorScheme="whiteAlpha" bg="whiteAlpha.300" alignSelf="flex-start" px={3} py={1} borderRadius="full">
+                  <Badge colorScheme="accent" alignSelf="flex-start" px={3} py={1} borderRadius="full">
                     Homeowner spotlight
                   </Badge>
-                  <Text fontSize="lg" fontWeight="bold">
+                  <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                     Lead with value and calm any hesitation before the call.
                   </Text>
-                  <Text fontSize="sm" color="whiteAlpha.800">
-                    Highlight bill relief, backup power, and the simplicity of your install process. These colors cue the homeowner to pay attention.
+                  <Text fontSize="sm" color={mutedColor}>
+                    Highlight bill relief, backup power, and the simplicity of your install process. These cues keep attention where you need it.
                   </Text>
                   <Button
                     size="sm"
                     variant="outline"
-                    borderColor="whiteAlpha.700"
-                    color="white"
-                    _hover={{ bg: "whiteAlpha.200" }}
                     onClick={() => setModalView("dashboard")}
                     alignSelf="flex-start"
                   >
@@ -537,7 +511,7 @@ function App({ onLogout }) {
                 shadow="lg"
               >
                 <Text fontSize="lg" fontWeight="bold" color={headingColor}>Performance pulse</Text>
-                <Text fontSize="sm" color="gray.500" mb={6}>
+                <Text fontSize="sm" color={mutedColor} mb={6}>
                   Monitor conversion health to see where homeowners are leaning in.
                 </Text>
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
@@ -548,7 +522,7 @@ function App({ onLogout }) {
                       p={5}
                       border="1px solid"
                       borderColor={borderColor}
-                      bg={useColorModeValue('gray.50', 'gray.700')}
+                      bg={useColorModeValue('brand.900', 'brand.900')}
                     >
                       <Stat>
                         <StatLabel fontWeight="medium">{label}</StatLabel>
@@ -569,7 +543,7 @@ function App({ onLogout }) {
                 shadow="lg"
               >
                 <Text fontSize="lg" fontWeight="bold" color={headingColor}>Lead journey overview</Text>
-                <Text fontSize="sm" color="gray.500" mb={6}>
+                <Text fontSize="sm" color={mutedColor} mb={6}>
                   Use the visuals to tailor your homeowner conversation and keep energy savings front and center.
                 </Text>
                 <Stack spacing={6}>
@@ -608,8 +582,8 @@ function App({ onLogout }) {
       {/* FOOTER */}
       <Box mt={20} py={10} borderTop="1px solid" borderColor={borderColor} bg={footerBg}>
         <Container maxW="6xl" textAlign="center">
-          <Text fontSize="sm" color="gray.600">Created by <strong>Nick Santiago</strong></Text>
-          <Text fontSize="xs" mt={1} color="gray.500">Solar Consultant • Tech Builder • AI Sales Trainer</Text>
+          <Text fontSize="sm" color="brand.200">Created by <strong>Nick Santiago</strong></Text>
+          <Text fontSize="xs" mt={1} color={mutedColor}>Solar Consultant • Tech Builder • AI Sales Trainer</Text>
         </Container>
       </Box>
 

@@ -15,10 +15,10 @@ import {
 } from "@chakra-ui/react";
 
 export default function LeadSummary({ leads }) {
-  const cardBg = useColorModeValue("white", "gray.900");
-  const sectionBg = useColorModeValue("gray.50", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const labelColor = useColorModeValue("gray.600", "gray.400");
+  const cardBg = useColorModeValue("brand.800", "brand.800");
+  const sectionBg = useColorModeValue("brand.900", "brand.900");
+  const borderColor = useColorModeValue("brand.700", "brand.700");
+  const labelColor = useColorModeValue("brand.300", "brand.200");
 
   const total = leads.length;
   const grouped = leads.reduce((acc, lead) => {
@@ -72,15 +72,15 @@ export default function LeadSummary({ leads }) {
       <VStack align="start" spacing={10}>
         {/* Status Grid */}
         <Box w="100%">
-          <Heading size="md" mb={4}>Lead Status Overview</Heading>
+          <Heading size="md" mb={4} color="highlight.200">Lead Status Overview</Heading>
           <SimpleGrid columns={{ base: 2, sm: 3, md: 3, lg: 4 }} spacing={6}>
             {statuses.map((stat, i) => (
               <SlideFade in={true} offsetY="10px" key={stat.label} delay={0.05 * i}>
-                <Box p={5} bg={cardBg} borderRadius="xl" boxShadow="base">
+                <Box p={5} bg={cardBg} borderRadius="xl" boxShadow="base" border="1px solid" borderColor={borderColor}>
                   <Stat>
                     <StatLabel fontWeight="medium" color={labelColor}>{stat.label}</StatLabel>
                     <StatNumber fontSize="2xl">{stat.value}</StatNumber>
-                    <StatHelpText fontSize="xs" color="gray.500">
+                    <StatHelpText fontSize="xs" color="highlight.200">
                       {total ? `${Math.round((stat.value / total) * 100)}% of total` : "0%"}
                     </StatHelpText>
                   </Stat>
@@ -94,7 +94,7 @@ export default function LeadSummary({ leads }) {
 
         {/* Insights */}
         <Box w="100%">
-          <Heading size="md" mb={4}>Performance Insights</Heading>
+          <Heading size="md" mb={4} color="highlight.200">Performance Insights</Heading>
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
             {insights.map((insight, i) => (
               <Box
@@ -103,11 +103,13 @@ export default function LeadSummary({ leads }) {
                 bg={sectionBg}
                 borderRadius="xl"
                 boxShadow="sm"
+                border="1px solid"
+                borderColor={borderColor}
               >
                 <Stat>
                   <StatLabel fontSize="sm" fontWeight="semibold">{insight.label}</StatLabel>
                   <StatNumber fontSize="xl">{insight.value}</StatNumber>
-                  <StatHelpText fontSize="xs" color="gray.500">
+                  <StatHelpText fontSize="xs" color="highlight.200">
                     {insight.help}
                   </StatHelpText>
                 </Stat>

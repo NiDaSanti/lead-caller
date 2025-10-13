@@ -76,23 +76,23 @@ export default function CallSession({ lead, onClose }) {
     }
   };
 
-  const bg = useColorModeValue("white", "gray.800");
-  const cardBg = useColorModeValue("gray.50", "gray.700");
-  const textColor = useColorModeValue("gray.800", "gray.100");
-  const inputBg = useColorModeValue("white", "gray.600");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const bg = useColorModeValue("brand.800", "brand.900");
+  const cardBg = useColorModeValue("brand.900", "brand.900");
+  const textColor = useColorModeValue("highlight.50", "highlight.50");
+  const inputBg = useColorModeValue("brand.800", "brand.800");
+  const borderColor = useColorModeValue("brand.700", "brand.700");
 
   return (
     <Container maxW="3xl" p={0} bg={bg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={borderColor} shadow="xl">
       {/* Header */}
-      <Box bg={useColorModeValue("gray.100", "gray.900")} p={6} borderBottom="1px solid" borderColor={borderColor}>
+      <Box bg={useColorModeValue("brand.900", "brand.900")} p={6} borderBottom="1px solid" borderColor={borderColor}>
         <HStack spacing={4}>
           <Avatar name={`${lead.firstName} ${lead.lastName}`} />
           <Box>
               <Text fontSize="lg" fontWeight="bold" color={textColor}>
                 Call Session: {lead.firstName} {lead.lastName}
               </Text>
-            <Text fontSize="sm" color="gray.500">
+            <Text fontSize="sm" color="brand.200">
               Phone: {lead.phone}
             </Text>
           </Box>
@@ -104,7 +104,7 @@ export default function CallSession({ lead, onClose }) {
         {/* Progress Bar */}
         <Progress
           value={(currentIndex / questions.length) * 100}
-          colorScheme="brand"
+          colorScheme="accent"
           size="sm"
           borderRadius="full"
           mb={6}
@@ -112,7 +112,7 @@ export default function CallSession({ lead, onClose }) {
 
         {/* Current Question Block */}
         <Box bg={cardBg} p={6} borderRadius="xl" border="1px solid" borderColor={borderColor}>
-          <Badge colorScheme="brand" fontSize="0.75rem" mb={2}>
+          <Badge colorScheme="highlight" fontSize="0.75rem" mb={2}>
             Question {currentIndex + 1} of {questions.length}
           </Badge>
           <Text fontSize="md" fontWeight="semibold" color={textColor}>
@@ -131,7 +131,7 @@ export default function CallSession({ lead, onClose }) {
           <Button
             mt={4}
             onClick={handleNext}
-            colorScheme="brand"
+            colorScheme="accent"
             size="sm"
             alignSelf="flex-end"
           >
@@ -148,7 +148,7 @@ export default function CallSession({ lead, onClose }) {
             <VStack spacing={3} align="stretch">
               {responses.map((entry, i) => (
                 <Box key={i}>
-                  <Text fontSize="sm" color="gray.500">
+                  <Text fontSize="sm" color="brand.200">
                     <strong>Q{i + 1}:</strong> {entry.q}
                   </Text>
                   <Text fontSize="sm" color={textColor}>
@@ -163,8 +163,8 @@ export default function CallSession({ lead, onClose }) {
       </Box>
 
       {/* Footer */}
-      <Box textAlign="center" p={4} borderTop="1px solid" borderColor={borderColor} bg={useColorModeValue("gray.50", "gray.900")}>
-        <Text fontSize="xs" color="gray.500">
+      <Box textAlign="center" p={4} borderTop="1px solid" borderColor={borderColor} bg={useColorModeValue("brand.900", "brand.900")}>
+        <Text fontSize="xs" color="brand.200">
           Powered by Solar Lead AI • {new Date().toLocaleDateString()}
         </Text>
       </Box>

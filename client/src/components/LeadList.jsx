@@ -4,7 +4,6 @@ import {
   Center,
   Stack,
   Heading,
-  useColorModeValue,
   Box,
   SimpleGrid,
   HStack,
@@ -44,7 +43,7 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
   if (leads.length === 0) {
     return (
       <Center py={12}>
-        <Text fontSize="md" color="gray.500">
+        <Text fontSize="md" color="brand.200">
           No leads yet. Use the form above to add one.
         </Text>
       </Center>
@@ -54,7 +53,7 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
   if (!hasVisibleLeads) {
     return (
       <Center py={12}>
-        <Text fontSize="md" color="gray.500">
+        <Text fontSize="md" color="brand.200">
           No leads found for "{filter}" filter.
         </Text>
       </Center>
@@ -70,9 +69,9 @@ export default function LeadList({ leads, onUpdateLead, onDeleteLead, scrollRef,
               as="h3"
               fontSize="lg"
               mb={3}
-              color={useColorModeValue("orange.600", "orange.300")}
+              color="highlight.200"
               borderLeft="4px solid"
-              borderColor="orange.300"
+              borderColor="accent.500"
               pl={3}
             >
               <HStack>
