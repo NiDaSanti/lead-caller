@@ -1,5 +1,5 @@
 import {
-  Card, CardBody, Heading, Text, Stack, Box, Badge,
+  Card, CardBody, Heading, Text, Stack, Box, Badge, HStack, Wrap, Tag,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
   VStack, Button, IconButton, Avatar, Divider, Input, useToast
@@ -44,10 +44,19 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const { isOpen: isReportOpen, onOpen: openReport, onClose: closeReport } = useDisclosure();
   const { isOpen: isCallOpen, onOpen: openCall, onClose: closeCall } = useDisclosure();
 
-  const cardBg = useColorModeValue("brand.800", "brand.800");
-  const modalBg = useColorModeValue("brand.900", "brand.900");
-  const textColor = useColorModeValue("highlight.50", "highlight.50");
-  const borderColor = useColorModeValue("brand.700", "brand.700");
+  const cardBg = useColorModeValue("white", "brand.800");
+  const headerGradient = useColorModeValue(
+    "linear(to-r, accent.100, highlight.100)",
+    "linear(to-r, brand.700, accent.600)"
+  );
+  const headerTextColor = useColorModeValue("brand.900", "highlight.50");
+  const modalBg = useColorModeValue("white", "brand.900");
+  const textColor = useColorModeValue("brand.900", "highlight.50");
+  const borderColor = useColorModeValue("brand.200", "brand.700");
+  const metaLabelColor = useColorModeValue("brand.500", "brand.200");
+  const metaValueColor = useColorModeValue("brand.900", "highlight.100");
+  const transcriptBg = useColorModeValue("brand.50", "brand.800");
+  const statusVariant = useColorModeValue("subtle", "solid");
   const badgeColor = ({
     Qualified: 'highlight',
     Scheduled: 'accent',
@@ -57,6 +66,12 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
     New: 'brand',
   })[lead.status] || 'brand';
   const toast = useToast();
+  const followUpDisplay = lead.followUpDate
+    ? new Date(lead.followUpDate).toLocaleString()
+    : 'Not scheduled';
+  const lastContactDisplay = lead.lastContacted
+    ? new Date(lead.lastContacted).toLocaleDateString()
+    : 'No contact yet';
 
   useEffect(() => {
     if (scrollRef?.current) {
@@ -198,92 +213,175 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
           bg={cardBg}
           border="1px solid"
           borderColor={borderColor}
-          borderRadius="xl"
-          boxShadow="sm"
-          _hover={{ shadow: "lg" }}
+          borderRadius="2xl"
+          boxShadow={useColorModeValue('lg', 'xl')}
+          overflow="hidden"
           cursor="pointer"
           onClick={openReport}
+          transition="all 0.3s ease"
+          _hover={{ shadow: '2xl', transform: 'translateY(-4px)' }}
         >
-          <CardBody>
-            <Stack spacing={2} fontSize="sm">
-            <Heading size="sm" noOfLines={1} color={textColor}>
-              {lead.firstName} {lead.lastName}
-            </Heading>
-            <Text fontSize="xs" color="brand.300">{lead.phone}</Text>
-            <Badge fontSize="0.7em" colorScheme={badgeColor}>
-              {lead.status}
-            </Badge>
-          <Stack direction="row" spacing={2} mt={3}>
-            <Button
-              size="xs"
-              bg="accent.600"
-              color="white"
-              _hover={{ bg: 'accent.500' }}
-              leftIcon={<PhoneIcon />}
-              onClick={startCall}
-              isLoading={isCalling}
+          <CardBody p={0}>
+            <Box
+              bgGradient={headerGradient}
+              color={headerTextColor}
+              px={6}
+              py={5}
+              borderBottom="1px solid"
+              borderColor={borderColor}
             >
-              Call
-            </Button>
-            <Button
-              size="xs"
-              variant="outline"
-              borderColor="highlight.400"
-              color="highlight.200"
-              _hover={{ bg: 'highlight.400', color: 'brand.900' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                openReport();
-              }}
-              leftIcon={<FiFileText />}
-            >
-              View Report
-            </Button>
-            <Button
-              size="xs"
-              variant="outline"
-              borderColor="accent.500"
-              color="accent.300"
-              _hover={{ bg: 'accent.500', color: 'white' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (window.confirm("Delete this lead?")) {
-                  onDeleteLead(lead.id);
-                  toast({
-                    title: "Lead removed",
-                    status: "info",
-                    duration: 3000,
-                    isClosable: true,
-                  });
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </Stack>
-          </Stack>
-        </CardBody>
-      </Card>
-    </MotionBox>
+              <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                spacing={4}
+                align={{ base: 'flex-start', sm: 'center' }}
+                justify="space-between"
+              >
+                <HStack align="center" spacing={4} w="full">
+                  <Avatar
+                    name={`${lead.firstName} ${lead.lastName}`}
+                    size="md"
+                    bg={useColorModeValue('accent.200', 'accent.700')}
+                    color={headerTextColor}
+                  />
+                  <Box flex="1">
+                    <Heading size="sm" noOfLines={1} color={headerTextColor}>
+                      {lead.firstName} {lead.lastName}
+                    </Heading>
+                    <Text fontSize="xs" color={useColorModeValue('brand.600', 'highlight.100')}>
+                      {lead.phone}
+                    </Text>
+                  </Box>
+                </HStack>
+                <Badge
+                  colorScheme={badgeColor}
+                  variant={statusVariant}
+                  borderRadius="full"
+                  px={3}
+                  py={1}
+                  fontSize="0.7em"
+                  textTransform="capitalize"
+                >
+                  {lead.status || 'New'}
+                </Badge>
+              </Stack>
+            </Box>
+
+            <Stack spacing={5} px={{ base: 5, md: 6 }} py={5} fontSize="sm">
+              <Stack direction={{ base: 'column', md: 'row' }} spacing={{ base: 4, md: 8 }}>
+                <Box>
+                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                    Phone
+                  </Text>
+                  <Text fontWeight="semibold" color={metaValueColor}>
+                    {lead.phone}
+                  </Text>
+                </Box>
+                <Box>
+                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                    Follow-up
+                  </Text>
+                  <Text fontWeight="semibold" color={metaValueColor}>
+                    {followUpDisplay}
+                  </Text>
+                </Box>
+                <Box>
+                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                    Last contact
+                  </Text>
+                  <Text fontWeight="semibold" color={metaValueColor}>
+                    {lastContactDisplay}
+                  </Text>
+                </Box>
+              </Stack>
+
+              {lead.tags?.length ? (
+                <Stack spacing={2}>
+                  <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
+                    Tags
+                  </Text>
+                  <Wrap shouldWrapChildren spacing={2}>
+                    {lead.tags.map((tag) => (
+                      <Tag key={tag} size="sm" borderRadius="full" colorScheme="accent" variant={statusVariant}>
+                        {tag}
+                      </Tag>
+                    ))}
+                  </Wrap>
+                </Stack>
+              ) : null}
+
+              <Divider borderColor={borderColor} />
+
+              <Stack direction={{ base: 'column', sm: 'row' }} spacing={3}>
+                <Button
+                  size="sm"
+                  bg="accent.600"
+                  color="white"
+                  _hover={{ bg: 'accent.500' }}
+                  leftIcon={<PhoneIcon />}
+                  onClick={startCall}
+                  isLoading={isCalling}
+                >
+                  Call lead
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  color={useColorModeValue('brand.700', 'highlight.100')}
+                  bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
+                  _hover={{ bg: useColorModeValue('blackAlpha.100', 'whiteAlpha.200') }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openReport();
+                  }}
+                  leftIcon={<FiFileText />}
+                >
+                  View report
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderColor="accent.500"
+                  color={useColorModeValue('accent.600', 'accent.200')}
+                  _hover={{ bg: 'accent.500', color: 'white' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm("Delete this lead?")) {
+                      onDeleteLead(lead.id);
+                      toast({
+                        title: "Lead removed",
+                        status: "info",
+                        duration: 3000,
+                        isClosable: true,
+                      });
+                    }
+                  }}
+                >
+                  Delete
+                </Button>
+              </Stack>
+            </Stack>
+          </CardBody>
+        </Card>
+      </MotionBox>
 
       <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
         <ModalOverlay />
-        <ModalContent borderRadius="2xl" bg={modalBg} p={6} position="relative">
+        <ModalContent borderRadius="2xl" bg={modalBg} p={6} position="relative" border="1px solid" borderColor={borderColor}>
           <IconButton icon={<CloseIcon />} position="absolute" top={2} right={2} size="sm"
-            variant="ghost" onClick={closeCall} aria-label="Close call" />
+            variant="ghost" onClick={closeCall} aria-label="Close call" color={metaLabelColor} />
           <ModalHeader textAlign="center" fontSize="lg" fontWeight="bold" color={textColor}>
             Calling {lead.firstName}
           </ModalHeader>
           <ModalBody>
             <VStack spacing={4}>
-              <Avatar name={lead.firstName} size="xl" />
+              <Avatar name={lead.firstName} size="xl" bg={useColorModeValue('accent.200', 'accent.700')} color={headerTextColor} />
               <SoundWave />
-              <Text fontSize="sm" fontWeight="medium" color="brand.200">
+              <Text fontSize="sm" fontWeight="medium" color={metaLabelColor}>
                 Status: {callStatus}
               </Text>
-              <Box maxH="150px" w="100%" overflowY="auto" bg="brand.800" p={2} borderRadius="md" border="1px solid" borderColor={borderColor}>
+              <Box maxH="150px" w="100%" overflowY="auto" bg={transcriptBg} p={3} borderRadius="md" border="1px solid" borderColor={borderColor}>
                 {transcript.map((line, idx) => (
-                  <Text key={idx} fontSize="xs" color="highlight.200">{line}</Text>
+                  <Text key={idx} fontSize="xs" color={metaValueColor}>{line}</Text>
                 ))}
               </Box>
             </VStack>
@@ -293,10 +391,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
 
       <Modal isOpen={isReportOpen} onClose={closeReport} size="6xl" isCentered>
         <ModalOverlay />
-        <ModalContent p={4} bg={modalBg} ref={reportRef}>
+        <ModalContent p={4} bg={modalBg} ref={reportRef} border="1px solid" borderColor={borderColor}>
           <Box textAlign="center" borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
-            <Text fontSize="2xl" fontWeight="bold">Solar Lead Report</Text>
-            <Text fontSize="sm" color="brand.200">Generated by Solar Lead AI</Text>
+            <Text fontSize="2xl" fontWeight="bold" color={textColor}>Solar Lead Report</Text>
+            <Text fontSize="sm" color={metaLabelColor}>Generated by Solar Lead AI</Text>
           </Box>
 
           <ModalHeader>Lead Report</ModalHeader>
@@ -318,10 +416,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 )}
               </Box>
 
-              <Divider />
+              <Divider borderColor={borderColor} />
 
               <Box>
-                <Heading size="sm" mb={2}>AI Call History</Heading>
+                <Heading size="sm" mb={2} color={textColor}>AI Call History</Heading>
                 {lead.callHistory?.length ? (
                   lead.callHistory.map((entry, idx) => {
                     const aiReply = typeof entry.ai === 'object' ? entry.ai.aiReply : entry.ai;
@@ -333,7 +431,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                         {timestamp && (
                           <Text fontSize="xs" color="brand.200">{new Date(timestamp).toLocaleString()}</Text>
                         )}
-                        <Divider mt={2} />
+                        <Divider mt={2} borderColor={borderColor} />
                       </Box>
                     );
                   })
@@ -342,11 +440,11 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 )}
               </Box>
 
-              <Divider />
+              <Divider borderColor={borderColor} />
 
               {aiSummary ? (
                 <Box>
-                  <Heading size="sm" mb={2}>AI Summary</Heading>
+                  <Heading size="sm" mb={2} color={textColor}>AI Summary</Heading>
                   <Text fontSize="sm" whiteSpace="pre-wrap">{aiSummary}</Text>
                 </Box>
               ) : (
@@ -357,25 +455,25 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
 
               {lead.notes && (
                 <>
-                  <Divider />
+                  <Divider borderColor={borderColor} />
                   <Box>
-                    <Heading size="sm" mb={2}>Rep Notes</Heading>
+                    <Heading size="sm" mb={2} color={textColor}>Rep Notes</Heading>
                     <Text fontSize="sm" whiteSpace="pre-wrap">{lead.notes}</Text>
                   </Box>
                 </>
               )}
 
-              <Divider />
+              <Divider borderColor={borderColor} />
               <Box>
-                <Heading size="sm" mb={2}>Call Summary</Heading>
+                <Heading size="sm" mb={2} color={textColor}>Call Summary</Heading>
                 <Text fontSize="sm">Exchanges: {lead.callHistory?.length || 0}</Text>
                 {lead.status === "Qualified" && (
-                  <Text fontSize="sm" color="highlight.200">This lead is marked as Qualified.</Text>
+                  <Text fontSize="sm" color={accentText}>This lead is marked as Qualified.</Text>
                 )}
               </Box>
-              <Divider />
+              <Divider borderColor={borderColor} />
               <Box w="100%">
-                <Heading size="sm" mb={2}>Schedule Follow-Up</Heading>
+                <Heading size="sm" mb={2} color={textColor}>Schedule Follow-Up</Heading>
                 <Input
                   type="datetime-local"
                   size="sm"
@@ -389,7 +487,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             </VStack>
           </ModalBody>
 
-          <Box borderTop="1px solid" borderColor={borderColor} mt={6} pt={3} textAlign="center" fontSize="xs" color="brand.200">
+          <Box borderTop="1px solid" borderColor={borderColor} mt={6} pt={3} textAlign="center" fontSize="xs" color={metaLabelColor}>
             <Text>© {new Date().getFullYear()} Nick Santiago • Solar Consultant</Text>
             <Text>Built with Solar Lead AI • Not for public distribution</Text>
           </Box>
