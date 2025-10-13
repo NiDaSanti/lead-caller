@@ -103,12 +103,12 @@ export default function AutoCallMenu() {
     }
   };
 
-  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBg = useColorModeValue('brand.800', 'brand.800');
 
   return (
-    <Box as="form" onSubmit={handleSubmit} maxW="md" mx="auto" bg={cardBg} p={6} borderRadius="xl" shadow="md">
+    <Box as="form" onSubmit={handleSubmit} maxW="md" mx="auto" bg={cardBg} p={6} borderRadius="xl" shadow="md" border="1px solid" borderColor={useColorModeValue('brand.700', 'brand.700')}>
       <VStack spacing={6} align="stretch">
-        <Heading size="md" textAlign="center">Auto Call Settings</Heading>
+        <Heading size="md" textAlign="center" color="highlight.200">Auto Call Settings</Heading>
         <FormControl display="flex" alignItems="center">
           <FormLabel flex="1" mb="0">Enable Auto Calls</FormLabel>
           <Switch isChecked={config.enabled} onChange={handleEnabledChange} />
@@ -142,7 +142,7 @@ export default function AutoCallMenu() {
             ))}
           </HStack>
         </FormControl>
-        <Button type="submit" colorScheme="brand" alignSelf="flex-end">Save</Button>
+        <Button type="submit" alignSelf="flex-end">Save</Button>
         {message && (
           <Alert status={message.type}>
             <AlertIcon />

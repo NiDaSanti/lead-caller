@@ -43,7 +43,7 @@ export default function Login({ onLogin }) {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bg="gray.50"
+      bg="brand.900"
       p={4}
     >
       <Box
@@ -52,33 +52,34 @@ export default function Login({ onLogin }) {
         p={10}
         maxW="md"
         w="full"
-        bg="white"
+        bg="brand.800"
         borderWidth="1px"
+        borderColor="brand.700"
         borderRadius="lg"
         boxShadow="lg"
       >
           <VStack spacing={8}>
             <Image src="/sunrun.svg" alt="Sunrun Logo" boxSize="60px" />
-            <Heading size="lg" color="brand.500">Lead Caller</Heading>
-            <Heading size="md">Sign In</Heading>
+            <Heading size="lg" color="highlight.200">Lead Caller</Heading>
+            <Heading size="md" color="brand.200">Sign In</Heading>
           <FormControl>
             <FormLabel>Username</FormLabel>
             <InputGroup>
-              <InputLeftElement pointerEvents="none" color="gray.400">
+              <InputLeftElement pointerEvents="none" color="brand.400">
                 <FiUser />
               </InputLeftElement>
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 borderRadius="md"
-                color="black"
+                color="highlight.50"
               />
             </InputGroup>
           </FormControl>
           <FormControl>
             <FormLabel>Password</FormLabel>
             <InputGroup>
-              <InputLeftElement pointerEvents="none" color="gray.400">
+              <InputLeftElement pointerEvents="none" color="brand.400">
                 <FiLock />
               </InputLeftElement>
               <Input
@@ -86,13 +87,13 @@ export default function Login({ onLogin }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 borderRadius="md"
-                color="black"
+                color="highlight.50"
               />
             </InputGroup>
           </FormControl>
           <Button
             type="submit"
-            colorScheme="brand"
+            colorScheme="accent"
             w="full"
             borderRadius="md"
           >

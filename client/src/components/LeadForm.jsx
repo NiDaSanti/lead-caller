@@ -113,9 +113,9 @@ export default function LeadForm({ onNewLead }) {
 
   return (
     <Box
-      bg={useColorModeValue("white", "gray.800")}
+      bg={useColorModeValue("brand.800", "brand.900")}
       border="1px solid"
-      borderColor={useColorModeValue("gray.200", "gray.600")}
+      borderColor={useColorModeValue("brand.700", "brand.700")}
       borderRadius="xl"
       p={6}
       boxShadow="md"
@@ -129,7 +129,7 @@ export default function LeadForm({ onNewLead }) {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
-            <FormHelperText>The lead&apos;s given name.</FormHelperText>
+            <FormHelperText color="brand.300">The lead&apos;s given name.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
@@ -139,14 +139,14 @@ export default function LeadForm({ onNewLead }) {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
-            <FormHelperText>Family name of the lead.</FormHelperText>
+            <FormHelperText color="brand.300">Family name of the lead.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Phone</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
-                <PhoneIcon color="gray.300" />
+                <PhoneIcon color="brand.400" />
               </InputLeftElement>
               <Input
                 placeholder="555-123-4567"
@@ -154,14 +154,14 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setPhone(e.target.value)}
               />
             </InputGroup>
-            <FormHelperText>Include area code.</FormHelperText>
+            <FormHelperText color="brand.300">Include area code.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Street Address</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
-                <Icon as={MdLocationOn} color="gray.300" />
+                <Icon as={MdLocationOn} color="brand.400" />
               </InputLeftElement>
               <Input
                 placeholder="1234 Main St"
@@ -169,7 +169,7 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setAddress(e.target.value)}
               />
             </InputGroup>
-            <FormHelperText>Street number and name.</FormHelperText>
+            <FormHelperText color="brand.300">Street number and name.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
@@ -179,7 +179,7 @@ export default function LeadForm({ onNewLead }) {
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
-            <FormHelperText>City of residence.</FormHelperText>
+            <FormHelperText color="brand.300">City of residence.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
@@ -189,7 +189,7 @@ export default function LeadForm({ onNewLead }) {
               value={state}
               onChange={(e) => setState(e.target.value)}
             />
-            <FormHelperText>Two-letter state code.</FormHelperText>
+            <FormHelperText color="brand.300">Two-letter state code.</FormHelperText>
           </FormControl>
 
           <FormControl isRequired>
@@ -199,7 +199,7 @@ export default function LeadForm({ onNewLead }) {
               value={zipcode}
               onChange={(e) => setZipcode(e.target.value)}
             />
-            <FormHelperText>5-digit ZIP code.</FormHelperText>
+            <FormHelperText color="brand.300">5-digit ZIP code.</FormHelperText>
           </FormControl>
 
           <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -210,7 +210,7 @@ export default function LeadForm({ onNewLead }) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
-              <FormHelperText>Optional notes.</FormHelperText>
+              <FormHelperText color="brand.300">Optional notes.</FormHelperText>
             </FormControl>
           </GridItem>
 
