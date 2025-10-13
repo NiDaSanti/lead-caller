@@ -56,6 +56,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const metaLabelColor = useColorModeValue("brand.500", "brand.200");
   const metaValueColor = useColorModeValue("brand.900", "highlight.100");
   const transcriptBg = useColorModeValue("brand.50", "brand.800");
+  const accentText = useColorModeValue("accent.500", "highlight.200");
   const statusVariant = useColorModeValue("subtle", "solid");
   const badgeColor = ({
     Qualified: 'highlight',
@@ -235,19 +236,29 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 spacing={4}
                 align={{ base: 'flex-start', sm: 'center' }}
                 justify="space-between"
+                flexWrap="wrap"
               >
-                <HStack align="center" spacing={4} w="full">
+                <HStack align="center" spacing={4} w="full" flexWrap="wrap">
                   <Avatar
                     name={`${lead.firstName} ${lead.lastName}`}
                     size="md"
                     bg={useColorModeValue('accent.200', 'accent.700')}
                     color={headerTextColor}
                   />
-                  <Box flex="1">
-                    <Heading size="sm" noOfLines={1} color={headerTextColor}>
+                  <Box flex="1" minW={0}>
+                    <Heading
+                      size="sm"
+                      noOfLines={{ base: 2, sm: 1 }}
+                      color={headerTextColor}
+                      wordBreak="break-word"
+                    >
                       {lead.firstName} {lead.lastName}
                     </Heading>
-                    <Text fontSize="xs" color={useColorModeValue('brand.600', 'highlight.100')}>
+                    <Text
+                      fontSize="xs"
+                      color={useColorModeValue('brand.600', 'highlight.100')}
+                      wordBreak="break-word"
+                    >
                       {lead.phone}
                     </Text>
                   </Box>
@@ -260,6 +271,12 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                   py={1}
                   fontSize="0.7em"
                   textTransform="capitalize"
+                  flexShrink={0}
+                  flexWrap="wrap"
+                  whiteSpace="normal"
+                  textAlign="center"
+                  justifyContent="center"
+                  alignContent="center"
                 >
                   {lead.status || 'New'}
                 </Badge>
@@ -279,7 +296,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                     <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
                       Phone
                     </Text>
-                    <Text fontWeight="semibold" color={metaValueColor}>
+                    <Text fontWeight="semibold" color={metaValueColor} wordBreak="break-word">
                       {lead.phone}
                     </Text>
                   </Box>
@@ -295,6 +312,12 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                       px={3}
                       py={1}
                       textTransform="none"
+                      whiteSpace="normal"
+                      flexWrap="wrap"
+                      wordBreak="break-word"
+                      display="inline-flex"
+                      justifyContent="center"
+                      textAlign="center"
                     >
                       {followUpDisplay}
                     </Badge>
@@ -303,7 +326,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                     <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
                       Last contact
                     </Text>
-                    <Text fontWeight="semibold" color={metaValueColor}>
+                    <Text fontWeight="semibold" color={metaValueColor} wordBreak="break-word">
                       {lastContactDisplay}
                     </Text>
                   </Box>
@@ -317,7 +340,18 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                   </Text>
                   <Wrap shouldWrapChildren spacing={2}>
                     {lead.tags.map((tag) => (
-                      <Tag key={tag} size="sm" borderRadius="full" colorScheme="accent" variant={statusVariant} px={3} py={1}>
+                      <Tag
+                        key={tag}
+                        size="sm"
+                        borderRadius="full"
+                        colorScheme="accent"
+                        variant={statusVariant}
+                        px={3}
+                        py={1}
+                        whiteSpace="normal"
+                        wordBreak="break-word"
+                        flexWrap="wrap"
+                      >
                         {tag}
                       </Tag>
                     ))}
