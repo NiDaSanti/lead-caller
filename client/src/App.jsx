@@ -48,13 +48,19 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("brand.900", "brand.900");
-  const cardBg = useColorModeValue("brand.800", "brand.800");
-  const headingColor = useColorModeValue("highlight.200", "highlight.200");
-  const borderColor = useColorModeValue("brand.700", "brand.700");
-  const footerBg = useColorModeValue("brand.900", "brand.900");
-  const modalBg = useColorModeValue("brand.800", "brand.800");
-  const mutedColor = useColorModeValue("brand.200", "brand.200");
+  const bg = useColorModeValue("white", "brand.900");
+  const cardBg = useColorModeValue("white", "brand.800");
+  const headingColor = useColorModeValue("brand.900", "highlight.100");
+  const borderColor = useColorModeValue("brand.200", "brand.700");
+  const footerBg = useColorModeValue("white", "brand.900");
+  const modalBg = useColorModeValue("white", "brand.800");
+  const mutedColor = useColorModeValue("brand.600", "brand.200");
+  const accentText = useColorModeValue("accent.600", "highlight.200");
+  const navBg = useColorModeValue("whiteAlpha.900", "brand.900");
+  const navTextPrimary = useColorModeValue("brand.900", "highlight.100");
+  const navTextSecondary = useColorModeValue("brand.600", "brand.200");
+  const navButtonHover = useColorModeValue("blackAlpha.50", "whiteAlpha.100");
+  const surfaceSubtle = useColorModeValue("brand.50", "brand.900");
 
   const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
     'brand.500', 'accent.500', 'brand.300', 'accent.300', 'brand.700', 'accent.700'
@@ -174,26 +180,30 @@ function App({ onLogout }) {
         align="center"
         px={{ base: 6, md: 10 }}
         py={4}
-        bg="brand.900"
+        bg={navBg}
         borderBottom="1px solid"
-        borderColor="brand.700"
+        borderColor={borderColor}
         shadow="xl"
+        backdropFilter="saturate(180%) blur(12px)"
+        position="sticky"
+        top={0}
+        zIndex={10}
       >
         <HStack spacing={4}>
           <Box
             w={10}
             h={10}
             borderRadius="full"
-            bg="accent.700"
+            bg={useColorModeValue('accent.100', 'accent.700')}
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
-            <Icon as={FiBarChart2} color="highlight.200" />
+            <Icon as={FiBarChart2} color={accentText} />
           </Box>
           <Box>
-            <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="highlight.100">Lead Caller</Text>
-            <Text fontSize="xs" color="brand.200">A disciplined solar outreach desk</Text>
+            <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={navTextPrimary}>Lead Caller</Text>
+            <Text fontSize="xs" color={navTextSecondary}>A disciplined solar outreach desk</Text>
           </Box>
         </HStack>
         <HStack spacing={2}>
@@ -202,9 +212,9 @@ function App({ onLogout }) {
               key={view}
               size="sm"
               variant="ghost"
-              color="brand.200"
-              leftIcon={<Icon as={icon} aria-label={label} color="highlight.300" />}
-              _hover={{ bg: "whiteAlpha.100", color: "highlight.100" }}
+              color={navTextSecondary}
+              leftIcon={<Icon as={icon} aria-label={label} color={accentText} />}
+              _hover={{ bg: navButtonHover, color: navTextPrimary }}
               onClick={() => setModalView(view)}
             >
               {label}
@@ -216,8 +226,8 @@ function App({ onLogout }) {
               variant="ghost"
               onClick={toggleColorMode}
               icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              color="highlight.200"
-              _hover={{ bg: "whiteAlpha.100" }}
+              color={accentText}
+              _hover={{ bg: navButtonHover }}
               aria-label="Toggle color mode"
             />
           </ChakraTooltip>
@@ -225,9 +235,9 @@ function App({ onLogout }) {
             size="sm"
             onClick={onLogout}
             variant="outline"
-            borderColor="accent.500"
-            color="highlight.200"
-            _hover={{ bg: "accent.500", color: "white" }}
+            borderColor={accentText}
+            color={accentText}
+            _hover={{ bg: 'accent.500', color: 'white' }}
           >
             Logout
           </Button>
@@ -236,13 +246,14 @@ function App({ onLogout }) {
 
       <Container maxW="7xl" py={{ base: 10, md: 16 }}>
         <Box
-          bg={useColorModeValue('brand.800', 'brand.800')}
-          color="highlight.50"
+          bg={surfaceSubtle}
+          color={useColorModeValue('brand.900', 'highlight.50')}
           borderRadius="3xl"
           p={{ base: 8, md: 12 }}
           mb={{ base: 12, lg: 16 }}
           border="1px solid"
-          borderColor="brand.700"
+          borderColor={borderColor}
+          boxShadow={useColorModeValue('xl', 'md')}
         >
           <Stack spacing={8}>
             <Stack
@@ -252,13 +263,25 @@ function App({ onLogout }) {
               spacing={{ base: 6, md: 10 }}
             >
               <VStack align="flex-start" spacing={4} maxW="3xl">
-                <Badge colorScheme="accent" bg="accent.600" color="white" px={3} py={1} borderRadius="full">
+                <Badge
+                  colorScheme="accent"
+                  bg={useColorModeValue('accent.100', 'accent.600')}
+                  color={useColorModeValue('accent.700', 'white')}
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                >
                   Mafia-grade solar desk
                 </Badge>
-                <Text fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }} fontWeight="extrabold" lineHeight="shorter">
+                <Text
+                  fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }}
+                  fontWeight="extrabold"
+                  lineHeight="shorter"
+                  color={headingColor}
+                >
                   Run every outreach with precision, restraint, and authority.
                 </Text>
-                <Text fontSize={{ base: "sm", md: "md" }} color="brand.200" maxW="2xl">
+                <Text fontSize={{ base: "sm", md: "md" }} color={mutedColor} maxW="2xl">
                   Keep the pipeline sharp, the messaging disciplined, and every homeowner interaction worthy of a marquee brand.
                 </Text>
                 <HStack spacing={4} flexWrap="wrap">
@@ -274,9 +297,9 @@ function App({ onLogout }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    borderColor="highlight.400"
-                    color="highlight.200"
-                    _hover={{ bg: "highlight.400", color: "brand.900" }}
+                    borderColor={accentText}
+                    color={accentText}
+                    _hover={{ bg: 'accent.500', color: 'white' }}
                     onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
                   >
                     Add a homeowner
@@ -286,20 +309,21 @@ function App({ onLogout }) {
               <VStack
                 align="flex-start"
                 spacing={4}
-                bg="brand.900"
+                bg={cardBg}
                 borderRadius="2xl"
                 p={6}
                 maxW="sm"
                 border="1px solid"
-                borderColor="brand.700"
+                borderColor={borderColor}
+                shadow="lg"
               >
-                <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color="brand.300">
+                <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={mutedColor}>
                   today's focus
                 </Text>
-                <Text fontSize="lg" fontWeight="bold" color="highlight.100">
+                <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                   Lead families from curiosity to confident consultations.
                 </Text>
-                <Text fontSize="sm" color="brand.200">
+                <Text fontSize="sm" color={mutedColor}>
                   Use the live metrics to reinforce urgency, savings, and trust.
                 </Text>
               </VStack>
@@ -308,21 +332,22 @@ function App({ onLogout }) {
               {primaryMetrics.map(({ label, value, help }) => (
                 <Box
                   key={label}
-                  bg="brand.900"
+                  bg={cardBg}
                   borderRadius="xl"
                   p={4}
                   border="1px solid"
-                  borderColor="brand.700"
+                  borderColor={borderColor}
+                  shadow="md"
                 >
                   <Stat>
-                    <StatLabel color="brand.200" fontSize="xs" textTransform="uppercase">
+                    <StatLabel color={mutedColor} fontSize="xs" textTransform="uppercase">
                       {label}
                     </StatLabel>
                     <StatNumber fontSize={{ base: "lg", md: "2xl" }}>
                       {value}
                     </StatNumber>
                     {help && (
-                      <StatHelpText color="highlight.200" fontSize="xs">
+                      <StatHelpText color={accentText} fontSize="xs">
                         {help}
                       </StatHelpText>
                     )}

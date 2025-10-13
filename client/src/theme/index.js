@@ -46,8 +46,8 @@ const theme = extendTheme({
   styles: {
     global: (props) => ({
       body: {
-        bg: props.colorMode === 'dark' ? 'brand.900' : 'brand.900',
-        color: props.colorMode === 'dark' ? 'highlight.50' : 'highlight.50',
+        bg: props.colorMode === 'dark' ? 'brand.900' : 'white',
+        color: props.colorMode === 'dark' ? 'highlight.50' : 'brand.900',
         fontFeatureSettings: "'tnum'",
       },
     }),
