@@ -3,40 +3,40 @@ import { extendTheme } from '@chakra-ui/react'
 const theme = extendTheme({
   colors: {
     brand: {
-      50: '#E9E9ED',
-      100: '#CACBD4',
-      200: '#A4A6B3',
-      300: '#7D8091',
-      400: '#56596F',
-      500: '#3B3E57',
-      600: '#2B2D40',
-      700: '#1C1E2A',
-      800: '#12141C',
-      900: '#08090F',
+      50: '#F5F8FF',
+      100: '#E6EEFF',
+      200: '#CBD9FF',
+      300: '#A5BFFE',
+      400: '#7AA2FA',
+      500: '#567EEB',
+      600: '#3D63CD',
+      700: '#2D4AA7',
+      800: '#243A82',
+      900: '#1D2E66',
     },
     accent: {
-      50: '#FBEAEA',
-      100: '#F4C5C5',
-      200: '#EAA0A0',
-      300: '#DD7A7A',
-      400: '#C35353',
-      500: '#9F3636',
-      600: '#812727',
-      700: '#641D1D',
-      800: '#431212',
-      900: '#240808',
+      50: '#E6FFFA',
+      100: '#B2F5EA',
+      200: '#81E6D9',
+      300: '#4FD1C5',
+      400: '#38B2AC',
+      500: '#2C7A7B',
+      600: '#285E61',
+      700: '#234E52',
+      800: '#1E3F43',
+      900: '#1A3538',
     },
     highlight: {
-      50: '#FFF8E5',
-      100: '#FDE5B5',
-      200: '#F8CF7F',
-      300: '#F1B84A',
-      400: '#E7A31E',
-      500: '#C88512',
-      600: '#9C6510',
-      700: '#70470C',
-      800: '#432B07',
-      900: '#1E1402',
+      50: '#FFF8EB',
+      100: '#FFE2B8',
+      200: '#FFC685',
+      300: '#FFA455',
+      400: '#FF8A2B',
+      500: '#F97012',
+      600: '#D65A0C',
+      700: '#B14609',
+      800: '#823205',
+      900: '#4F1D02',
     },
   },
   fonts: {
@@ -46,7 +46,7 @@ const theme = extendTheme({
   styles: {
     global: (props) => ({
       body: {
-        bg: props.colorMode === 'dark' ? 'brand.900' : 'white',
+        bg: props.colorMode === 'dark' ? 'brand.900' : 'brand.50',
         color: props.colorMode === 'dark' ? 'highlight.50' : 'brand.900',
         fontFeatureSettings: "'tnum'",
       },
@@ -72,10 +72,16 @@ const theme = extendTheme({
         },
         outline: {
           borderColor: 'highlight.400',
-          color: 'highlight.300',
+          color: 'highlight.400',
           _hover: {
-            bg: 'highlight.400',
+            bg: 'highlight.50',
             color: 'brand.900',
+          },
+        },
+        ghost: {
+          color: 'brand.500',
+          _hover: {
+            bg: 'brand.100',
           },
         },
       },
@@ -84,6 +90,49 @@ const theme = extendTheme({
       baseStyle: {
         textTransform: 'uppercase',
         letterSpacing: 'wider',
+      },
+    },
+    Input: {
+      defaultProps: {
+        focusBorderColor: 'accent.400',
+        variant: 'filled',
+      },
+      baseStyle: {
+        field: {
+          borderRadius: 'lg',
+        },
+      },
+      variants: {
+        filled: {
+          field: {
+            bg: 'white',
+            _dark: {
+              bg: 'brand.800',
+            },
+          },
+        },
+      },
+    },
+    Textarea: {
+      defaultProps: {
+        focusBorderColor: 'accent.400',
+        variant: 'filled',
+      },
+      baseStyle: {
+        borderRadius: 'lg',
+      },
+      variants: {
+        filled: {
+          bg: 'white',
+          _dark: {
+            bg: 'brand.800',
+          },
+        },
+      },
+    },
+    NumberInput: {
+      defaultProps: {
+        focusBorderColor: 'accent.400',
       },
     },
   },

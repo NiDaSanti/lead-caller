@@ -50,19 +50,19 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("white", "brand.900");
+  const bg = useColorModeValue("brand.50", "brand.900");
   const cardBg = useColorModeValue("white", "brand.800");
   const headingColor = useColorModeValue("brand.900", "highlight.100");
   const borderColor = useColorModeValue("brand.200", "brand.700");
   const footerBg = useColorModeValue("white", "brand.900");
   const modalBg = useColorModeValue("white", "brand.800");
   const mutedColor = useColorModeValue("brand.600", "brand.200");
-  const accentText = useColorModeValue("accent.600", "highlight.200");
-  const navBg = useColorModeValue("whiteAlpha.900", "brand.900");
+  const accentText = useColorModeValue("accent.500", "highlight.200");
+  const navBg = useColorModeValue("rgba(255,255,255,0.9)", "brand.900");
   const navTextPrimary = useColorModeValue("brand.900", "highlight.100");
   const navTextSecondary = useColorModeValue("brand.600", "brand.200");
-  const navButtonHover = useColorModeValue("blackAlpha.50", "whiteAlpha.100");
-  const surfaceSubtle = useColorModeValue("brand.50", "brand.900");
+  const navButtonHover = useColorModeValue("brand.100", "whiteAlpha.100");
+  const surfaceSubtle = useColorModeValue("white", "brand.900");
 
   const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
     'brand.500', 'accent.500', 'brand.300', 'accent.300', 'brand.700', 'accent.700'
@@ -177,7 +177,7 @@ function App({ onLogout }) {
   const ratioMetrics = metrics.slice(4);
 
   return (
-    <Box bg={bg} minH="100vh" color="highlight.50">
+    <Box bg={bg} minH="100vh" color={useColorModeValue('brand.900', 'highlight.50')}>
       {/* NAVBAR */}
       <Flex
         justify="space-between"
@@ -275,7 +275,7 @@ function App({ onLogout }) {
                   py={1}
                   borderRadius="full"
                 >
-                  Mafia-grade solar desk
+                  Premium solar outreach desk
                 </Badge>
                 <Text
                   fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }}
@@ -283,10 +283,10 @@ function App({ onLogout }) {
                   lineHeight="shorter"
                   color={headingColor}
                 >
-                  Run every outreach with precision, restraint, and authority.
+                  Elevate every homeowner conversation with clarity and warmth.
                 </Text>
                 <Text fontSize={{ base: "sm", md: "md" }} color={mutedColor} maxW="2xl">
-                  Keep the pipeline sharp, the messaging disciplined, and every homeowner interaction worthy of a marquee brand.
+                  A refined workspace for organized follow-ups, confident scheduling, and genuinely helpful solar consultations.
                 </Text>
                 <HStack spacing={4} flexWrap="wrap">
                   <Button
@@ -303,7 +303,7 @@ function App({ onLogout }) {
                     variant="outline"
                     borderColor={accentText}
                     color={accentText}
-                    _hover={{ bg: 'accent.500', color: 'white' }}
+                    _hover={{ bg: 'accent.400', color: 'white' }}
                     onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
                   >
                     Add a homeowner
@@ -374,7 +374,7 @@ function App({ onLogout }) {
                 shadow="lg"
               >
                 <Stack spacing={4}>
-                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start">
+                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start" bg={useColorModeValue('accent.100','accent.600')} color={useColorModeValue('accent.700','white')}>
                     Lead filters
                   </Badge>
                   <Text fontSize="xl" fontWeight="bold" color={headingColor}>
@@ -412,17 +412,17 @@ function App({ onLogout }) {
                       <WrapItem key={status}>
                         <Button
                           size="sm"
-                          variant={filter === status ? "solid" : "ghost"}
+                          variant={filter === status ? "solid" : "outline"}
                           colorScheme="accent"
                           bg={filter === status ? 'accent.500' : 'transparent'}
-                          color={filter === status ? 'white' : 'brand.200'}
-                          borderColor={filter === status ? undefined : 'brand.700'}
-                          borderWidth={filter === status ? 0 : 1}
+                          color={filter === status ? 'white' : navTextSecondary}
+                          borderColor={filter === status ? 'accent.400' : borderColor}
+                          borderWidth={1}
                           onClick={() => setFilter(status)}
                           leftIcon={<Icon as={icon} aria-label={label} />}
                           borderRadius="full"
                           px={4}
-                          _hover={{ bg: filter === status ? 'accent.400' : 'brand.800', color: 'highlight.100' }}
+                          _hover={{ bg: filter === status ? 'accent.400' : 'brand.100', color: navTextPrimary }}
                         >
                           {label}
                         </Button>
@@ -569,7 +569,7 @@ function App({ onLogout }) {
                       p={5}
                       border="1px solid"
                       borderColor={borderColor}
-                      bg={useColorModeValue('brand.900', 'brand.900')}
+                      bg={useColorModeValue('brand.50', 'brand.900')}
                     >
                       <Stat>
                         <StatLabel fontWeight="medium">{label}</StatLabel>
