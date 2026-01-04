@@ -7,7 +7,8 @@ import {
   Box,
   SimpleGrid,
   HStack,
-  Icon
+  Icon,
+  useColorModeValue
 } from "@chakra-ui/react";
 import {
   FiCheckCircle,
@@ -17,6 +18,7 @@ import {
   FiTag
 } from "react-icons/fi";
 import LeadCard from "./LeadCard";
+import PropTypes from 'prop-types';
 
 const STATUS_ICONS = {
   Qualified: FiCheckCircle,
@@ -34,6 +36,8 @@ export default function LeadList({
   searchQuery = "",
   socket
 }) {
+  const sectionHeadingColor = useColorModeValue('highlight.700', 'highlight.200');
+
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const safeLeads = Array.isArray(leads) ? leads : [];
 
@@ -69,7 +73,7 @@ export default function LeadList({
     return (
       <Center py={12}>
         <Text fontSize="md" color="brand.200">
-          No leads yet. Use the form above to add one.
+          No leads yet. Add one above.
         </Text>
       </Center>
     );
@@ -79,7 +83,7 @@ export default function LeadList({
     return (
       <Center py={12}>
         <Text fontSize="md" color="brand.200">
-          No leads found for the current filters.
+          No matches.
         </Text>
       </Center>
     );
@@ -89,7 +93,7 @@ export default function LeadList({
     <Stack spacing={10} w="100%">
       {filter !== 'All' ? (
         // When a specific filter is active render a single universal grid
-        <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
+        <SimpleGrid minChildWidth={{ base: '280px', md: '320px', lg: '340px' }} spacing={5}>
           {filteredLeads.map((lead, idx) => (
             <LeadCard
               key={lead.id}
@@ -110,7 +114,7 @@ export default function LeadList({
                 as="h3"
                 fontSize="lg"
                 mb={3}
-                color="highlight.200"
+                color={sectionHeadingColor}
                 borderLeft="4px solid"
                 borderColor="accent.500"
                 pl={3}
@@ -135,7 +139,7 @@ export default function LeadList({
                   ))}
                 </Stack>
               ) : (
-                <SimpleGrid minChildWidth={{ base: '280px', md: '360px' }} spacing={6}>
+                <SimpleGrid minChildWidth={{ base: '280px', md: '320px', lg: '340px' }} spacing={5}>
                   {grouped[status].map((lead, idx) => {
                     const isLast = idx === grouped[status].length - 1;
                     return (
@@ -158,3 +162,19 @@ export default function LeadList({
     </Stack>
   );
 }
+
+LeadList.propTypes = {
+  leads: PropTypes.arrayOf(PropTypes.object),
+  onUpdateLead: PropTypes.func.isRequired,
+  onDeleteLead: PropTypes.func.isRequired,
+  scrollRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any }),
+  ]),
+  filter: PropTypes.string,
+  searchQuery: PropTypes.string,
+  socket: PropTypes.shape({
+    on: PropTypes.func,
+    off: PropTypes.func,
+  }),
+};

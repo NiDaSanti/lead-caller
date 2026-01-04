@@ -1,22 +1,18 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { readDataFile, writeDataFile } from '../utils/fileHelpers.js';
 import { logAction } from '../utils/logger.js';
 import { summarizeLead } from '../services/openaiClients.js';
+import { leadStore, normalizePhone } from '../services/leadStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
-const leadsFile = process.env.LEADS_FILE
-  ? path.resolve(process.env.LEADS_FILE)
-  : path.join(__dirname, `../data/${env}/leads.json`);
 
-  // server/controllers/leadController.js
-  export const getLeads = (req, res) => {
-    const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
-    res.json(leads); // should already include callHistory per lead
-  };
+// server/controllers/leadController.js
+export const getLeads = (req, res) => {
+  // LeadStore is warmed at startup. This is an in-memory read.
+  res.json(leadStore.getAll());
+};
 
 
 export const addLead = (req, res) => {
@@ -36,11 +32,8 @@ export const addLead = (req, res) => {
   }
 
   try {
-    const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
-
-    const normalizePhone = (p) => String(p).replace(/\D/g, '');
     const normalizedPhone = normalizePhone(phone);
-    const exists = leads.some(l => normalizePhone(l.phone) === normalizedPhone);
+    const exists = leadStore.hasPhone(normalizedPhone);
     if (exists) {
       return res.status(409).json({ error: 'Phone already exists' });
     }
@@ -58,11 +51,70 @@ export const addLead = (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    leads.push(newLead);
-    fs.writeFileSync(leadsFile, JSON.stringify(leads, null, 2));
+    leadStore.add(newLead);
     res.status(201).json({ success: true, lead: newLead });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save new lead' });
+  }
+};
+
+// POST /api/leads/bulk
+export const addLeadsBulk = (req, res) => {
+  try {
+    const items = Array.isArray(req.body.leads) ? req.body.leads : req.body;
+    if (!Array.isArray(items)) return res.status(400).json({ error: 'Request must be an array of leads' });
+
+    const normalizePhoneLocal = (p) => String(p || '').replace(/\D/g, '');
+
+    let inserted = 0;
+    let duplicates = 0;
+    let errors = 0;
+    const added = [];
+
+    for (const row of items) {
+      try {
+        const firstName = row.firstName;
+        const lastName = row.lastName;
+        const phone = row.phone;
+        const address = row.address || {};
+
+        if (!firstName || !lastName || !phone || !address.street || !address.city || !address.state || !address.zip) {
+          errors += 1;
+          continue;
+        }
+
+        const normalizedPhone = normalizePhoneLocal(phone);
+        const exists = leadStore.hasPhone(normalizedPhone);
+        if (exists) {
+          duplicates += 1;
+          continue;
+        }
+
+        const newLead = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          firstName,
+          lastName,
+          phone: normalizedPhone,
+          address,
+          note: row.note || row.notes || '',
+          status: 'New',
+          tags: row.tags || [],
+          callHistory: [],
+          createdAt: new Date().toISOString(),
+        };
+
+        leadStore.add(newLead);
+        added.push(newLead);
+        inserted += 1;
+      } catch (err) {
+        errors += 1;
+      }
+    }
+
+    res.status(201).json({ success: true, inserted, duplicates, errors, leads: added });
+  } catch (err) {
+    console.error('Bulk add error:', err);
+    res.status(500).json({ error: 'Failed to add leads in bulk' });
   }
 };
 
@@ -72,12 +124,9 @@ export const updateLead = (req, res) => {
   try {
     const id = Number(req.params.id);
     const { id: _unusedId, note, tags, followUpDate, answers, ...rest } = req.body;
-    const leads = readDataFile(leadsFile);
-    const index = leads.findIndex(lead => lead.id === id);
 
-    if (index === -1) return res.status(404).json({ error: 'Lead not found' });
-
-    const existing = leads[index];
+    const existing = leadStore.getById(id);
+    if (!existing) return res.status(404).json({ error: 'Lead not found' });
 
     const filteredAnswers = (answers || []).filter(resp =>
       typeof resp.q === 'string' &&
@@ -110,8 +159,7 @@ export const updateLead = (req, res) => {
       totalReplies
     };
 
-    leads[index] = updatedLead;
-    writeDataFile(leadsFile, leads);
+    leadStore.updateById(id, updatedLead);
 
     res.status(200).json(updatedLead);
   } catch (err) {
@@ -124,13 +172,10 @@ export const updateLead = (req, res) => {
 export const softDeleteLead = (req, res) => {
   try {
     const leadId = Number(req.params.id);
-    const leads = readDataFile(leadsFile);
     const deletedPath = path.join(__dirname, '../data/deleted.json');
-    const index = leads.findIndex(lead => lead.id === leadId);
 
-    if (index === -1) return res.status(404).json({ error: 'Lead not found' });
-
-    const [removedLead] = leads.splice(index, 1);
+    const removedLead = leadStore.removeById(leadId);
+    if (!removedLead) return res.status(404).json({ error: 'Lead not found' });
 
     // Archive the lead
     let archive = [];
@@ -139,9 +184,6 @@ export const softDeleteLead = (req, res) => {
     }
     archive.push({ ...removedLead, deletedAt: new Date().toISOString() });
     fs.writeFileSync(deletedPath, JSON.stringify(archive, null, 2));
-
-    // Update original file
-    writeDataFile(leadsFile, leads);
 
     logAction('DELETE', `Lead ${removedLead.firstName} ${removedLead.lastName} archived.`);
 
@@ -154,8 +196,7 @@ export const softDeleteLead = (req, res) => {
 
 export const getLeadById = (req, res) => {
   const { id } = req.params;
-  const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
-  const lead = leads.find((l) => l.id == id);
+  const lead = leadStore.getById(id);
   if (!lead) return res.status(404).json({ error: 'Lead not found' });
   res.json(lead);
 };
@@ -164,8 +205,7 @@ export const getLeadById = (req, res) => {
 export const getLeadSummary = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const leads = JSON.parse(fs.readFileSync(leadsFile, 'utf-8'));
-    const lead = leads.find(l => l.id === id);
+    const lead = leadStore.getById(id);
     if (!lead) {
       return res.status(404).json({ error: 'Lead not found' });
     }

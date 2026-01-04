@@ -108,12 +108,24 @@ if (envName === 'development') {
   optionalVar('OPENAI_DEV_MAX_CALLS', 'limits how many OpenAI requests can be made during development.');
 }
 
-requireVar('TWILIO_SID', 'required to initialize the Twilio client.');
-requireVar('TWILIO_AUTH', 'required to authenticate with Twilio.');
-const twilioNumberVar = envName === 'production' ? 'TWILIO_PHONE_PROD' : 'TWILIO_PHONE_DEV';
-const twilioNumber = requireVar(twilioNumberVar, `Twilio caller ID for the ${envName} environment.`);
-if (twilioNumber && !/^\+\d{10,}$/.test(twilioNumber)) {
-  note(`${twilioNumberVar} does not look like an E.164 formatted number (e.g., +15551234567).`);
+// Twilio is required for auto-dial / live calling, but the app can still run (UI + lead mgmt)
+// during local development without it.
+if (envName === 'production') {
+  requireVar('TWILIO_SID', 'required to initialize the Twilio client.');
+  requireVar('TWILIO_AUTH', 'required to authenticate with Twilio.');
+  const twilioNumberVar = 'TWILIO_PHONE_PROD';
+  const twilioNumber = requireVar(twilioNumberVar, `Twilio caller ID for the ${envName} environment.`);
+  if (twilioNumber && !/^\+\d{10,}$/.test(twilioNumber)) {
+    note(`${twilioNumberVar} does not look like an E.164 formatted number (e.g., +15551234567).`);
+  }
+} else {
+  optionalVar('TWILIO_SID', 'required to initialize Twilio (optional for basic local dev).');
+  optionalVar('TWILIO_AUTH', 'required to authenticate with Twilio (optional for basic local dev).');
+  const twilioNumberVar = 'TWILIO_PHONE_DEV';
+  const twilioNumber = optionalVar(twilioNumberVar, 'Twilio caller ID for development (optional for basic local dev).');
+  if (twilioNumber && !/^\+\d{10,}$/.test(twilioNumber)) {
+    note(`${twilioNumberVar} does not look like an E.164 formatted number (e.g., +15551234567).`);
+  }
 }
 
 const serverBaseUrl = requireVar('SERVER_BASE_URL', 'used to construct Twilio webhook URLs. Must be publicly reachable.');

@@ -23,6 +23,7 @@ import {
 import { PhoneIcon } from '@chakra-ui/icons';
 import { MdLocationOn } from 'react-icons/md';
 import PropTypes from 'prop-types';
+import { apiFetch } from '../services/apiClient.js';
 
 export default function LeadForm({ onNewLead }) {
   const [firstName, setFirstName] = useState('');
@@ -40,8 +41,8 @@ export default function LeadForm({ onNewLead }) {
 
     if (!firstName || !lastName || !phone || !address || !city || !state || !zipcode) {
       toast({
-        title: "Missing fields",
-        description: "All fields must be filled out.",
+        title: "Missing info",
+        description: "Please fill out all required fields.",
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -63,11 +64,10 @@ export default function LeadForm({ onNewLead }) {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/api/leads', {
+      const res = await apiFetch('/api/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(newLead),
       });
@@ -76,7 +76,7 @@ export default function LeadForm({ onNewLead }) {
 
       if (res.status === 409) {
         toast({
-          title: 'Phone already exists',
+          title: 'Phone already used',
           description: data.error,
           status: 'warning',
           duration: 3000,
@@ -97,7 +97,7 @@ export default function LeadForm({ onNewLead }) {
         setNote('');
         toast({
           title: "Lead added",
-          description: `${data.lead.firstName} ${data.lead.lastName} added successfully.`,
+          description: `${data.lead.firstName} ${data.lead.lastName} was added.`,
           status: "success",
           duration: 3000,
           isClosable: true,
@@ -107,7 +107,7 @@ export default function LeadForm({ onNewLead }) {
       }
     } catch (err) {
       toast({
-        title: "Server Error",
+        title: "Error",
         description: err.message,
         status: "error",
         duration: 3000,
@@ -134,17 +134,17 @@ export default function LeadForm({ onNewLead }) {
         <Stack spacing={3}>
           <HStack spacing={3}>
             <Badge colorScheme="accent" px={3} py={1} borderRadius="full">
-              New homeowner
+              New lead
             </Badge>
             <Badge colorScheme="highlight" variant="subtle" px={3} py={1} borderRadius="full">
-              Takes ~2 minutes
+              ~2 min
             </Badge>
           </HStack>
           <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight="semibold">
-            Capture lead details while the conversation is fresh.
+            Add a lead.
           </Text>
           <Text fontSize="sm" color={helperColor} maxW="2xl">
-            Quick notes on every contact help your team personalize follow-ups, schedule site surveys, and close with confidence.
+            Save the basics now. Add notes if you want.
           </Text>
         </Stack>
 
@@ -160,7 +160,7 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setFirstName(e.target.value)}
                 bg={sectionBg}
               />
-              <FormHelperText color={helperColor}>The lead&apos;s given name.</FormHelperText>
+              <FormHelperText color={helperColor}>First name.</FormHelperText>
             </FormControl>
 
             <FormControl isRequired>
@@ -171,7 +171,7 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setLastName(e.target.value)}
                 bg={sectionBg}
               />
-              <FormHelperText color={helperColor}>Family name of the lead.</FormHelperText>
+              <FormHelperText color={helperColor}>Last name.</FormHelperText>
             </FormControl>
 
             <FormControl isRequired>
@@ -203,7 +203,7 @@ export default function LeadForm({ onNewLead }) {
                   bg={sectionBg}
                 />
               </InputGroup>
-              <FormHelperText color={helperColor}>Street number and name.</FormHelperText>
+              <FormHelperText color={helperColor}>Street and number.</FormHelperText>
             </FormControl>
 
             <FormControl isRequired>
@@ -214,7 +214,7 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setCity(e.target.value)}
                 bg={sectionBg}
               />
-              <FormHelperText color={helperColor}>City of residence.</FormHelperText>
+              <FormHelperText color={helperColor}>City.</FormHelperText>
             </FormControl>
 
             <FormControl isRequired>
@@ -225,7 +225,7 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setState(e.target.value)}
                 bg={sectionBg}
               />
-              <FormHelperText color={helperColor}>Two-letter state code.</FormHelperText>
+              <FormHelperText color={helperColor}>State (2 letters).</FormHelperText>
             </FormControl>
 
             <FormControl isRequired>
@@ -236,19 +236,19 @@ export default function LeadForm({ onNewLead }) {
                 onChange={(e) => setZipcode(e.target.value)}
                 bg={sectionBg}
               />
-              <FormHelperText color={helperColor}>5-digit ZIP code.</FormHelperText>
+              <FormHelperText color={helperColor}>ZIP code.</FormHelperText>
             </FormControl>
 
             <GridItem colSpan={{ base: 1, md: 2 }}>
               <FormControl>
                 <FormLabel>Note</FormLabel>
                 <Textarea
-                  placeholder="Additional details about the lead"
+                  placeholder="Notes (optional)"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   bg={sectionBg}
                 />
-                <FormHelperText color={helperColor}>Optional notes.</FormHelperText>
+                <FormHelperText color={helperColor}>Optional.</FormHelperText>
               </FormControl>
             </GridItem>
 

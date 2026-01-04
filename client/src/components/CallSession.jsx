@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from 'prop-types';
 import {
   VStack,
   Text,
@@ -13,8 +14,8 @@ import {
   HStack,
   Divider,
   useColorModeValue,
-  Flex,
 } from "@chakra-ui/react";
+import { apiFetch } from '../services/apiClient.js';
 
 const questions = [
   "Who pays the electric bill?",
@@ -46,11 +47,10 @@ export default function CallSession({ lead, onClose }) {
     const updatedLead = { ...lead, answers: finalResponses };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}`, {
+      const res = await apiFetch(`/api/leads/${lead.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(updatedLead),
       });
@@ -81,18 +81,21 @@ export default function CallSession({ lead, onClose }) {
   const textColor = useColorModeValue("brand.800", "highlight.50");
   const inputBg = useColorModeValue("brand.50", "brand.800");
   const borderColor = useColorModeValue("brand.200", "brand.700");
+  const shadow = useColorModeValue('xl', 'md');
+  const headerBg = useColorModeValue("white", "brand.900");
+  const subTextColor = useColorModeValue('brand.500', 'brand.200');
 
   return (
-    <Container maxW="3xl" p={0} bg={bg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={borderColor} shadow={useColorModeValue('xl', 'md')}>
+    <Container maxW="3xl" p={0} bg={bg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={borderColor} shadow={shadow}>
       {/* Header */}
-      <Box bg={useColorModeValue("white", "brand.900")} p={6} borderBottom="1px solid" borderColor={borderColor}>
+      <Box bg={headerBg} p={6} borderBottom="1px solid" borderColor={borderColor}>
         <HStack spacing={4}>
           <Avatar name={`${lead.firstName} ${lead.lastName}`} />
           <Box>
             <Text fontSize="lg" fontWeight="bold" color={textColor}>
               Call Session: {lead.firstName} {lead.lastName}
             </Text>
-            <Text fontSize="sm" color={useColorModeValue('brand.500', 'brand.200')}>
+            <Text fontSize="sm" color={subTextColor}>
               Phone: {lead.phone}
             </Text>
           </Box>
@@ -148,7 +151,7 @@ export default function CallSession({ lead, onClose }) {
             <VStack spacing={3} align="stretch">
               {responses.map((entry, i) => (
                 <Box key={i}>
-                  <Text fontSize="sm" color={useColorModeValue('brand.500', 'brand.200')}>
+                  <Text fontSize="sm" color={subTextColor}>
                     <strong>Q{i + 1}:</strong> {entry.q}
                   </Text>
                   <Text fontSize="sm" color={textColor}>
@@ -163,11 +166,21 @@ export default function CallSession({ lead, onClose }) {
       </Box>
 
       {/* Footer */}
-      <Box textAlign="center" p={4} borderTop="1px solid" borderColor={borderColor} bg={useColorModeValue("white", "brand.900")}>
-        <Text fontSize="xs" color={useColorModeValue('brand.500', 'brand.200')}>
+      <Box textAlign="center" p={4} borderTop="1px solid" borderColor={borderColor} bg={headerBg}>
+        <Text fontSize="xs" color={subTextColor}>
           Powered by Solar Lead AI • {new Date().toLocaleDateString()}
         </Text>
       </Box>
     </Container>
   );
 }
+
+CallSession.propTypes = {
+  lead: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    phone: PropTypes.string,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+};

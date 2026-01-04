@@ -1,23 +1,14 @@
 import twilio from 'twilio';
-import dotenv from 'dotenv';
 import { saveLeadUpdate } from './leadDataService.js';
+// Environment variables are loaded once in `server/server.js`.
 
-dotenv.config();
-
-const requireEnv = (name) => {
-  const value = process.env[name];
-  if (!value) {
-    console.error(`❌ Missing required environment variable: ${name}`);
-  }
-  return value;
-};
-
-const accountSid = requireEnv('TWILIO_SID');
-const authToken = requireEnv('TWILIO_AUTH');
-const serverBaseUrl = requireEnv('SERVER_BASE_URL');
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development';
-const twilioNumber = requireEnv(env === 'production' ? 'TWILIO_PHONE_PROD' : 'TWILIO_PHONE_DEV');
+const accountSid = process.env.TWILIO_SID;
+const authToken = process.env.TWILIO_AUTH;
+const serverBaseUrl = process.env.SERVER_BASE_URL;
+const twilioNumber = process.env[env === 'production' ? 'TWILIO_PHONE_PROD' : 'TWILIO_PHONE_DEV'];
 
+// Only initialize Twilio if credentials exist.
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
 
 export const initiateCall = async (phoneNumber, leadId) => {

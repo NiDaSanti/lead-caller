@@ -1,29 +1,54 @@
+/* eslint-disable react-refresh/only-export-components */
 // main.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import App from './App.jsx';
 import Login from './components/Login.jsx';
 import theme from './theme/index.js';
+import { getSession, logout as logoutWithCookie, setAuthenticated } from './services/auth.js';
+import { getApiBase } from './services/apiClient.js';
 
 function Root() {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(null);
+  const [checking, setChecking] = useState(true);
 
-  const handleLogin = () => setToken(localStorage.getItem('token'));
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const session = await getSession({ apiBase: getApiBase() });
+        if (!mounted) return;
+        setToken(session.authenticated ? 'cookie' : null);
+        setAuthenticated(!!session.authenticated);
+      } finally {
+        if (mounted) setChecking(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const handleLogout = () => {
-    const t = localStorage.getItem('token');
-    if (t) {
-      fetch('http://localhost:3000/api/auth/logout', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${t}` },
-      }).catch(() => {});
+  // After successful login, the App needs an authenticated session.
+  // Re-check session so the in-memory session state is synced and requests succeed.
+  const handleLoginAndSync = async () => {
+    setToken('cookie');
+    try {
+      await getSession({ apiBase: getApiBase() });
+    } catch {
+      // ignore
     }
-    localStorage.removeItem('token');
-    setToken(null);
   };
 
-  return token ? <App onLogout={handleLogout} /> : <Login onLogin={handleLogin} />;
+  const handleLogout = () => {
+    logoutWithCookie({ apiBase: getApiBase() })
+      .catch(() => {})
+      .finally(() => setToken(null));
+  };
+
+  if (checking) return null;
+  return token ? <App onLogout={handleLogout} /> : <Login onLogin={handleLoginAndSync} />;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

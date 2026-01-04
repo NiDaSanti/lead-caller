@@ -19,6 +19,13 @@ testFn('login succeeds with hashed and plaintext configurations', async (t) => {
   const makeServer = () => {
     const app = express();
     app.use(express.json());
+    // auth router now reads cookies; tests should include cookie parsing.
+    try {
+      const cookieParser = require('cookie-parser');
+      app.use(cookieParser());
+    } catch {
+      // ignore in case cookie-parser isn't available in test runtime
+    }
     app.use('/auth', authRouter);
     return app.listen(0);
   };

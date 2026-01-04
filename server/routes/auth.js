@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import { generateToken, registerToken, unregisterToken } from '../middleware/auth.js';
+import { getCookieOptions } from '../utils/cookies.js';
 
 const router = express.Router();
 
@@ -13,6 +14,12 @@ router.post('/login', (req, res) => {
     ? hash(process.env.ADMIN_PASSWORD)
     : process.env.ADMIN_PASSWORD_HASH;
 
+  if (!storedUser || !storedHash) {
+    return res.status(500).json({
+      error: 'Server auth is not configured (missing ADMIN_USERNAME and/or ADMIN_PASSWORD[_HASH]).'
+    });
+  }
+
   if (
     !username ||
     !password ||
@@ -24,14 +31,31 @@ router.post('/login', (req, res) => {
 
   const token = generateToken();
   registerToken(token);
-  res.json({ token });
+
+  const cookieOptions = getCookieOptions(req);
+  res.cookie('auth', token, cookieOptions);
+
+  // Backwards compatible response: token is still returned for older clients/tests,
+  // but the recommended flow is HttpOnly cookie auth.
+  res.json({ token, success: true });
 });
 
 router.post('/logout', (req, res) => {
+  const cookieToken = req.cookies?.auth;
+  if (cookieToken) unregisterToken(cookieToken);
+
   const authHeader = req.headers.authorization || '';
-  const token = authHeader.split(' ')[1];
-  if (token) unregisterToken(token);
+  const headerToken = authHeader.split(' ')[1];
+  if (headerToken) unregisterToken(headerToken);
+
+  res.clearCookie('auth', { path: '/' });
   res.json({ success: true });
+});
+
+router.get('/session', (req, res) => {
+  const cookieToken = req.cookies?.auth;
+  const authenticated = !!cookieToken;
+  res.json({ authenticated });
 });
 
 export default router;

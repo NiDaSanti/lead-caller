@@ -11,16 +11,12 @@ import {
   Alert,
   AlertIcon,
   Switch,
-  Checkbox,
-  HStack,
   Heading,
-  Divider,
   useColorModeValue,
   Text,
-  FormHelperText,
-  Tag,
-  SimpleGrid
+  Wrap
 } from '@chakra-ui/react';
+import { apiFetch } from '../services/apiClient.js';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -33,36 +29,30 @@ export default function AutoCallMenu() {
     days: DAYS.slice(0, 5)
   });
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchConfig = async () => {
-    const res = await fetch('http://localhost:3000/api/scheduler/config', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    const data = await res.json();
-    setConfig({
-      startTime: data.startTime || '',
-      stopTime: data.stopTime || '',
-      callsPerHour: data.callsPerHour ?? 1,
-      enabled: data.enabled ?? false,
-      days: data.days || DAYS.slice(0, 5)
-    });
+    setLoading(true);
+    try {
+      const res = await apiFetch('/api/scheduler/config');
+      const data = await res.json();
+      setConfig({
+        startTime: data.startTime || '',
+        stopTime: data.stopTime || '',
+        callsPerHour: data.callsPerHour ?? 1,
+        enabled: data.enabled ?? false,
+        days: data.days || DAYS.slice(0, 5)
+      });
+    } catch {
+      setMessage({ type: 'error', text: 'Could not load settings.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchConfig();
   }, []);
-
-  const handleChange = (e) => {
-    setConfig(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleCallsChange = (_, value) => {
-    setConfig(prev => ({ ...prev, callsPerHour: value }));
-  };
-
-  const handleEnabledChange = (e) => {
-    setConfig(prev => ({ ...prev, enabled: e.target.checked }));
-  };
 
   const toggleDay = (day) => {
     setConfig(prev => ({
@@ -76,114 +66,143 @@ export default function AutoCallMenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
+
     if (config.startTime >= config.stopTime) {
-      setMessage({ type: 'error', text: 'Start time must be before stop time' });
+      setMessage({ type: 'error', text: 'Start time must be before stop time.' });
       return;
     }
-    if (config.callsPerHour <= 0) {
-      setMessage({ type: 'error', text: 'Calls per hour must be greater than 0' });
+    if (Number(config.callsPerHour) <= 0) {
+      setMessage({ type: 'error', text: 'Calls per hour must be more than 0.' });
       return;
     }
+
+    setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/scheduler/config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          startTime: config.startTime,
-          stopTime: config.stopTime,
-          callsPerHour: Number(config.callsPerHour),
-          enabled: config.enabled,
-          days: config.days
-        })
+      const res = await apiFetch('/api/scheduler/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
       });
-      if (!res.ok) throw new Error('Request failed');
-      await fetchConfig();
-      setMessage({ type: 'success', text: 'Settings saved' });
+      if (!res.ok) throw new Error('Could not save settings.');
+      setMessage({ type: 'success', text: 'Saved.' });
     } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to save settings' });
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
     }
   };
 
   const cardBg = useColorModeValue('white', 'brand.900');
   const borderColor = useColorModeValue('brand.200', 'brand.700');
-  const helperColor = useColorModeValue('brand.500', 'brand.300');
+  const helperColor = useColorModeValue('brand.600', 'brand.300');
+  const pageBg = useColorModeValue('brand.50', 'brand.900');
+  const headingColor = useColorModeValue('brand.900', 'brand.50');
+  const labelColor = useColorModeValue('brand.800', 'brand.100');
+  const inputBg = useColorModeValue('white', 'brand.800');
+  const inputBorder = useColorModeValue('brand.200', 'brand.700');
+  const inputHoverBorder = useColorModeValue('brand.300', 'brand.600');
+  const inputFocusBorder = useColorModeValue('accent.500', 'accent.400');
+  const alertBg = useColorModeValue('brand.100', 'brand.800');
+  const alertColor = useColorModeValue('brand.800', 'brand.100');
+  const alertIconColor = useColorModeValue('brand.700', 'brand.100');
 
   return (
-    <Box
-      as="form"
-      onSubmit={handleSubmit}
-      maxW="lg"
-      mx="auto"
-      bg={cardBg}
-      p={{ base: 6, md: 8 }}
-      borderRadius="2xl"
-      shadow={useColorModeValue('xl', 'md')}
-      border="1px solid"
-      borderColor={borderColor}
-    >
-      <VStack spacing={6} align="stretch">
-        <VStack spacing={1} align="stretch">
-          <Heading size="md" textAlign="left" color={useColorModeValue('brand.800', 'highlight.200')}>
-            Auto Call Settings
-          </Heading>
-          <Text fontSize="sm" color={helperColor}>
-            Define a respectful calling cadence so your team connects with homeowners when they&apos;re most likely to answer.
-          </Text>
+    <Box p={6} bg={pageBg} minH="100vh">
+      <Box maxW="800px" mx="auto" bg={cardBg} p={6} borderRadius="md" shadow="lg" border="1px solid" borderColor={borderColor}>
+        <Heading size="lg" mb={4} textAlign="center" color={headingColor}>
+          Auto Calls
+        </Heading>
+        <Text fontSize="sm" mb={6} color={helperColor} textAlign="center">
+          Set when calls can run.
+        </Text>
+
+        <VStack spacing={4} align="stretch" as="form" onSubmit={handleSubmit}>
+          <FormControl>
+            <FormLabel color={labelColor}>Start Time</FormLabel>
+            <Input
+              type="time"
+              value={config.startTime}
+              onChange={(e) => setConfig({ ...config, startTime: e.target.value })}
+              bg={inputBg}
+              borderColor={inputBorder}
+              _hover={{ borderColor: inputHoverBorder }}
+              _focusVisible={{ borderColor: inputFocusBorder, boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)' }}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel color={labelColor}>Stop Time</FormLabel>
+            <Input
+              type="time"
+              value={config.stopTime}
+              onChange={(e) => setConfig({ ...config, stopTime: e.target.value })}
+              bg={inputBg}
+              borderColor={inputBorder}
+              _hover={{ borderColor: inputHoverBorder }}
+              _focusVisible={{ borderColor: inputFocusBorder, boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)' }}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel color={labelColor}>Calls per hour</FormLabel>
+            <NumberInput
+              value={config.callsPerHour}
+              onChange={(value) => setConfig({ ...config, callsPerHour: value })}
+              min={1}
+              max={100}
+            >
+              <NumberInputField
+                bg={inputBg}
+                borderColor={inputBorder}
+                _hover={{ borderColor: inputHoverBorder }}
+                _focusVisible={{ borderColor: inputFocusBorder, boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)' }}
+              />
+            </NumberInput>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel color={labelColor}>On</FormLabel>
+            <Switch
+              isChecked={config.enabled}
+              onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
+              colorScheme="accent"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel color={labelColor}>Days</FormLabel>
+            <Wrap spacing={2}>
+              {DAYS.map((day) => (
+                <Button
+                  key={day}
+                  size="sm"
+                  variant={config.days.includes(day) ? 'solid' : 'outline'}
+                  colorScheme="accent"
+                  onClick={() => toggleDay(day)}
+                >
+                  {day}
+                </Button>
+              ))}
+            </Wrap>
+          </FormControl>
+
+          {message && (
+            <Alert
+              status={message.type}
+              borderRadius="md"
+              bg={alertBg}
+              color={alertColor}
+            >
+              <AlertIcon color={alertIconColor} />
+              {message.text}
+            </Alert>
+          )}
+
+           <Button colorScheme="accent" size="lg" type="submit" isLoading={loading}>
+            Save
+          </Button>
         </VStack>
-        <FormControl display="flex" alignItems="center">
-          <FormLabel flex="1" mb="0">Enable Auto Calls</FormLabel>
-          <Switch isChecked={config.enabled} onChange={handleEnabledChange} colorScheme="accent" />
-        </FormControl>
-        <Divider />
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-          <FormControl>
-            <FormLabel>Start Time</FormLabel>
-            <Input type="time" name="startTime" value={config.startTime} onChange={handleChange} bg={useColorModeValue('brand.50', 'brand.800')} />
-            <FormHelperText color={helperColor}>Local time to begin dialing.</FormHelperText>
-          </FormControl>
-          <FormControl>
-            <FormLabel>Stop Time</FormLabel>
-            <Input type="time" name="stopTime" value={config.stopTime} onChange={handleChange} bg={useColorModeValue('brand.50', 'brand.800')} />
-            <FormHelperText color={helperColor}>Last call will start before this time.</FormHelperText>
-          </FormControl>
-        </SimpleGrid>
-        <FormControl>
-          <FormLabel>Calls Per Hour</FormLabel>
-          <NumberInput min={1} value={config.callsPerHour} onChange={handleCallsChange}>
-            <NumberInputField name="callsPerHour" bg={useColorModeValue('brand.50', 'brand.800')} />
-          </NumberInput>
-          <FormHelperText color={helperColor}>Balance agent focus with prompt responses.</FormHelperText>
-        </FormControl>
-        <FormControl>
-          <FormLabel>Active Days</FormLabel>
-          <HStack spacing={2} flexWrap="wrap">
-            {DAYS.map(day => (
-              <Tag
-                key={day}
-                size="lg"
-                variant={config.days.includes(day) ? 'solid' : 'subtle'}
-                colorScheme={config.days.includes(day) ? 'accent' : 'gray'}
-                cursor="pointer"
-                onClick={() => toggleDay(day)}
-              >
-                {day}
-              </Tag>
-            ))}
-          </HStack>
-        </FormControl>
-        <Button type="submit" alignSelf="flex-end" colorScheme="accent" borderRadius="full">
-          Save schedule
-        </Button>
-        {message && (
-          <Alert status={message.type}>
-            <AlertIcon />
-            {message.text}
-          </Alert>
-        )}
-      </VStack>
+      </Box>
     </Box>
   );
 }

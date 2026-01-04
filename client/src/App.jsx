@@ -1,11 +1,12 @@
+import { getApiBase, apiFetch } from './services/apiClient.js';
 // App.jsx
 import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
   Collapse, useColorMode, useColorModeValue, useToken,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText,
-  FormControl, FormLabel, Switch, GridItem, Wrap, WrapItem, Badge, Divider,
-  Input, InputGroup, InputLeftElement
+  Input, InputGroup, InputLeftElement, Heading, Badge, Wrap, WrapItem,
+  Divider
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { Icon } from "@chakra-ui/react";
@@ -28,12 +29,33 @@ import LeadList from "./components/LeadList";
 import LeadSummary from "./components/LeadSummary";
 import LeadCsvUpload from "./components/LeadCsvUpload";
 import AutoCallMenu from "./components/AutoCallMenu";
+import SettingsPanel from "./components/SettingsPanel";
+import Footer from "./components/Footer";
 import PropTypes from 'prop-types';
 
 import {
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Bar,
 } from 'recharts';
+
+const COLORS = [
+  '#3B82F6', // accent.500
+  '#1D4ED8',
+  '#60A5FA',
+  '#0EA5E9',
+  '#22C55E',
+  '#14B8A6',
+  '#EF4444',
+  '#A855F7',
+];
 
 function getStatusData(leads) {
   const safeLeads = Array.isArray(leads) ? leads : [];
@@ -50,25 +72,28 @@ function App({ onLogout }) {
   const formRef = useRef(null);
   const socketRef = useRef(null);
 
-  const bg = useColorModeValue("brand.50", "brand.900");
-  const cardBg = useColorModeValue("white", "brand.800");
-  const headingColor = useColorModeValue("brand.900", "highlight.100");
+  const cardBg = useColorModeValue("white", "black");
+  const headingColor = useColorModeValue("brand.900", "accent.200");
   const borderColor = useColorModeValue("brand.200", "brand.700");
-  const footerBg = useColorModeValue("white", "brand.900");
-  const modalBg = useColorModeValue("white", "brand.800");
+  const modalBg = useColorModeValue("white", "black");
   const mutedColor = useColorModeValue("brand.600", "brand.200");
-  const accentText = useColorModeValue("accent.500", "highlight.200");
-  const navBg = useColorModeValue("rgba(255,255,255,0.9)", "brand.900");
-  const navTextPrimary = useColorModeValue("brand.900", "highlight.100");
+  const accentText = useColorModeValue("accent.600", "accent.300");
+  const navBg = useColorModeValue("rgba(255,255,255,0.9)", "black");
+  const navTextPrimary = useColorModeValue("brand.900", "brand.50");
   const navTextSecondary = useColorModeValue("brand.600", "brand.200");
-  const navButtonHover = useColorModeValue("brand.100", "whiteAlpha.100");
-  const surfaceSubtle = useColorModeValue("white", "brand.900");
+  const navButtonHover = useColorModeValue("brand.100", "whiteAlpha.200");
+  const appShellBg = useColorModeValue('gray.50', 'gray.800');
+  const avatarBadgeBg = useColorModeValue('accent.100', 'accent.700');
+  const filtersBadgeBg = useColorModeValue('accent.100', 'accent.600');
+  const filtersBadgeColor = useColorModeValue('accent.700', 'white');
+  const searchBg = useColorModeValue('white', 'brand.900');
+  const dashboardMuted = useColorModeValue('brand.600', 'brand.200');
+  const dashboardCardBg = useColorModeValue('white', 'brand.900');
+  const dashboardCardHoverBg = useColorModeValue('brand.50', 'brand.800');
+  const dashboardPhoneColor = useColorModeValue('brand.600', 'brand.400');
+  const dashboardDateColor = useColorModeValue('brand.500', 'brand.300');
 
-  const [brand500, accent500, brand300, accent300, brand700, accent700] = useToken('colors', [
-    'brand.500', 'accent.500', 'brand.300', 'accent.300', 'brand.700', 'accent.700'
-  ]);
-
-  const COLORS = [brand500, accent500, brand300, accent300, brand700, accent700];
+  const [brand500] = useToken('colors', ['brand.500']);
 
   const [leads, setLeads] = useState([]);
   const [showForm, setShowForm] = useState(() => localStorage.getItem("showForm") !== "false");
@@ -76,6 +101,20 @@ function App({ onLogout }) {
   const [filter, setFilter] = useState(() => localStorage.getItem("leadFilter") || "All");
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem("leadSearch") || "");
   const [modalView, setModalView] = useState(null);
+  const [dashboardRange, setDashboardRange] = useState('30');
+
+  const leadsCount = Array.isArray(leads) ? leads.length : 0;
+  const statusCounts = (Array.isArray(leads) ? leads : []).reduce(
+    (acc, l) => {
+      const key = l?.status || 'New';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  const topStatuses = Object.entries(statusCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
 
   const navItems = [
     { view: "dashboard", label: "Dashboard", icon: FiBarChart2 },
@@ -85,7 +124,7 @@ function App({ onLogout }) {
   ];
 
   useEffect(() => {
-    const socket = io('http://localhost:3000', { transports: ['websocket'] });
+  const socket = io(getApiBase() || window.location.origin, { transports: ['websocket'], withCredentials: true });
     socketRef.current = socket;
 
     socket.on('call-ended', ({ to }) => {
@@ -101,9 +140,7 @@ function App({ onLogout }) {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/leads", {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const res = await apiFetch('/api/leads');
         if (!res.ok) {
           console.error('Failed to fetch leads:', res.status);
           setLeads([]);
@@ -131,23 +168,17 @@ function App({ onLogout }) {
   const addLead = (newLead) => setLeads(prev => [...prev, newLead]);
 
   const updateLead = async (updated) => {
-    await fetch(`http://localhost:3000/api/leads/${updated.id}`, {
+    await apiFetch(`/api/leads/${updated.id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
     });
     setLeads(prev => prev.map(l => l.id === updated.id ? updated : l));
   };
 
   const deleteLead = async (id) => {
-    await fetch(`http://localhost:3000/api/leads/${id}`, {
+    await apiFetch(`/api/leads/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
     });
     setLeads(prev => prev.filter(l => l.id !== id));
   };
@@ -161,23 +192,19 @@ function App({ onLogout }) {
   const answered = grouped["Answered"] || 0;
   const qualified = grouped["Qualified"] || 0;
   const scheduled = grouped["Scheduled"] || 0;
-  const engagementRate = total ? Math.round(((answered + qualified + scheduled) / total) * 100) : 0;
-  const conversionRate = answered ? Math.round((scheduled / answered) * 100) : 0;
 
   const metrics = [
-    { label: "Total Leads", value: total },
-    { label: "Qualified", value: qualified, help: total ? `${Math.round((qualified / total) * 100)}% of total` : "0%" },
-    { label: "Answered", value: answered, help: total ? `${Math.round((answered / total) * 100)}% of total` : "0%" },
-    { label: "Scheduled", value: scheduled, help: total ? `${Math.round((scheduled / total) * 100)}% of total` : "0%" },
-    { label: "Engagement Rate", value: `${engagementRate}%`, help: "Answered + Qualified + Scheduled" },
-    { label: "Conversion Rate", value: `${conversionRate}%`, help: "Scheduled ÷ Answered" }
+    { label: 'Total', value: total },
+    { label: 'Answered', value: answered },
+    { label: 'Qualified', value: qualified },
+    { label: 'Scheduled', value: scheduled },
   ];
 
-  const primaryMetrics = metrics.slice(0, 4);
-  const ratioMetrics = metrics.slice(4);
+  // Keep the counts for filtering/quick sanity checks if needed later.
+  // (UI metrics and charts were removed from the homepage to reduce clutter.)
 
   return (
-    <Box bg={bg} minH="100vh" color={useColorModeValue('brand.900', 'highlight.50')}>
+    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minH="100vh" bg={appShellBg}>
       {/* NAVBAR */}
       <Flex
         justify="space-between"
@@ -198,7 +225,7 @@ function App({ onLogout }) {
             w={10}
             h={10}
             borderRadius="full"
-            bg={useColorModeValue('accent.100', 'accent.700')}
+            bg={avatarBadgeBg}
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -207,7 +234,7 @@ function App({ onLogout }) {
           </Box>
           <Box>
             <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={navTextPrimary}>Lead Caller</Text>
-            <Text fontSize="xs" color={navTextSecondary}>A disciplined solar outreach desk</Text>
+            <Text fontSize="xs" color={navTextSecondary}>Solar calling tool</Text>
           </Box>
         </HStack>
         <HStack spacing={2}>
@@ -224,7 +251,7 @@ function App({ onLogout }) {
               {label}
             </Button>
           ))}
-          <ChakraTooltip label={colorMode === "light" ? "Dark Mode" : "Light Mode"}>
+          <ChakraTooltip label={colorMode === "light" ? "Dark mode" : "Light mode"}>
             <IconButton
               size="sm"
               variant="ghost"
@@ -249,122 +276,7 @@ function App({ onLogout }) {
       </Flex>
 
       <Container maxW="7xl" py={{ base: 10, md: 16 }}>
-        <Box
-          bg={surfaceSubtle}
-          color={useColorModeValue('brand.900', 'highlight.50')}
-          borderRadius="3xl"
-          p={{ base: 8, md: 12 }}
-          mb={{ base: 12, lg: 16 }}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow={useColorModeValue('xl', 'md')}
-        >
-          <Stack spacing={8}>
-            <Stack
-              direction={{ base: "column", md: "row" }}
-              justify="space-between"
-              align={{ base: "flex-start", md: "center" }}
-              spacing={{ base: 6, md: 10 }}
-            >
-              <VStack align="flex-start" spacing={4} maxW="3xl">
-                <Badge
-                  colorScheme="accent"
-                  bg={useColorModeValue('accent.100', 'accent.600')}
-                  color={useColorModeValue('accent.700', 'white')}
-                  px={3}
-                  py={1}
-                  borderRadius="full"
-                >
-                  Premium solar outreach desk
-                </Badge>
-                <Text
-                  fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }}
-                  fontWeight="extrabold"
-                  lineHeight="shorter"
-                  color={headingColor}
-                >
-                  Elevate every homeowner conversation with clarity and warmth.
-                </Text>
-                <Text fontSize={{ base: "sm", md: "md" }} color={mutedColor} maxW="2xl">
-                  A refined workspace for organized follow-ups, confident scheduling, and genuinely helpful solar consultations.
-                </Text>
-                <HStack spacing={4} flexWrap="wrap">
-                  <Button
-                    size="sm"
-                    bg="highlight.400"
-                    color="brand.900"
-                    _hover={{ bg: 'highlight.300' }}
-                    onClick={() => setShowLeads(true)}
-                  >
-                    View lead pipeline
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    borderColor={accentText}
-                    color={accentText}
-                    _hover={{ bg: 'accent.400', color: 'white' }}
-                    onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth" })}
-                  >
-                    Add a homeowner
-                  </Button>
-                </HStack>
-              </VStack>
-              <VStack
-                align="flex-start"
-                spacing={4}
-                bg={cardBg}
-                borderRadius="2xl"
-                p={6}
-                maxW="sm"
-                border="1px solid"
-                borderColor={borderColor}
-                shadow="lg"
-              >
-                <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={mutedColor}>
-                  today's focus
-                </Text>
-                <Text fontSize="lg" fontWeight="bold" color={headingColor}>
-                  Lead families from curiosity to confident consultations.
-                </Text>
-                <Text fontSize="sm" color={mutedColor}>
-                  Use the live metrics to reinforce urgency, savings, and trust.
-                </Text>
-              </VStack>
-            </Stack>
-            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
-              {primaryMetrics.map(({ label, value, help }) => (
-                <Box
-                  key={label}
-                  bg={cardBg}
-                  borderRadius="xl"
-                  p={4}
-                  border="1px solid"
-                  borderColor={borderColor}
-                  shadow="md"
-                >
-                  <Stat>
-                    <StatLabel color={mutedColor} fontSize="xs" textTransform="uppercase">
-                      {label}
-                    </StatLabel>
-                    <StatNumber fontSize={{ base: "lg", md: "2xl" }}>
-                      {value}
-                    </StatNumber>
-                    {help && (
-                      <StatHelpText color={accentText} fontSize="xs">
-                        {help}
-                      </StatHelpText>
-                    )}
-                  </Stat>
-                </Box>
-              ))}
-            </SimpleGrid>
-          </Stack>
-        </Box>
-
-        <SimpleGrid columns={{ base: 1, xl: 3 }} spacing={{ base: 8, lg: 10 }} alignItems="flex-start">
-          <GridItem colSpan={{ base: 1, xl: 2 }}>
-            <Stack spacing={10}>
+        <Stack spacing={10} w="100%">
               <Box
                 bg={cardBg}
                 borderRadius="2xl"
@@ -374,14 +286,14 @@ function App({ onLogout }) {
                 shadow="lg"
               >
                 <Stack spacing={4}>
-                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start" bg={useColorModeValue('accent.100','accent.600')} color={useColorModeValue('accent.700','white')}>
-                    Lead filters
+                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start" bg={filtersBadgeBg} color={filtersBadgeColor}>
+                    Filters
                   </Badge>
                   <Text fontSize="xl" fontWeight="bold" color={headingColor}>
-                    Focus your homeowner outreach
+                    Find leads
                   </Text>
                   <Text fontSize="sm" color={mutedColor}>
-                    Segment leads to spotlight the families ready for solar savings and personalize your follow-up.
+                    Filter and search your list.
                   </Text>
                   <Wrap spacing={3}>
                     <WrapItem w={{ base: "100%", md: "auto" }}>
@@ -392,8 +304,8 @@ function App({ onLogout }) {
                         <Input
                           value={searchQuery}
                           onChange={(event) => setSearchQuery(event.target.value)}
-                          placeholder="Search all lead details"
-                          bg={useColorModeValue('white', 'brand.900')}
+                          placeholder="Search leads"
+                          bg={searchBg}
                           borderColor={borderColor}
                           _hover={{ borderColor: accentText }}
                           _focusVisible={{ borderColor: accentText, boxShadow: `0 0 0 1px ${accentText}` }}
@@ -451,13 +363,13 @@ function App({ onLogout }) {
                   <VStack align="start" spacing={1}>
                     <Badge colorScheme="accent" variant="subtle">Capture interest</Badge>
                     <Text fontSize="2xl" fontWeight="bold" color={headingColor}>Add New Lead</Text>
-                    <Text fontSize="sm" color={mutedColor}>Collect homeowner details while their excitement is high.</Text>
+                    <Text fontSize="sm" color={mutedColor}>Enter the lead info.</Text>
                   </VStack>
                   <IconButton
                     icon={showForm ? <MinusIcon /> : <AddIcon />}
                     size="sm"
                     variant="ghost"
-                    color="highlight.200"
+                    color={useColorModeValue('highlight.700', 'highlight.200')}
                     onClick={() => setShowForm(!showForm)}
                     aria-label="Toggle lead form"
                   />
@@ -468,6 +380,17 @@ function App({ onLogout }) {
                     <LeadCsvUpload onNewLead={addLead} />
                   </Stack>
                 </Collapse>
+                {!showForm && (
+                  <Box mt={6}>
+                    <Text fontSize="sm" color={mutedColor}>
+                      Add leads here via the manual form or bulk import from a CSV.
+                    </Text>
+                    <HStack mt={3} spacing={2} flexWrap="wrap">
+                      <Badge variant="subtle" colorScheme="accent">Manual entry</Badge>
+                      <Badge variant="subtle" colorScheme="accent">CSV import</Badge>
+                    </HStack>
+                  </Box>
+                )}
               </Box>
 
               <Box
@@ -487,14 +410,14 @@ function App({ onLogout }) {
                 >
                   <VStack align="start" spacing={1}>
                     <Badge colorScheme="highlight" variant="subtle">Active pipeline</Badge>
-                    <Text fontSize="2xl" fontWeight="bold" color={headingColor}>Lead pipeline</Text>
-                    <Text fontSize="sm" color={mutedColor}>Track conversations and spotlight ready-to-convert homeowners.</Text>
+                    <Text fontSize="2xl" fontWeight="bold" color={headingColor}>Leads</Text>
+                    <Text fontSize="sm" color={mutedColor}>View and update lead status.</Text>
                   </VStack>
                   <IconButton
                     icon={showLeads ? <MinusIcon /> : <AddIcon />}
                     size="sm"
                     variant="ghost"
-                    color="highlight.200"
+                    color={useColorModeValue('highlight.700', 'highlight.200')}
                     onClick={() => setShowLeads(!showLeads)}
                     aria-label="Toggle lead list"
                   />
@@ -510,129 +433,31 @@ function App({ onLogout }) {
                   />
                 </Collapse>
                 {!showLeads && (
-                  <Text mt={6} fontSize="sm" color={mutedColor}>
-                    Lead list hidden. Reopen it to re-engage homeowners while interest is warm.
-                  </Text>
+                  <Box mt={6}>
+                    <Text fontSize="sm" color={mutedColor}>
+                      {leadsCount ? `${leadsCount} leads available.` : 'No leads loaded yet.'}
+                      {filter && filter !== 'All' ? ` Filtered: ${filter}.` : ''}
+                      {searchQuery?.trim() ? ` Search: “${searchQuery.trim()}”.` : ''}
+                    </Text>
+                    {leadsCount > 0 && topStatuses.length > 0 && (
+                      <HStack mt={3} spacing={2} flexWrap="wrap">
+                        <Text fontSize="xs" color={mutedColor}>
+                          Top statuses:
+                        </Text>
+                        {topStatuses.map(([name, count]) => (
+                          <Badge key={name} variant="subtle" colorScheme="accent">
+                            {name}: {count}
+                          </Badge>
+                        ))}
+                      </HStack>
+                    )}
+                  </Box>
                 )}
               </Box>
-            </Stack>
-          </GridItem>
-
-          <GridItem colSpan={{ base: 1, xl: 1 }}>
-            <VStack spacing={8} align="stretch">
-              <Box
-                bg={cardBg}
-                borderRadius="2xl"
-                p={{ base: 6, md: 8 }}
-                border="1px solid"
-                borderColor={borderColor}
-                shadow="xl"
-              >
-                <Stack spacing={4}>
-                  <Badge colorScheme="accent" alignSelf="flex-start" px={3} py={1} borderRadius="full">
-                    Homeowner spotlight
-                  </Badge>
-                  <Text fontSize="lg" fontWeight="bold" color={headingColor}>
-                    Lead with value and calm any hesitation before the call.
-                  </Text>
-                  <Text fontSize="sm" color={mutedColor}>
-                    Highlight bill relief, backup power, and the simplicity of your install process. These cues keep attention where you need it.
-                  </Text>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setModalView("dashboard")}
-                    alignSelf="flex-start"
-                  >
-                    View dashboard insights
-                  </Button>
-                </Stack>
-              </Box>
-
-              <Box
-                bg={cardBg}
-                borderRadius="2xl"
-                p={{ base: 6, md: 8 }}
-                border="1px solid"
-                borderColor={borderColor}
-                shadow="lg"
-              >
-                <Text fontSize="lg" fontWeight="bold" color={headingColor}>Performance pulse</Text>
-                <Text fontSize="sm" color={mutedColor} mb={6}>
-                  Monitor conversion health to see where homeowners are leaning in.
-                </Text>
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                  {ratioMetrics.map(({ label, value, help }) => (
-                    <Box
-                      key={label}
-                      borderRadius="xl"
-                      p={5}
-                      border="1px solid"
-                      borderColor={borderColor}
-                      bg={useColorModeValue('brand.50', 'brand.900')}
-                    >
-                      <Stat>
-                        <StatLabel fontWeight="medium">{label}</StatLabel>
-                        <StatNumber>{value}</StatNumber>
-                        {help && <StatHelpText>{help}</StatHelpText>}
-                      </Stat>
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              </Box>
-
-              <Box
-                bg={cardBg}
-                borderRadius="2xl"
-                p={{ base: 6, md: 8 }}
-                border="1px solid"
-                borderColor={borderColor}
-                shadow="lg"
-              >
-                <Text fontSize="lg" fontWeight="bold" color={headingColor}>Lead journey overview</Text>
-                <Text fontSize="sm" color={mutedColor} mb={6}>
-                  Use the visuals to tailor your homeowner conversation and keep energy savings front and center.
-                </Text>
-                <Stack spacing={6}>
-                  <Box h={{ base: "220px", md: "240px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={getStatusData(leads)} dataKey="value" nameKey="name" outerRadius={90} label>
-                          {getStatusData(leads).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                  <Divider />
-                  <Box h={{ base: "220px", md: "240px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={getStatusData(leads)} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <RechartsTooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill={brand500} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Stack>
-              </Box>
-            </VStack>
-          </GridItem>
-        </SimpleGrid>
+        </Stack>
       </Container>
 
-      {/* FOOTER */}
-      <Box mt={20} py={10} borderTop="1px solid" borderColor={borderColor} bg={footerBg}>
-        <Container maxW="6xl" textAlign="center">
-          <Text fontSize="sm" color="brand.200">Created by <strong>Nick Santiago</strong></Text>
-          <Text fontSize="xs" mt={1} color={mutedColor}>Solar Consultant • Tech Builder • AI Sales Trainer</Text>
-        </Container>
-      </Box>
+      <Footer appName="Lead Caller" />
 
       {/* MODAL */}
       {modalView && (
@@ -647,66 +472,116 @@ function App({ onLogout }) {
               {modalView === "reports" ? (
                 <LeadSummary leads={leads} />
               ) : modalView === "dashboard" ? (
-                <VStack spacing={8} align="stretch">
-                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                <VStack spacing={6} align="stretch">
+                  <HStack justify="space-between" align="center">
                     <Box>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie data={getStatusData(leads)} dataKey="value" nameKey="name" outerRadius={100} label>
-                            {getStatusData(leads).map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      <Heading size="lg">Dashboard</Heading>
+                      <Text fontSize="sm" color={dashboardMuted}>Quick summary.</Text>
                     </Box>
+                    <HStack>
+                      <Text fontSize="sm" color={dashboardMuted}>Range</Text>
+                      <Button size="sm" variant={dashboardRange==='7' ? 'solid' : 'outline'} onClick={() => setDashboardRange('7')}>7d</Button>
+                      <Button size="sm" variant={dashboardRange==='30' ? 'solid' : 'outline'} onClick={() => setDashboardRange('30')}>30d</Button>
+                      <Button size="sm" variant={dashboardRange==='90' ? 'solid' : 'outline'} onClick={() => setDashboardRange('90')}>90d</Button>
+                      <Button size="sm" variant="ghost" onClick={() => {
+                        const csvHeader = ['name','phone','email','status','lastContacted'];
+                        const rows = leads.map(l => [l.name, l.phone, l.email || '', l.status || '', l.lastContacted || '']).map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+                        const csv = [csvHeader.join(','), ...rows].join('\n');
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = `leads-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+                      }}>Export</Button>
+                    </HStack>
+                  </HStack>
+
+                  <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={6} alignItems="start">
+                    <Box gridColumn={{ base: '1 / -1', lg: '1 / span 2' }}>
+                      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={4}>
+                        <Box bg={cardBg} borderRadius="xl" p={4} border="1px solid" borderColor={borderColor} boxShadow="sm">
+                          <Text fontSize="sm" color={dashboardMuted}>Lead mix</Text>
+                          <Box h={{ base: 220, md: 260 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie data={getStatusData(leads)} dataKey="value" nameKey="name" innerRadius={30} outerRadius={80} paddingAngle={4}>
+                                  {getStatusData(leads).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                  ))}
+                                </Pie>
+                                <RechartsTooltip />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </Box>
+                        </Box>
+
+                        <Box bg={cardBg} borderRadius="xl" p={4} border="1px solid" borderColor={borderColor} boxShadow="sm">
+                          <Text fontSize="sm" color={dashboardMuted}>Counts</Text>
+                          <Box h={{ base: 220, md: 260 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={getStatusData(leads)} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <RechartsTooltip />
+                                <Bar dataKey="value" fill={brand500} />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </Box>
+                        </Box>
+                      </SimpleGrid>
+
+                      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+                        {metrics.map(({ label, value, help }) => (
+                          <Box key={label} bg={cardBg} borderRadius="lg" p={4} border="1px solid" borderColor={borderColor}>
+                            <Stat>
+                              <StatLabel fontSize="xs" color={dashboardMuted}>{label}</StatLabel>
+                              <StatNumber fontSize="lg">{value}</StatNumber>
+                              {help && <StatHelpText fontSize="xs">{help}</StatHelpText>}
+                            </Stat>
+                          </Box>
+                        ))}
+                      </SimpleGrid>
+                    </Box>
+
                     <Box>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={getStatusData(leads)} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <RechartsTooltip />
-                          <Legend />
-                          <Bar dataKey="value" fill={brand500} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </Box>
-                  </SimpleGrid>
-                  <SimpleGrid columns={{ base: 2, md: 3 }} spacing={6}>
-                    {metrics.map(({ label, value, help }) => (
-                      <Box key={label} bg={cardBg} borderRadius="xl" p={6} shadow="md" border="1px solid" borderColor={borderColor}>
-                        <Stat>
-                          <StatLabel fontWeight="medium">{label}</StatLabel>
-                          <StatNumber>{value}</StatNumber>
-                          {help && <StatHelpText>{help}</StatHelpText>}
-                        </Stat>
+                      <Box bg={cardBg} borderRadius="xl" p={4} border="1px solid" borderColor={borderColor} boxShadow="sm">
+                        <HStack justify="space-between" mb={3}>
+                          <Text fontWeight="bold">Recent leads</Text>
+                          <Text fontSize="sm" color={dashboardMuted}>{leads.length} total</Text>
+                        </HStack>
+                        <VStack align="stretch" spacing={3} maxH={320} overflowY="auto">
+                          {leads.slice().sort((a,b)=> new Date(b.lastContacted || b.createdAt || 0) - new Date(a.lastContacted || a.createdAt || 0)).slice(0,8).map(l => (
+                            <Box key={l.id || l.phone} p={3} borderRadius="md" border="1px solid" borderColor={borderColor} bg={dashboardCardBg}
+                              _hover={{ bg: dashboardCardHoverBg }}>
+                              <HStack justify="space-between">
+                                <Box>
+                                  <Text fontWeight="semibold">{l.name || '—'}</Text>
+                                  <Text fontSize="sm" color={dashboardPhoneColor}>{l.phone || ''}</Text>
+                                </Box>
+                                <VStack spacing={0} align="end">
+                                  <Badge variant="subtle" colorScheme="accent">{l.status || 'New'}</Badge>
+                                  <Text fontSize="xs" color={dashboardDateColor}>{l.lastContacted ? new Date(l.lastContacted).toLocaleDateString() : '—'}</Text>
+                                </VStack>
+                              </HStack>
+                            </Box>
+                          ))}
+                        </VStack>
+                        <Divider my={3} />
+                        <Button size="sm" w="100%" variant="outline" onClick={() => setModalView('reports')}>Open reports</Button>
                       </Box>
-                    ))}
+                    </Box>
                   </SimpleGrid>
                 </VStack>
               ) : modalView === "settings" ? (
-                <VStack spacing={4} align="stretch">
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="show-form-toggle" flex="1" mb="0">
-                      Show Lead Form
-                    </FormLabel>
-                    <Switch id="show-form-toggle" isChecked={showForm} onChange={(e) => setShowForm(e.target.checked)} />
-                  </FormControl>
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="show-leads-toggle" flex="1" mb="0">
-                      Show Lead List
-                    </FormLabel>
-                    <Switch id="show-leads-toggle" isChecked={showLeads} onChange={(e) => setShowLeads(e.target.checked)} />
-                  </FormControl>
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="color-mode-toggle" flex="1" mb="0">
-                      Dark Mode
-                    </FormLabel>
-                    <Switch id="color-mode-toggle" isChecked={colorMode === 'dark'} onChange={toggleColorMode} />
-                  </FormControl>
-                </VStack>
+                <SettingsPanel
+                  showForm={showForm}
+                  setShowForm={setShowForm}
+                  showLeads={showLeads}
+                  setShowLeads={setShowLeads}
+                  colorMode={colorMode}
+                  toggleColorMode={toggleColorMode}
+                  setModalView={setModalView}
+                />
               ) : modalView === "autoCall" ? (
                 <AutoCallMenu />
               ) : (

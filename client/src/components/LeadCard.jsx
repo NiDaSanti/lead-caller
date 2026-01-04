@@ -1,15 +1,17 @@
 import {
-  Card, CardBody, Heading, Text, Stack, Box, Badge, HStack, Wrap, Tag,
+  Card, CardBody, Heading, Text, Stack, Box, Badge, Wrap, Tag,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider, Input, useToast, SimpleGrid,
-  AvatarGroup, Flex, Spacer, Tooltip
+  VStack, Button, IconButton, Avatar, Divider, Input, useToast,
+  AvatarGroup, Flex, Tooltip
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
 import { FiFileText, FiTrash2 } from 'react-icons/fi';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import html2pdf from 'html2pdf.js';
+import { apiFetch } from '../services/apiClient.js';
 
 function SoundWave() {
   const waveColor = useColorModeValue('accent.400', 'highlight.200');
@@ -59,6 +61,16 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const transcriptBg = useColorModeValue("brand.50", "brand.800");
   const accentText = useColorModeValue("accent.500", "highlight.200");
   const statusVariant = useColorModeValue("subtle", "solid");
+  const cardShadow = useColorModeValue('lg', 'xl');
+  const avatarLeadBg = useColorModeValue('accent.200', 'accent.700');
+  const avatarTagBg = useColorModeValue('brand.100', 'brand.700');
+  const headerSubText = useColorModeValue('brand.600', 'highlight.100');
+  const contactPanelBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100');
+  const outlineBorder = useColorModeValue('brand.200', 'brand.600');
+  const outlineColor = useColorModeValue('brand.700', 'highlight.100');
+  const outlineHoverBg = useColorModeValue('brand.50', 'whiteAlpha.300');
+  const deleteColor = useColorModeValue('accent.600', 'accent.200');
+  const deleteHoverBg = useColorModeValue('accent.50', 'whiteAlpha.300');
   const badgeColor = ({
     Qualified: 'highlight',
     Scheduled: 'accent',
@@ -87,11 +99,9 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
     );
   }, [lead.followUpDate]);
 
-  const checkCallStatus = async () => {
+  const checkCallStatus = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await apiFetch(`/api/leads/${lead.id}`);
       const data = await res.json();
       if (!data.callInProgress) {
         clearInterval(pollingRef.current);
@@ -104,7 +114,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
     } catch (err) {
       console.error("Error polling call status:", err);
     }
-  };
+  }, [closeCall, lead.id, onUpdateLead]);
 
   useEffect(() => {
     if (lead.callInProgress && isCalling) {
@@ -116,18 +126,17 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [lead.callInProgress, isCalling]);
+  }, [checkCallStatus, isCalling, lead.callInProgress, openCall]);
 
   const startCall = async (e) => {
     e.stopPropagation();
     setIsCalling(true);
     setCallStatus("Calling...");
     try {
-      const res = await fetch("http://localhost:3000/api/phone/call", {
+      const res = await apiFetch('/api/phone/call', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ phoneNumber: lead.phone, leadId: lead.id })
       });
@@ -143,11 +152,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
 
   const saveFollowUpDate = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}`, {
+      const res = await apiFetch(`/api/leads/${lead.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           followUpDate: followUpDateInput
@@ -189,9 +197,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const generateSummary = async () => {
     setSummaryLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/leads/${lead.id}/summary`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await apiFetch(`/api/leads/${lead.id}/summary`);
       const data = await res.json();
       setAiSummary(data.summary || 'No summary available');
     } catch (err) {
@@ -210,16 +216,14 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.3 }}
         w="100%"
-        display="flex"
-        justifyContent="center"
       >
-  <Box w="full" maxW={{ base: '100%', md: '2000px', lg: '2400px' }} px={{ base: 2, md: 8, lg: 12 }}>
+        <Box w="full">
         <Card
           bg={cardBg}
           border="1px solid"
           borderColor={borderColor}
           borderRadius="2xl"
-          boxShadow={useColorModeValue('lg', 'xl')}
+          boxShadow={cardShadow}
           overflow="hidden"
           cursor="pointer"
           onClick={openReport}
@@ -230,8 +234,8 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
               <Box
                 bgGradient={headerGradient}
                 color={headerTextColor}
-                px={4}
-                py={3}
+                px={{ base: 4, md: 3 }}
+                py={{ base: 3, md: 2 }}
                 borderBottom="1px solid"
                 borderColor={borderColor}
               >
@@ -241,15 +245,15 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                     <Tooltip label="Lead" placement="top">
                           <Avatar
                             name={`${lead.firstName} ${lead.lastName}`}
-                            bg={useColorModeValue('accent.200', 'accent.700')}
+                            bg={avatarLeadBg}
                             color={headerTextColor}
-                            boxSize={{ base: '44px', md: '48px' }}
+                            boxSize={{ base: '44px', md: '40px' }}
                           />
                     </Tooltip>
                     {/* Avatars for tags (show first 2 tags as avatars) */}
                     {(lead.tags || []).slice(0, 2).map((tag) => (
                       <Tooltip key={tag} label={tag} placement="top">
-                        <Avatar name={tag} bg={useColorModeValue('brand.100', 'brand.700')} />
+                        <Avatar name={tag} bg={avatarTagBg} />
                       </Tooltip>
                     ))}
                   </AvatarGroup>
@@ -265,7 +269,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                     </Heading>
                     <Text
                       fontSize="xs"
-                      color={useColorModeValue('brand.600', 'highlight.100')}
+                      color={headerSubText}
                       wordBreak="normal"
                       whiteSpace="nowrap"
                       overflow="hidden"
@@ -289,14 +293,14 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 </Flex>
               </Box>
 
-            <Flex direction={{ base: 'column', md: 'row' }} gap={4} px={{ base: 4, md: 6 }} py={4} align="center">
-              <Box flexBasis={{ base: '100%', md: '20%' }}>
+            <Flex direction={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 3 }} px={{ base: 4, md: 3 }} py={{ base: 4, md: 3 }} align="center">
+              <Box flexBasis={{ base: '100%', md: '34%' }} w="full">
                 <Box
                   borderRadius="xl"
                   border="1px solid"
                   borderColor={borderColor}
-                  bg={useColorModeValue('blackAlpha.50', 'whiteAlpha.100')}
-                  p={{ base: 3, md: 4 }}
+                  bg={contactPanelBg}
+                  p={{ base: 3, md: 3 }}
                 >
                   <VStack align="start" spacing={2}>
                     <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={metaLabelColor}>
@@ -313,7 +317,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 </Box>
               </Box>
 
-              <Box flexBasis={{ base: '100%', md: '62%' }}>
+              <Box flexBasis={{ base: '100%', md: '66%' }} w="full">
                 <Box p={2}>
                   {lead.tags?.length ? (
                     <Wrap mb={2}>
@@ -333,9 +337,9 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
             </Flex>
 
             {/* Full-width action buttons for quick access (keeps original behavior) */}
-            <Stack direction={{ base: 'column', md: 'row' }} spacing={3} px={{ base: 5, md: 6 }} pb={6}>
+            <Stack direction={{ base: 'column', md: 'row' }} spacing={2} px={{ base: 4, md: 3 }} pb={{ base: 5, md: 4 }}>
               <Button
-                size="md"
+                size="sm"
                 bgGradient="linear(to-r, accent.500, accent.600)"
                 color="white"
                 _hover={{ bgGradient: 'linear(to-r, accent.600, accent.700)' }}
@@ -347,11 +351,11 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 Call lead
               </Button>
               <Button
-                size="md"
+                size="sm"
                 variant="outline"
-                borderColor={useColorModeValue('brand.200', 'brand.600')}
-                color={useColorModeValue('brand.700', 'highlight.100')}
-                _hover={{ bg: useColorModeValue('brand.50', 'whiteAlpha.300') }}
+                borderColor={outlineBorder}
+                color={outlineColor}
+                _hover={{ bg: outlineHoverBg }}
                 onClick={(e) => { e.stopPropagation(); openReport(); }}
                 leftIcon={<FiFileText />}
                 w="full"
@@ -359,10 +363,10 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 View report
               </Button>
               <Button
-                size="md"
+                size="sm"
                 variant="ghost"
-                color={useColorModeValue('accent.600', 'accent.200')}
-                _hover={{ bg: useColorModeValue('accent.50', 'whiteAlpha.300') }}
+                color={deleteColor}
+                _hover={{ bg: deleteHoverBg }}
                 onClick={(e) => { e.stopPropagation(); if (window.confirm("Delete this lead?")) { onDeleteLead(lead.id); toast({ title: "Lead removed", status: "info", duration: 3000, isClosable: true }); } }}
                 leftIcon={<FiTrash2 />}
                 w="full"
@@ -370,7 +374,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 Delete
               </Button>
             </Stack>
-            <Box px={{ base: 5, md: 6 }} pb={4}>
+            <Box px={{ base: 4, md: 3 }} pb={4}>
               <Text fontSize="xs" color={metaLabelColor} textAlign="center">{lead.callHistory?.length || 0} exchanges</Text>
             </Box>
           </CardBody>
@@ -388,7 +392,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
           </ModalHeader>
           <ModalBody>
             <VStack spacing={4}>
-              <Avatar name={lead.firstName} size="xl" bg={useColorModeValue('accent.200', 'accent.700')} color={headerTextColor} />
+              <Avatar name={lead.firstName} size="xl" bg={avatarLeadBg} color={headerTextColor} />
               <SoundWave />
               <Text fontSize="sm" fontWeight="medium" color={metaLabelColor}>
                 Status: {callStatus}
@@ -516,3 +520,35 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
     </>
   );
 }
+
+LeadCard.propTypes = {
+  lead: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    phone: PropTypes.string,
+    status: PropTypes.string,
+    followUpDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
+    lastContacted: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
+    tags: PropTypes.arrayOf(PropTypes.string),
+    notes: PropTypes.string,
+    callInProgress: PropTypes.bool,
+    callHistory: PropTypes.arrayOf(PropTypes.any),
+    address: PropTypes.shape({
+      street: PropTypes.string,
+      city: PropTypes.string,
+      state: PropTypes.string,
+      zip: PropTypes.string,
+    }),
+  }).isRequired,
+  onUpdateLead: PropTypes.func.isRequired,
+  onDeleteLead: PropTypes.func.isRequired,
+  scrollRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any }),
+  ]),
+  socket: PropTypes.shape({
+    on: PropTypes.func,
+    off: PropTypes.func,
+  }),
+};

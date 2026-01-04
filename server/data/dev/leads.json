@@ -256,5 +256,39 @@
     "tags": [],
     "callHistory": [],
     "createdAt": "2025-09-10T14:48:24.550Z"
+  },
+  {
+    "id": 1767419489414,
+    "firstName": "Alfredi",
+    "lastName": "Villa",
+    "phone": "9892984832",
+    "address": {
+      "street": "3223 Orange Ave",
+      "city": "Santa Ana",
+      "state": "CA",
+      "zip": "90002"
+    },
+    "note": "A test lead.",
+    "status": "New",
+    "tags": [],
+    "callHistory": [],
+    "createdAt": "2026-01-03T05:51:29.414Z"
+  },
+  {
+    "id": 1767487443241,
+    "firstName": "Nick",
+    "lastName": "Santiago",
+    "phone": "4564282929",
+    "address": {
+      "street": "1129 E. 103rd St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zip": "90002"
+    },
+    "note": "Test Dev",
+    "status": "New",
+    "tags": [],
+    "callHistory": [],
+    "createdAt": "2026-01-04T00:44:03.241Z"
   }
 ]

@@ -3,6 +3,7 @@ import { Box, Input, Button, Stack, useToast, useColorModeValue, Text, Icon, HSt
 import { FiUploadCloud } from 'react-icons/fi';
 import Papa from 'papaparse';
 import PropTypes from 'prop-types';
+import { apiFetch } from '../services/apiClient.js';
 
 export default function LeadCsvUpload({ onNewLead }) {
   const [file, setFile] = useState(null);
@@ -20,69 +21,104 @@ export default function LeadCsvUpload({ onNewLead }) {
       return;
     }
 
+    // Stream and upload in batches to /api/leads/bulk
+    const BATCH_SIZE = 200; // recommended batch size
+    let buffer = [];
+    let inserted = 0;
+    let duplicates = 0;
+    let errors = 0;
+    let totalRows = 0;
+
+    const uploadBatch = async (batch) => {
+      if (!batch.length) return;
+      try {
+        const res = await apiFetch('/api/leads/bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ leads: batch }),
+        });
+        const data = await res.json();
+        if (res.ok && data) {
+          inserted += data.inserted || 0;
+          duplicates += data.duplicates || 0;
+          errors += data.errors || 0;
+          if (Array.isArray(data.leads)) {
+            data.leads.forEach((l) => onNewLead && onNewLead(l));
+          }
+        } else {
+          errors += batch.length;
+        }
+      } catch (err) {
+        errors += batch.length;
+      }
+    };
+
+    const toastId = `csv-upload-${Date.now()}`;
+  toast({ title: 'Uploading CSV', description: 'Uploading...', status: 'info', duration: 3000, id: toastId });
+
     Papa.parse(file, {
       header: true,
-      complete: async (results) => {
-        let success = 0;
-        let errors = 0;
-        let duplicates = 0;
+      worker: true,
+      step: async (results, parser) => {
+        const row = results.data;
+        totalRows += 1;
+        if (Object.values(row).every((val) => val === undefined || val === '')) return;
 
-        for (const row of results.data) {
-          if (Object.values(row).every((val) => val === undefined || val === '')) continue;
+        const lead = {
+          firstName: row.firstName,
+          lastName: row.lastName,
+          phone: row.phone,
+          address: {
+            street: row.street,
+            city: row.city,
+            state: row.state,
+            zip: row.zip,
+          },
+          note: row.note,
+        };
 
-          const lead = {
-            firstName: row.firstName,
-            lastName: row.lastName,
-            phone: row.phone,
-            address: {
-              street: row.street,
-              city: row.city,
-              state: row.state,
-              zip: row.zip,
-            },
-            note: row.note,
-          };
-
-          try {
-            const res = await fetch('http://localhost:3000/api/leads', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
-              body: JSON.stringify(lead),
-            });
-            // Skip adding a lead if the phone number already exists
-
-            if (res.status === 409) {
-              duplicates += 1;
-              continue;
-            }
-
-            const data = await res.json();
-            if (data.success) {
-              success += 1;
-              if (onNewLead) onNewLead(data.lead);
-            } else {
-              errors += 1;
-            }
-          } catch (err) {
-            errors += 1;
-          }
+        if (!lead.firstName || !lead.lastName || !lead.phone) {
+          errors += 1;
+          toast({
+            title: 'Row skipped',
+            description: `Row ${totalRows} is missing firstName, lastName, or phone.`,
+            status: 'warning',
+            duration: 3000,
+            isClosable: true,
+          });
+          return;
         }
-
-        const message =
-          `${success} leads added` +
+        buffer.push(lead);
+        if (buffer.length >= BATCH_SIZE) {
+          parser.pause();
+          await uploadBatch(buffer);
+          buffer = [];
+          parser.resume();
+        }
+      },
+      complete: async () => {
+        await uploadBatch(buffer);
+        const message = `${inserted} leads added` +
           `${duplicates ? `, ${duplicates} duplicates` : ''}` +
           `${errors ? `, ${errors} failed` : ''}.`;
         toast({
-          title: 'CSV Upload Complete',
+          title: 'Upload done',
           description: message,
           status: duplicates || errors ? 'warning' : 'success',
-          duration: 5000,
+          duration: 6000,
           isClosable: true,
         });
-        setFile(null);
+      },
+      error: (err) => {
+        toast({
+          title: 'CSV error',
+          description: String(err),
+          status: 'error',
+          duration: 6000,
+          isClosable: true,
+        });
       },
     });
   };
@@ -104,15 +140,15 @@ export default function LeadCsvUpload({ onNewLead }) {
       <Stack spacing={4} align="flex-start">
         <HStack spacing={3} color={useColorModeValue('brand.600', 'brand.200')}>
           <Icon as={FiUploadCloud} boxSize={6} color={useColorModeValue('accent.500', 'accent.300')} />
-          <Text fontWeight="semibold">Bulk upload homeowners</Text>
+          <Text fontWeight="semibold">Upload leads</Text>
         </HStack>
         <Text fontSize="sm" color={useColorModeValue('brand.500', 'brand.300')}>
-          Import a spreadsheet of homeowners to populate the pipeline instantly. Use the provided template to ensure headers match your CRM.
+          Upload a CSV to add leads.
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }} spacing={4} w="full">
           <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} bg={useColorModeValue('white', 'brand.900')} />
           <Button type="submit" colorScheme="accent" borderRadius="full">
-            Upload CSV
+            Upload
           </Button>
         </Stack>
       </Stack>

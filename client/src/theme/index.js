@@ -3,40 +3,43 @@ import { extendTheme } from '@chakra-ui/react'
 const theme = extendTheme({
   colors: {
     brand: {
-      50: '#F5F8FF',
-      100: '#E6EEFF',
-      200: '#CBD9FF',
-      300: '#A5BFFE',
-      400: '#7AA2FA',
-      500: '#567EEB',
-      600: '#3D63CD',
-      700: '#2D4AA7',
-      800: '#243A82',
-      900: '#1D2E66',
+      // Neutral slate base (professional, readable)
+      50: '#F8FAFC',
+      100: '#F1F5F9',
+      200: '#E2E8F0',
+      300: '#CBD5E1',
+      400: '#94A3B8',
+      500: '#64748B',
+      600: '#475569',
+      700: '#334155',
+      800: '#1E293B',
+      900: '#0F172A',
     },
     accent: {
-      50: '#E6FFFA',
-      100: '#B2F5EA',
-      200: '#81E6D9',
-      300: '#4FD1C5',
-      400: '#38B2AC',
-      500: '#2C7A7B',
-      600: '#285E61',
-      700: '#234E52',
-      800: '#1E3F43',
-      900: '#1A3538',
+      // Blue accent (modern, trustworthy)
+      50: '#EFF6FF',
+      100: '#DBEAFE',
+      200: '#BFDBFE',
+      300: '#93C5FD',
+      400: '#60A5FA',
+      500: '#3B82F6',
+      600: '#2563EB',
+      700: '#1D4ED8',
+      800: '#1E40AF',
+      900: '#1E3A8A',
     },
     highlight: {
-      50: '#FFF8EB',
-      100: '#FFE2B8',
-      200: '#FFC685',
-      300: '#FFA455',
-      400: '#FF8A2B',
-      500: '#F97012',
-      600: '#D65A0C',
-      700: '#B14609',
-      800: '#823205',
-      900: '#4F1D02',
+      // Teal highlight (accessible alternative to yellow)
+      50: '#F0FDFA',
+      100: '#CCFBF1',
+      200: '#99F6E4',
+      300: '#5EEAD4',
+      400: '#2DD4BF',
+      500: '#14B8A6',
+      600: '#0D9488',
+      700: '#0F766E',
+      800: '#115E59',
+      900: '#134E4A',
     },
   },
   fonts: {
@@ -47,7 +50,7 @@ const theme = extendTheme({
     global: (props) => ({
       body: {
         bg: props.colorMode === 'dark' ? 'brand.900' : 'brand.50',
-        color: props.colorMode === 'dark' ? 'highlight.50' : 'brand.900',
+        color: props.colorMode === 'dark' ? 'brand.50' : 'brand.900',
         fontFeatureSettings: "'tnum'",
       },
     }),
@@ -55,35 +58,38 @@ const theme = extendTheme({
   components: {
     Button: {
       baseStyle: {
-        borderRadius: 'full',
+        borderRadius: 'md',
         fontWeight: 'semibold',
-        letterSpacing: 'wide',
+        letterSpacing: 'normal',
       },
       variants: {
         solid: {
-          bg: 'accent.500',
+          bg: 'accent.600',
           color: 'white',
           _hover: {
-            bg: 'accent.400',
+            bg: 'accent.700',
           },
           _active: {
-            bg: 'accent.600',
+            bg: 'accent.800',
           },
         },
         outline: {
-          borderColor: 'highlight.400',
-          color: 'highlight.400',
+          borderColor: 'brand.300',
+          color: 'brand.700',
           _hover: {
-            bg: 'highlight.50',
-            color: 'brand.900',
+            bg: 'brand.100',
+            borderColor: 'brand.400',
           },
         },
         ghost: {
-          color: 'brand.500',
+          color: 'brand.700',
           _hover: {
             bg: 'brand.100',
           },
         },
+      },
+      defaultProps: {
+        colorScheme: 'accent',
       },
     },
     Badge: {
@@ -94,7 +100,7 @@ const theme = extendTheme({
     },
     Input: {
       defaultProps: {
-        focusBorderColor: 'accent.400',
+        focusBorderColor: 'accent.500',
         variant: 'filled',
       },
       baseStyle: {
@@ -109,13 +115,22 @@ const theme = extendTheme({
             _dark: {
               bg: 'brand.800',
             },
+            border: '1px solid',
+            borderColor: 'brand.200',
+            _hover: {
+              borderColor: 'brand.300',
+            },
+            _focusVisible: {
+              borderColor: 'accent.500',
+              boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+            },
           },
         },
       },
     },
     Textarea: {
       defaultProps: {
-        focusBorderColor: 'accent.400',
+        focusBorderColor: 'accent.500',
         variant: 'filled',
       },
       baseStyle: {
@@ -127,12 +142,17 @@ const theme = extendTheme({
           _dark: {
             bg: 'brand.800',
           },
+          border: '1px solid',
+          borderColor: 'brand.200',
+          _hover: {
+            borderColor: 'brand.300',
+          },
         },
       },
     },
     NumberInput: {
       defaultProps: {
-        focusBorderColor: 'accent.400',
+        focusBorderColor: 'accent.500',
       },
     },
   },

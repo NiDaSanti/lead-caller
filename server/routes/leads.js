@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getLeads,
   addLead,
+  addLeadsBulk,
   updateLead,
   getLeadById, // ← You need this
   getLeadSummary,
@@ -13,6 +14,8 @@ const router = express.Router();
 
 router.get('/', requireAuth, getLeads);
 router.post('/', requireAuth, addLead);
+// Bulk add
+router.post('/bulk', requireAuth, addLeadsBulk);
 
 router.get('/:id/summary', requireAuth, getLeadSummary);
 

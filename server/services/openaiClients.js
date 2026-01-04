@@ -1,10 +1,12 @@
 // server/services/openaiClients.js
 
 import OpenAI from 'openai';
-import dotenv from 'dotenv';
-dotenv.config();
+// Environment variables are loaded once in `server/server.js`.
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// In development, we allow the server to start without an OpenAI key.
+// The endpoints that depend on OpenAI will error if invoked.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 const MODEL_NAME = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
 const TEMP_VAL = parseFloat(process.env.OPENAI_TEMPERATURE);
@@ -26,6 +28,10 @@ const checkQuota = () => {
 
 export const askAI = async (messages) => {
   try {
+    if (!openai) {
+      throw new Error('OpenAI is not configured (missing OPENAI_API_KEY)');
+    }
+
     const cacheKey = JSON.stringify(messages);
     if (process.env.NODE_ENV === 'development' && askCache.has(cacheKey)) {
       return askCache.get(cacheKey);
@@ -60,6 +66,10 @@ export const askAI = async (messages) => {
 
 export const summarizeLead = async (lead) => {
   try {
+    if (!openai) {
+      return 'Summary unavailable';
+    }
+
     const historyText = (lead.callHistory || [])
       .map(entry => {
         const ai = typeof entry.ai === 'object' ? entry.ai.aiReply : entry.ai;
