@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { resolveLeadsFilePath } from '../utils/dataPaths.js';
+import { resolveLeadsFilePath, resolveLeadsFilePathForAccount } from '../utils/dataPaths.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -182,14 +182,39 @@ export class LeadStore {
   }
 }
 
-// Singleton store used by the API.
+// Singleton store used by the API (legacy/global datastore).
 export const leadStore = new LeadStore({
   flushDelayMs: parseInt(process.env.LEADS_FLUSH_DELAY_MS || '400', 10),
 });
 
+// Cache per-account stores to avoid reloading/parsing on every request.
+const accountStores = new Map();
+
+export function getLeadStoreForAccount(accountKey) {
+  // If account scoping isn't configured, return default singleton.
+  if (!process.env.DATA_DIR && !process.env.LEADS_DIR) return leadStore;
+
+  const key = String(accountKey || 'default');
+  const existing = accountStores.get(key);
+  if (existing) return existing;
+
+  const store = new LeadStore({
+    filePath: resolveLeadsFilePathForAccount(key),
+    flushDelayMs: parseInt(process.env.LEADS_FLUSH_DELAY_MS || '400', 10),
+  });
+  accountStores.set(key, store);
+  return store;
+}
+
 export async function initLeadStore() {
   await leadStore.init();
   return leadStore;
+}
+
+export async function initLeadStoreForAccount(accountKey) {
+  const store = getLeadStoreForAccount(accountKey);
+  await store.init();
+  return store;
 }
 
 export { normalizePhone };

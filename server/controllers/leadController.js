@@ -3,15 +3,17 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { logAction } from '../utils/logger.js';
 import { summarizeLead } from '../services/openaiClients.js';
-import { leadStore, normalizePhone } from '../services/leadStore.js';
+import { leadStore, getLeadStoreForAccount, initLeadStoreForAccount, normalizePhone } from '../services/leadStore.js';
+import { getAccountKey } from '../utils/requestContext.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // server/controllers/leadController.js
 export const getLeads = (req, res) => {
-  // LeadStore is warmed at startup. This is an in-memory read.
-  res.json(leadStore.getAll());
+  const accountKey = getAccountKey(req);
+  const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+  res.json(store.getAll());
 };
 
 
@@ -32,8 +34,15 @@ export const addLead = (req, res) => {
   }
 
   try {
+    const accountKey = getAccountKey(req);
+    const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+    if (accountKey) {
+      // Warm the per-account store on first use.
+      initLeadStoreForAccount(accountKey).catch(() => {});
+    }
+
     const normalizedPhone = normalizePhone(phone);
-    const exists = leadStore.hasPhone(normalizedPhone);
+    const exists = store.hasPhone(normalizedPhone);
     if (exists) {
       return res.status(409).json({ error: 'Phone already exists' });
     }
@@ -51,7 +60,7 @@ export const addLead = (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    leadStore.add(newLead);
+    store.add(newLead);
     res.status(201).json({ success: true, lead: newLead });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save new lead' });
@@ -61,6 +70,12 @@ export const addLead = (req, res) => {
 // POST /api/leads/bulk
 export const addLeadsBulk = (req, res) => {
   try {
+    const accountKey = getAccountKey(req);
+    const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+    if (accountKey) {
+      initLeadStoreForAccount(accountKey).catch(() => {});
+    }
+
     const items = Array.isArray(req.body.leads) ? req.body.leads : req.body;
     if (!Array.isArray(items)) return res.status(400).json({ error: 'Request must be an array of leads' });
 
@@ -84,7 +99,7 @@ export const addLeadsBulk = (req, res) => {
         }
 
         const normalizedPhone = normalizePhoneLocal(phone);
-        const exists = leadStore.hasPhone(normalizedPhone);
+        const exists = store.hasPhone(normalizedPhone);
         if (exists) {
           duplicates += 1;
           continue;
@@ -103,7 +118,7 @@ export const addLeadsBulk = (req, res) => {
           createdAt: new Date().toISOString(),
         };
 
-        leadStore.add(newLead);
+        store.add(newLead);
         added.push(newLead);
         inserted += 1;
       } catch (err) {
@@ -122,10 +137,16 @@ export const addLeadsBulk = (req, res) => {
 // PUT /api/leads/:id
 export const updateLead = (req, res) => {
   try {
+    const accountKey = getAccountKey(req);
+    const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+    if (accountKey) {
+      initLeadStoreForAccount(accountKey).catch(() => {});
+    }
+
     const id = Number(req.params.id);
     const { id: _unusedId, note, tags, followUpDate, answers, ...rest } = req.body;
 
-    const existing = leadStore.getById(id);
+    const existing = store.getById(id);
     if (!existing) return res.status(404).json({ error: 'Lead not found' });
 
     const filteredAnswers = (answers || []).filter(resp =>
@@ -159,7 +180,7 @@ export const updateLead = (req, res) => {
       totalReplies
     };
 
-    leadStore.updateById(id, updatedLead);
+  store.updateById(id, updatedLead);
 
     res.status(200).json(updatedLead);
   } catch (err) {
@@ -171,10 +192,16 @@ export const updateLead = (req, res) => {
 
 export const softDeleteLead = (req, res) => {
   try {
+    const accountKey = getAccountKey(req);
+    const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+    if (accountKey) {
+      initLeadStoreForAccount(accountKey).catch(() => {});
+    }
+
     const leadId = Number(req.params.id);
     const deletedPath = path.join(__dirname, '../data/deleted.json');
 
-    const removedLead = leadStore.removeById(leadId);
+    const removedLead = store.removeById(leadId);
     if (!removedLead) return res.status(404).json({ error: 'Lead not found' });
 
     // Archive the lead
@@ -196,7 +223,9 @@ export const softDeleteLead = (req, res) => {
 
 export const getLeadById = (req, res) => {
   const { id } = req.params;
-  const lead = leadStore.getById(id);
+  const accountKey = getAccountKey(req);
+  const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+  const lead = store.getById(id);
   if (!lead) return res.status(404).json({ error: 'Lead not found' });
   res.json(lead);
 };
@@ -205,7 +234,9 @@ export const getLeadById = (req, res) => {
 export const getLeadSummary = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const lead = leadStore.getById(id);
+    const accountKey = getAccountKey(req);
+    const store = accountKey ? getLeadStoreForAccount(accountKey) : leadStore;
+    const lead = store.getById(id);
     if (!lead) {
       return res.status(404).json({ error: 'Lead not found' });
     }

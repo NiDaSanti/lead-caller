@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import { generateToken, registerToken, unregisterToken } from '../middleware/auth.js';
-import { activeTokens } from '../middleware/tokenStore.js';
+import { activeTokens, registerTokenUser, unregisterTokenUser } from '../middleware/tokenStore.js';
 import { getCookieOptions } from '../utils/cookies.js';
 import { generateCsrfToken, getCsrfCookieOptions } from '../middleware/csrf.js';
 
@@ -33,6 +33,8 @@ router.post('/login', (req, res) => {
 
   const token = generateToken();
   registerToken(token);
+  // Store who owns this token so we can scope JSON datastores per account.
+  registerTokenUser(token, username);
 
   const cookieOptions = getCookieOptions(req);
   res.cookie('auth', token, cookieOptions);
@@ -56,11 +58,17 @@ router.get('/csrf', (req, res) => {
 
 router.post('/logout', (req, res) => {
   const cookieToken = req.cookies?.auth;
-  if (cookieToken) unregisterToken(cookieToken);
+  if (cookieToken) {
+    unregisterToken(cookieToken);
+    unregisterTokenUser(cookieToken);
+  }
 
   const authHeader = req.headers.authorization || '';
   const headerToken = authHeader.split(' ')[1];
-  if (headerToken) unregisterToken(headerToken);
+  if (headerToken) {
+    unregisterToken(headerToken);
+    unregisterTokenUser(headerToken);
+  }
 
   // Clear cookies using the same options that were used to set them.
   // In particular, production cookies are SameSite=None; Secure, and browsers

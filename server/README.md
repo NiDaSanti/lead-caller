@@ -113,6 +113,27 @@ Notes:
 - Backups (when used) will be written to a `backups/` folder next to `LEADS_FILE`.
 - If you later need multiple instances, migrate to Postgres (planned) instead of file-based JSON.
 
+### 👤 Per-user JSON datastores (tie production data to the account)
+
+If you want each account holder to have their **own** isolated dataset (separate leads per login),
+you can enable per-user JSON files.
+
+Set one of the following:
+
+- `DATA_DIR=/var/data` (recommended) — leads will be stored in `/var/data/leads/<username>.json`
+- or `LEADS_DIR=/var/data/leads` (explicit leads directory)
+
+How it works:
+
+- The server stores a mapping of `auth token → username` at login.
+- Lead routes use that username to pick the correct JSON file.
+
+Important:
+
+- Devices will share data **only when they log into the same account**.
+- This still requires a persistent disk in production.
+- This in-memory auth store is not shared across multiple server instances.
+
 ### Optional (can be added later)
 
 - Twilio: `TWILIO_SID`, `TWILIO_AUTH`, `TWILIO_PHONE_PROD`

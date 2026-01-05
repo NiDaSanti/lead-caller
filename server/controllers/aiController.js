@@ -3,12 +3,18 @@
 import { getNextAIResponse } from '../services/openaiClients.js';
 import fs from 'fs';
 import path from 'path';
-import { resolveLeadsFilePath } from '../utils/dataPaths.js';
+import { resolveLeadsFilePath, resolveLeadsFilePathForAccount } from '../utils/dataPaths.js';
+import { getAccountKey } from '../utils/requestContext.js';
 
-const leadsPath = resolveLeadsFilePath();
+const defaultLeadsPath = resolveLeadsFilePath();
 
 export const handleVoiceScript = async (req, res) => {
   const { leadId } = req.params;
+
+  const accountKey = getAccountKey(req);
+  const leadsPath = (process.env.DATA_DIR || process.env.LEADS_DIR)
+    ? resolveLeadsFilePathForAccount(accountKey)
+    : defaultLeadsPath;
 
   const leads = JSON.parse(fs.readFileSync(leadsPath, 'utf-8'));
   const lead = leads.find(l => l.id === Number(leadId));

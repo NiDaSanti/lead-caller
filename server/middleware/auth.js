@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import { activeTokens } from './tokenStore.js';
+import { activeTokens, registerTokenUser, unregisterTokenUser } from './tokenStore.js';
 
 export const generateToken = () => crypto.randomBytes(48).toString('hex');
-export const registerToken = (token) => activeTokens.add(token);
-export const unregisterToken = (token) => activeTokens.delete(token);
+export const registerToken = (token) => registerTokenUser(token);
+export const unregisterToken = (token) => unregisterTokenUser(token);
 
 // Backwards compatible auth:
 // - preferred: HttpOnly cookie named `auth`
