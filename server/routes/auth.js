@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 import { generateToken, registerToken, unregisterToken } from '../middleware/auth.js';
 import { getCookieOptions } from '../utils/cookies.js';
+import { generateCsrfToken, getCsrfCookieOptions } from '../middleware/csrf.js';
 
 const router = express.Router();
 
@@ -35,9 +36,21 @@ router.post('/login', (req, res) => {
   const cookieOptions = getCookieOptions(req);
   res.cookie('auth', token, cookieOptions);
 
+  // Issue CSRF token cookie for double-submit pattern.
+  // Client should read this cookie and send it back via X-CSRF-Token header.
+  res.cookie('csrf', generateCsrfToken(), getCsrfCookieOptions(req));
+
   // Backwards compatible response: token is still returned for older clients/tests,
   // but the recommended flow is HttpOnly cookie auth.
   res.json({ token, success: true });
+});
+
+// Fetch/refresh CSRF token.
+// This is safe to call before any state-changing request.
+router.get('/csrf', (req, res) => {
+  const token = generateCsrfToken();
+  res.cookie('csrf', token, getCsrfCookieOptions(req));
+  res.json({ csrfToken: token });
 });
 
 router.post('/logout', (req, res) => {
@@ -49,6 +62,7 @@ router.post('/logout', (req, res) => {
   if (headerToken) unregisterToken(headerToken);
 
   res.clearCookie('auth', { path: '/' });
+  res.clearCookie('csrf', { path: '/' });
   res.json({ success: true });
 });
 

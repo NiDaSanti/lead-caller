@@ -1,9 +1,11 @@
 import {
   Card, CardBody, Heading, Text, Stack, Box, Badge, Wrap, Tag,
+  AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogContent, AlertDialogOverlay,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter, useDisclosure, useColorModeValue,
-  VStack, Button, IconButton, Avatar, Divider, Input, useToast,
-  AvatarGroup, Flex, Tooltip
+  VStack, Button, IconButton, Avatar, Divider, Input, useToast, HStack,
+  AvatarGroup, Flex, Tooltip, SimpleGrid
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { PhoneIcon, CloseIcon } from '@chakra-ui/icons';
@@ -34,6 +36,7 @@ const MotionBox = motion(Box);
 export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, socket }) {
   const reportRef = useRef();
   const pollingRef = useRef(null);
+  const cancelDeleteRef = useRef(null);
 
   const [isCalling, setIsCalling] = useState(false);
   const [callStatus, setCallStatus] = useState("Idle");
@@ -46,6 +49,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
 
   const { isOpen: isReportOpen, onOpen: openReport, onClose: closeReport } = useDisclosure();
   const { isOpen: isCallOpen, onOpen: openCall, onClose: closeCall } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: openDelete, onClose: closeDelete } = useDisclosure();
 
   const cardBg = useColorModeValue("white", "brand.800");
   const headerGradient = useColorModeValue(
@@ -59,6 +63,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const metaLabelColor = useColorModeValue("brand.500", "brand.200");
   const metaValueColor = useColorModeValue("brand.900", "highlight.100");
   const transcriptBg = useColorModeValue("brand.50", "brand.800");
+  const sectionBg = useColorModeValue('surfaceMuted', 'surfaceMuted');
   const accentText = useColorModeValue("accent.500", "highlight.200");
   const statusVariant = useColorModeValue("subtle", "solid");
   const cardShadow = useColorModeValue('lg', 'xl');
@@ -69,6 +74,8 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const outlineBorder = useColorModeValue('brand.200', 'brand.600');
   const outlineColor = useColorModeValue('brand.700', 'highlight.100');
   const outlineHoverBg = useColorModeValue('brand.50', 'whiteAlpha.300');
+  const reportCardBg = useColorModeValue('surface', 'surface');
+  const reportShadow = useColorModeValue('surface', 'surface');
   const deleteColor = useColorModeValue('accent.600', 'accent.200');
   const deleteHoverBg = useColorModeValue('accent.50', 'whiteAlpha.300');
   const badgeColor = ({
@@ -86,6 +93,8 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const lastContactDisplay = lead.lastContacted
     ? new Date(lead.lastContacted).toLocaleDateString()
     : 'No contact yet';
+
+  const reportId = `LR-${String(lead.id ?? 'NA')}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
 
   useEffect(() => {
     if (scrollRef?.current) {
@@ -204,6 +213,21 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
       console.error('Failed to fetch summary:', err);
     } finally {
       setSummaryLoading(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await onDeleteLead(lead.id);
+      toast({
+        title: 'Lead deleted',
+        description: 'This lead was permanently removed.',
+        status: 'info',
+        duration: 3500,
+        isClosable: true,
+      });
+    } finally {
+      closeDelete();
     }
   };
 
@@ -367,7 +391,7 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
                 variant="ghost"
                 color={deleteColor}
                 _hover={{ bg: deleteHoverBg }}
-                onClick={(e) => { e.stopPropagation(); if (window.confirm("Delete this lead?")) { onDeleteLead(lead.id); toast({ title: "Lead removed", status: "info", duration: 3000, isClosable: true }); } }}
+                onClick={(e) => { e.stopPropagation(); openDelete(); }}
                 leftIcon={<FiTrash2 />}
                 w="full"
               >
@@ -382,9 +406,9 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
         </Box>
       </MotionBox>
 
-      <Modal isOpen={isCallOpen} onClose={closeCall} size="md" isCentered>
+      <Modal isOpen={isCallOpen} onClose={closeCall} size={{ base: "full", sm: "md" }} isCentered>
         <ModalOverlay />
-        <ModalContent borderRadius="2xl" bg={modalBg} p={6} position="relative" border="1px solid" borderColor={borderColor}>
+        <ModalContent borderRadius={{ base: 0, sm: "2xl" }} bg={modalBg} p={{ base: 4, sm: 6 }} position="relative" border="1px solid" borderColor={borderColor}>
           <IconButton icon={<CloseIcon />} position="absolute" top={2} right={2} size="sm"
             variant="ghost" onClick={closeCall} aria-label="Close call" color={metaLabelColor} />
           <ModalHeader textAlign="center" fontSize="lg" fontWeight="bold" color={textColor}>
@@ -407,100 +431,202 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={isReportOpen} onClose={closeReport} size="6xl" isCentered>
+      <Modal isOpen={isReportOpen} onClose={closeReport} size={{ base: "full", md: "6xl" }} isCentered>
         <ModalOverlay />
-        <ModalContent p={4} bg={modalBg} ref={reportRef} border="1px solid" borderColor={borderColor}>
-          <Box textAlign="center" borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
-            <Text fontSize="2xl" fontWeight="bold" color={textColor}>Solar Lead Report</Text>
-            <Text fontSize="sm" color={metaLabelColor}>Generated by Solar Lead AI</Text>
+        <ModalContent p={{ base: 3, md: 4 }} bg={modalBg} ref={reportRef} border="1px solid" borderColor={borderColor} borderRadius={{ base: 0, md: "2xl" }}>
+          <Box
+            borderBottom="1px solid"
+            borderColor={borderColor}
+            pb={3}
+            mb={4}
+          >
+            <Flex align="flex-start" justify="space-between" gap={4} flexWrap="wrap">
+              <Box>
+                <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight="semibold" color={textColor} letterSpacing="tight">
+                  Solar Lead Report
+                </Text>
+                <Text fontSize="xs" color={metaLabelColor}>
+                  Generated by Solar Lead AI • Report ID: <Text as="span" fontWeight="semibold" color={accentText}>{reportId}</Text>
+                </Text>
+                <HStack mt={2} spacing={2} flexWrap="wrap">
+                  <Badge colorScheme={badgeColor} variant={statusVariant} fontSize="xs">
+                    {lead.status || 'New'}
+                  </Badge>
+                  {lead.followUpDate ? (
+                    <Badge colorScheme="highlight" variant="subtle" fontSize="xs">
+                      Follow-up: {new Date(lead.followUpDate).toLocaleDateString()}
+                    </Badge>
+                  ) : null}
+                  <Badge colorScheme="brand" variant="subtle" fontSize="xs">
+                    Last contact: {lastContactDisplay}
+                  </Badge>
+                </HStack>
+              </Box>
+
+              <HStack spacing={2}>
+                <Button size="sm" variant="outline" onClick={downloadPDF} leftIcon={<FiFileText />}>
+                  Download PDF
+                </Button>
+                <IconButton
+                  icon={<CloseIcon />}
+                  aria-label="Close report"
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => { e.stopPropagation(); closeReport(); }}
+                />
+              </HStack>
+            </Flex>
           </Box>
 
-          <ModalHeader>Lead Report</ModalHeader>
+          <ModalHeader pt={0} pb={2} fontSize="sm" color={metaLabelColor}>
+            Lead details & activity
+          </ModalHeader>
           <ModalBody>
-            <VStack align="start" spacing={4}>
-              <Box>
-                <Heading size="sm" mb={2}>Lead Details</Heading>
-                <Text><strong>Name:</strong> {lead.firstName} {lead.lastName}</Text>
-                <Text><strong>Phone:</strong> {lead.phone}</Text>
-                {lead.address?.street && (
-                  <Text><strong>Address:</strong> {lead.address.street}, {lead.address.city}, {lead.address.state} {lead.address.zip}</Text>
-                )}
-                <Text><strong>Status:</strong> {lead.status}</Text>
-                {lead.lastContacted && (
-                  <Text><strong>Last Contacted:</strong> {new Date(lead.lastContacted).toLocaleString()}</Text>
-                )}
-                {lead.tags?.length > 0 && (
-                  <Text><strong>Tags:</strong> {lead.tags.join(', ')}</Text>
-                )}
-              </Box>
+            <VStack align="stretch" spacing={4}>
+              <Box
+                bg={reportCardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="2xl"
+                p={{ base: 4, md: 5 }}
+                boxShadow={reportShadow}
+              >
+                <HStack justify="space-between" mb={3}>
+                  <Heading size="sm" color={textColor}>Lead details</Heading>
+                  {lead.tags?.length ? (
+                    <HStack spacing={2} flexWrap="wrap" justify="flex-end">
+                      {lead.tags.slice(0, 4).map((t) => (
+                        <Tag key={t} size="sm" bg={avatarTagBg} color={outlineColor} borderRadius="full">
+                          {t}
+                        </Tag>
+                      ))}
+                    </HStack>
+                  ) : null}
+                </HStack>
 
-              <Divider borderColor={borderColor} />
-
-              <Box>
-                <Heading size="sm" mb={2} color={textColor}>AI Call History</Heading>
-                {lead.callHistory?.length ? (
-                  lead.callHistory.map((entry, idx) => {
-                    const aiReply = typeof entry.ai === 'object' ? entry.ai.aiReply : entry.ai;
-                    const timestamp = typeof entry.ai === 'object' ? entry.ai.timestamp : entry.timestamp;
-                    return (
-                      <Box key={idx} mb={4}>
-                        <Text fontSize="sm"><strong>You:</strong> {entry.user || "N/A"}</Text>
-                        <Text fontSize="sm"><strong>AI:</strong> {aiReply || "No reply"}</Text>
-                        {timestamp && (
-                          <Text fontSize="xs" color="brand.200">{new Date(timestamp).toLocaleString()}</Text>
-                        )}
-                        <Divider mt={2} borderColor={borderColor} />
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Text>No AI interaction history.</Text>
-                )}
-              </Box>
-
-              <Divider borderColor={borderColor} />
-
-              {aiSummary ? (
-                <Box>
-                  <Heading size="sm" mb={2} color={textColor}>AI Summary</Heading>
-                  <Text fontSize="sm" whiteSpace="pre-wrap">{aiSummary}</Text>
-                </Box>
-              ) : (
-                <Button size="sm" onClick={generateSummary} isLoading={isSummaryLoading}>
-                  Generate AI Summary
-                </Button>
-              )}
-
-              {lead.notes && (
-                <>
-                  <Divider borderColor={borderColor} />
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
                   <Box>
-                    <Heading size="sm" mb={2} color={textColor}>Rep Notes</Heading>
-                    <Text fontSize="sm" whiteSpace="pre-wrap">{lead.notes}</Text>
+                    <Text fontSize="xs" color={metaLabelColor} fontWeight="semibold">Name</Text>
+                    <Text fontSize="sm" color={textColor}>{lead.firstName} {lead.lastName}</Text>
                   </Box>
-                </>
-              )}
+                  <Box>
+                    <Text fontSize="xs" color={metaLabelColor} fontWeight="semibold">Phone</Text>
+                    <Text fontSize="sm" color={textColor}>{lead.phone}</Text>
+                  </Box>
+                  {lead.address?.street ? (
+                    <Box>
+                      <Text fontSize="xs" color={metaLabelColor} fontWeight="semibold">Address</Text>
+                      <Text fontSize="sm" color={textColor}>
+                        {lead.address.street}, {lead.address.city}, {lead.address.state} {lead.address.zip}
+                      </Text>
+                    </Box>
+                  ) : null}
+                  <Box>
+                    <Text fontSize="xs" color={metaLabelColor} fontWeight="semibold">Status</Text>
+                    <Text fontSize="sm" color={textColor}>{lead.status || 'New'}</Text>
+                  </Box>
+                </SimpleGrid>
+              </Box>
 
-              <Divider borderColor={borderColor} />
-              <Box>
-                <Heading size="sm" mb={2} color={textColor}>Call Summary</Heading>
-                <Text fontSize="sm">Exchanges: {lead.callHistory?.length || 0}</Text>
-                {lead.status === "Qualified" && (
-                  <Text fontSize="sm" color={accentText}>This lead is marked as Qualified.</Text>
+              <Box
+                bg={reportCardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="2xl"
+                p={{ base: 4, md: 5 }}
+                boxShadow={reportShadow}
+              >
+                <HStack justify="space-between" mb={3}>
+                  <Heading size="sm" color={textColor}>AI call history</Heading>
+                  <Text fontSize="xs" color={metaLabelColor}>{lead.callHistory?.length || 0} exchanges</Text>
+                </HStack>
+
+                {lead.callHistory?.length ? (
+                  <VStack align="stretch" spacing={3}>
+                    {lead.callHistory.map((entry, idx) => {
+                      const aiReply = typeof entry.ai === 'object' ? entry.ai.aiReply : entry.ai;
+                      const timestamp = typeof entry.ai === 'object' ? entry.ai.timestamp : entry.timestamp;
+                      return (
+                        <Box key={idx} border="1px solid" borderColor={outlineBorder} borderRadius="xl" p={3} bg={contactPanelBg}>
+                          <HStack justify="space-between" mb={2}>
+                            <Text fontSize="xs" color={metaLabelColor} fontWeight="semibold">
+                              Exchange {idx + 1}
+                            </Text>
+                            {timestamp ? (
+                              <Text fontSize="xs" color={metaLabelColor}>{new Date(timestamp).toLocaleString()}</Text>
+                            ) : null}
+                          </HStack>
+                          <Text fontSize="sm" color={textColor}><Text as="span" fontWeight="semibold">You:</Text> {entry.user || 'N/A'}</Text>
+                          <Text fontSize="sm" color={textColor} mt={1}><Text as="span" fontWeight="semibold">AI:</Text> {aiReply || 'No reply'}</Text>
+                        </Box>
+                      );
+                    })}
+                  </VStack>
+                ) : (
+                  <Text fontSize="sm" color={metaLabelColor}>No AI interaction history.</Text>
+                )}
+
+                <Divider my={4} borderColor={borderColor} />
+
+                {aiSummary ? (
+                  <Box>
+                    <Heading size="sm" mb={2} color={textColor}>AI summary</Heading>
+                    <Text fontSize="sm" whiteSpace="pre-wrap" color={textColor}>{aiSummary}</Text>
+                  </Box>
+                ) : (
+                  <Button size="sm" onClick={generateSummary} isLoading={isSummaryLoading}>
+                    Generate AI summary
+                  </Button>
                 )}
               </Box>
-              <Divider borderColor={borderColor} />
-              <Box w="100%">
-                <Heading size="sm" mb={2} color={textColor}>Schedule Follow-Up</Heading>
-                <Input
-                  type="datetime-local"
-                  size="sm"
-                  value={followUpDateInput}
-                  onChange={(e) => setFollowUpDateInput(e.target.value)}
-                />
-                <Button size="sm" mt={2} onClick={saveFollowUpDate}>
-                  Save
-                </Button>
+
+              {lead.notes ? (
+                <Box
+                  bg={reportCardBg}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  borderRadius="2xl"
+                  p={{ base: 4, md: 5 }}
+                  boxShadow={reportShadow}
+                >
+                  <Heading size="sm" mb={2} color={textColor}>Rep notes</Heading>
+                  <Text fontSize="sm" whiteSpace="pre-wrap" color={textColor}>{lead.notes}</Text>
+                </Box>
+              ) : null}
+
+              <Box
+                bg={reportCardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="2xl"
+                p={{ base: 4, md: 5 }}
+                boxShadow={reportShadow}
+              >
+                <HStack justify="space-between" mb={3}>
+                  <Heading size="sm" color={textColor}>Schedule follow-up</Heading>
+                  <Text fontSize="xs" color={metaLabelColor}>Save a reminder for later</Text>
+                </HStack>
+                <HStack align="flex-end" spacing={3} flexWrap="wrap">
+                  <Box flex="1" minW={{ base: '100%', md: '280px' }}>
+                    <Text fontSize="xs" color={metaLabelColor} mb={1} fontWeight="semibold">Follow-up date</Text>
+                    <Input
+                      type="datetime-local"
+                      size="sm"
+                      value={followUpDateInput}
+                      onChange={(e) => setFollowUpDateInput(e.target.value)}
+                      bg={sectionBg}
+                    />
+                  </Box>
+                  <Button size="sm" onClick={saveFollowUpDate} colorScheme="accent">
+                    Save
+                  </Button>
+                </HStack>
+                <Divider my={4} borderColor={borderColor} />
+                <Heading size="sm" mb={1} color={textColor}>Call summary</Heading>
+                <Text fontSize="sm" color={metaLabelColor}>Exchanges: {lead.callHistory?.length || 0}</Text>
+                {lead.status === "Qualified" ? (
+                  <Text fontSize="sm" color={accentText} mt={1}>This lead is marked as Qualified.</Text>
+                ) : null}
               </Box>
             </VStack>
           </ModalBody>
@@ -508,15 +634,57 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
           <Box borderTop="1px solid" borderColor={borderColor} mt={6} pt={3} textAlign="center" fontSize="xs" color={metaLabelColor}>
             <Text>© {new Date().getFullYear()} Nick Santiago • Solar Consultant</Text>
             <Text>Built with Solar Lead AI • Not for public distribution</Text>
+            <Text mt={1}>Report ID: {reportId}</Text>
           </Box>
 
           <ModalFooter>
-            <Button bg="accent.600" color="white" _hover={{ bg: 'accent.500' }} onClick={downloadPDF}>
-              Download PDF
-            </Button>
+            <HStack w="full" justify="flex-end">
+              <Button bg="accent.600" color="white" _hover={{ bg: 'accent.500' }} onClick={downloadPDF}>
+                Download PDF
+              </Button>
+            </HStack>
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <AlertDialog
+        isOpen={isDeleteOpen}
+        leastDestructiveRef={cancelDeleteRef}
+        onClose={closeDelete}
+        isCentered
+      >
+        <AlertDialogOverlay />
+        <AlertDialogContent borderRadius="2xl" bg={modalBg} border="1px solid" borderColor={borderColor}>
+          <AlertDialogHeader fontSize="lg" fontWeight="semibold" color={textColor}>
+            Delete lead permanently?
+          </AlertDialogHeader>
+
+          <AlertDialogBody color={metaValueColor}>
+            This action is <Text as="span" fontWeight="bold">permanent</Text>. The lead and its call history will be removed.
+            <Box
+              mt={3}
+              p={3}
+              borderRadius="lg"
+              bg={useColorModeValue('red.50', 'red.900')}
+              border="1px solid"
+              borderColor={useColorModeValue('red.200', 'red.700')}
+            >
+              <Text fontSize="sm" color={useColorModeValue('red.800', 'red.100')}>
+                Tip: If you only want to hide this lead, move it to <Text as="span" fontWeight="semibold">Unqualified</Text> instead.
+              </Text>
+            </Box>
+          </AlertDialogBody>
+
+          <AlertDialogFooter>
+            <Button ref={cancelDeleteRef} onClick={closeDelete} variant="outline" mr={3}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={confirmDelete}>
+              Delete permanently
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

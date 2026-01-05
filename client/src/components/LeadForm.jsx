@@ -116,10 +116,10 @@ export default function LeadForm({ onNewLead }) {
     }
   };
 
-  const containerBg = useColorModeValue('white', 'brand.900');
-  const borderColor = useColorModeValue('brand.200', 'brand.700');
-  const sectionBg = useColorModeValue('brand.50', 'brand.800');
-  const helperColor = useColorModeValue('brand.500', 'brand.300');
+  const containerBg = useColorModeValue('surface', 'surface');
+  const borderColor = useColorModeValue('surfaceBorder', 'surfaceBorder');
+  const sectionBg = useColorModeValue('surfaceMuted', 'surfaceMuted');
+  const helperColor = useColorModeValue('textMuted', 'textMuted');
 
   return (
     <Box
@@ -128,7 +128,7 @@ export default function LeadForm({ onNewLead }) {
       borderColor={borderColor}
       borderRadius="2xl"
       p={{ base: 6, md: 8 }}
-      boxShadow={useColorModeValue('xl', 'md')}
+      boxShadow={useColorModeValue('surface', 'surface')}
     >
       <Stack spacing={8}>
         <Stack spacing={3}>

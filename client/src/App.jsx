@@ -2,11 +2,12 @@ import { getApiBase, apiFetch } from './services/apiClient.js';
 // App.jsx
 import {
   Box, Container, Stack, HStack, VStack, Flex, Text, Button, IconButton,
-  Collapse, useColorMode, useColorModeValue, useToken,
+  Collapse, useColorMode, useColorModeValue, useToken, useDisclosure,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   SimpleGrid, Tooltip as ChakraTooltip, Stat, StatLabel, StatNumber, StatHelpText,
-  Input, InputGroup, InputLeftElement, Heading, Badge, Wrap, WrapItem,
-  Divider
+  Input, InputGroup, InputLeftElement, Heading, Badge,
+  Divider,
+  Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { Icon } from "@chakra-ui/react";
@@ -14,12 +15,7 @@ import {
   FiBarChart2,
   FiFileText,
   FiSettings,
-  FiList,
-  FiCheckCircle,
   FiPhoneCall,
-  FiCalendar,
-  FiXCircle,
-  FiStar,
   FiSearch
 } from "react-icons/fi";
 import { useEffect, useRef, useState } from "react";
@@ -49,8 +45,6 @@ import {
 const COLORS = [
   '#3B82F6', // accent.500
   '#1D4ED8',
-  '#60A5FA',
-  '#0EA5E9',
   '#22C55E',
   '#14B8A6',
   '#EF4444',
@@ -84,8 +78,6 @@ function App({ onLogout }) {
   const navButtonHover = useColorModeValue("brand.100", "whiteAlpha.200");
   const appShellBg = useColorModeValue('gray.50', 'gray.800');
   const avatarBadgeBg = useColorModeValue('accent.100', 'accent.700');
-  const filtersBadgeBg = useColorModeValue('accent.100', 'accent.600');
-  const filtersBadgeColor = useColorModeValue('accent.700', 'white');
   const searchBg = useColorModeValue('white', 'brand.900');
   const dashboardMuted = useColorModeValue('brand.600', 'brand.200');
   const dashboardCardBg = useColorModeValue('white', 'brand.900');
@@ -102,6 +94,7 @@ function App({ onLogout }) {
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem("leadSearch") || "");
   const [modalView, setModalView] = useState(null);
   const [dashboardRange, setDashboardRange] = useState('30');
+  const { isOpen: isNavOpen, onOpen: openNav, onClose: closeNav } = useDisclosure();
 
   const leadsCount = Array.isArray(leads) ? leads.length : 0;
   const statusCounts = (Array.isArray(leads) ? leads : []).reduce(
@@ -192,6 +185,13 @@ function App({ onLogout }) {
   const answered = grouped["Answered"] || 0;
   const qualified = grouped["Qualified"] || 0;
   const scheduled = grouped["Scheduled"] || 0;
+  const newLeads = grouped["New"] || 0;
+  const unqualified = grouped["Unqualified"] || 0;
+
+  const safePct = (num, den) => (den > 0 ? Math.round((num / den) * 100) : 0);
+  const answeredRate = safePct(answered, total);
+  const qualifiedRate = safePct(qualified, answered);
+  const scheduledRate = safePct(scheduled, qualified);
 
   const metrics = [
     { label: 'Total', value: total },
@@ -204,13 +204,14 @@ function App({ onLogout }) {
   // (UI metrics and charts were removed from the homepage to reduce clutter.)
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minH="100vh" bg={appShellBg}>
+    <Box minH="100vh" bg={appShellBg}>
       {/* NAVBAR */}
       <Flex
         justify="space-between"
-        align="center"
-        px={{ base: 6, md: 10 }}
-        py={4}
+        align={{ base: 'flex-start', md: 'center' }}
+        w="100%"
+        px={{ base: 4, md: 8, lg: 10 }}
+        py={{ base: 3, md: 4 }}
         bg={navBg}
         borderBottom="1px solid"
         borderColor={borderColor}
@@ -220,7 +221,7 @@ function App({ onLogout }) {
         top={0}
         zIndex={10}
       >
-        <HStack spacing={4}>
+  <HStack spacing={{ base: 3, md: 4 }}>
           <Box
             w={10}
             h={10}
@@ -237,20 +238,34 @@ function App({ onLogout }) {
             <Text fontSize="xs" color={navTextSecondary}>Solar calling tool</Text>
           </Box>
         </HStack>
-        <HStack spacing={2}>
-          {navItems.map(({ view, label, icon }) => (
-            <Button
-              key={view}
-              size="sm"
-              variant="ghost"
-              color={navTextSecondary}
-              leftIcon={<Icon as={icon} aria-label={label} color={accentText} />}
-              _hover={{ bg: navButtonHover, color: navTextPrimary }}
-              onClick={() => setModalView(view)}
-            >
-              {label}
-            </Button>
-          ))}
+        <HStack spacing={2} flexWrap="wrap" justify={{ base: 'flex-start', md: 'flex-end' }}>
+          {/* Mobile menu */}
+          <Button
+            size="sm"
+            variant="outline"
+            display={{ base: 'inline-flex', md: 'none' }}
+            borderColor={borderColor}
+            onClick={openNav}
+          >
+            Menu
+          </Button>
+
+          {/* Desktop/tablet nav */}
+          <HStack spacing={1} display={{ base: 'none', md: 'flex' }} flexWrap="wrap">
+            {navItems.map(({ view, label, icon }) => (
+              <Button
+                key={view}
+                size="sm"
+                variant="ghost"
+                color={navTextSecondary}
+                leftIcon={<Icon as={icon} aria-label={label} color={accentText} />}
+                _hover={{ bg: navButtonHover, color: navTextPrimary }}
+                onClick={() => setModalView(view)}
+              >
+                {label}
+              </Button>
+            ))}
+          </HStack>
           <ChakraTooltip label={colorMode === "light" ? "Dark mode" : "Light mode"}>
             <IconButton
               size="sm"
@@ -275,74 +290,172 @@ function App({ onLogout }) {
         </HStack>
       </Flex>
 
-      <Container maxW="7xl" py={{ base: 10, md: 16 }}>
-        <Stack spacing={10} w="100%">
-              <Box
-                bg={cardBg}
-                borderRadius="2xl"
-                p={{ base: 6, md: 8 }}
-                border="1px solid"
-                borderColor={borderColor}
-                shadow="lg"
+      {/* COMMAND BAR */}
+      <Box
+        w="100%"
+        borderBottom="1px solid"
+        borderColor={borderColor}
+        bg={useColorModeValue('white', 'black')}
+        position="sticky"
+        // Navbar uses responsive vertical padding; keep the command bar pinned
+        // directly under it without “floating” over subsequent content.
+        top={0}
+        zIndex={9}
+      >
+        <Container maxW="7xl" py={{ base: 2, md: 3 }}>
+          <Stack spacing={3} w="100%">
+            <Flex
+              gap={3}
+              align={{ base: 'stretch', md: 'center' }}
+              justify="space-between"
+              direction={{ base: 'column', md: 'row' }}
+            >
+              <InputGroup size="sm" maxW={{ base: '100%', md: '420px', lg: '520px' }}>
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={FiSearch} color={mutedColor} />
+                </InputLeftElement>
+                <Input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search leads by name, phone, email"
+                  bg={searchBg}
+                  borderColor={borderColor}
+                  _hover={{ borderColor: accentText }}
+                  _focusVisible={{ borderColor: accentText, boxShadow: `0 0 0 1px ${accentText}` }}
+                  _placeholder={{ color: mutedColor }}
+                />
+              </InputGroup>
+
+              <HStack
+                spacing={2}
+                justify={{ base: 'flex-start', md: 'flex-end' }}
+                flexWrap={{ base: 'wrap', md: 'nowrap' }}
+                w={{ base: '100%', md: 'auto' }}
+                align="center"
               >
-                <Stack spacing={4}>
-                  <Badge colorScheme="accent" variant="subtle" alignSelf="flex-start" bg={filtersBadgeBg} color={filtersBadgeColor}>
-                    Filters
-                  </Badge>
-                  <Text fontSize="xl" fontWeight="bold" color={headingColor}>
-                    Find leads
-                  </Text>
-                  <Text fontSize="sm" color={mutedColor}>
-                    Filter and search your list.
-                  </Text>
-                  <Wrap spacing={3}>
-                    <WrapItem w={{ base: "100%", md: "auto" }}>
-                      <InputGroup size="sm" maxW={{ base: "100%", md: "sm" }}>
-                        <InputLeftElement pointerEvents="none">
-                          <Icon as={FiSearch} color={mutedColor} />
-                        </InputLeftElement>
-                        <Input
-                          value={searchQuery}
-                          onChange={(event) => setSearchQuery(event.target.value)}
-                          placeholder="Search leads"
-                          bg={searchBg}
-                          borderColor={borderColor}
-                          _hover={{ borderColor: accentText }}
-                          _focusVisible={{ borderColor: accentText, boxShadow: `0 0 0 1px ${accentText}` }}
-                          _placeholder={{ color: mutedColor }}
-                        />
-                      </InputGroup>
-                    </WrapItem>
-                    {[
-                      { status: "All", label: "All", icon: FiList },
-                      { status: "Qualified", label: "Qualified", icon: FiCheckCircle },
-                      { status: "Answered", label: "Answered", icon: FiPhoneCall },
-                      { status: "Scheduled", label: "Scheduled", icon: FiCalendar },
-                      { status: "Unqualified", label: "Unqualified", icon: FiXCircle },
-                      { status: "New", label: "New", icon: FiStar }
-                    ].map(({ status, label, icon }) => (
-                      <WrapItem key={status}>
-                        <Button
-                          size="sm"
-                          variant={filter === status ? "solid" : "outline"}
-                          colorScheme="accent"
-                          bg={filter === status ? 'accent.500' : 'transparent'}
-                          color={filter === status ? 'white' : navTextSecondary}
-                          borderColor={filter === status ? 'accent.400' : borderColor}
-                          borderWidth={1}
-                          onClick={() => setFilter(status)}
-                          leftIcon={<Icon as={icon} aria-label={label} />}
-                          borderRadius="full"
-                          px={4}
-                          _hover={{ bg: filter === status ? 'accent.400' : 'brand.100', color: navTextPrimary }}
-                        >
-                          {label}
-                        </Button>
-                      </WrapItem>
-                    ))}
-                  </Wrap>
-                </Stack>
+                <Button
+                  size="sm"
+                  colorScheme="accent"
+                  variant="solid"
+                  onClick={() => {
+                    setShowForm(true);
+                    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+                  }}
+                >
+                  Add lead
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderColor={borderColor}
+                  color={navTextPrimary}
+                  onClick={() => {
+                    setShowForm(true);
+                    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+                  }}
+                >
+                  Upload CSV
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setModalView('reports')}
+                  leftIcon={<Icon as={FiFileText} />}
+                >
+                  Reports
+                </Button>
+
+                {(filter !== 'All' || searchQuery?.trim()) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    borderColor={borderColor}
+                    onClick={() => {
+                      setFilter('All');
+                      setSearchQuery('');
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </HStack>
+            </Flex>
+
+            <Flex
+              gap={2}
+              align="center"
+              justify="space-between"
+              direction={{ base: 'column', md: 'row' }}
+            >
+              <Box w="100%" overflowX="auto" pb={1}>
+                <HStack spacing={2} w="max-content" minW="100%">
+                  {["All", "New", "Answered", "Qualified", "Scheduled", "Unqualified"].map((status) => (
+                    <Button
+                      key={status}
+                      size="xs"
+                      variant={filter === status ? 'solid' : 'outline'}
+                      colorScheme="accent"
+                      bg={filter === status ? 'accent.500' : 'transparent'}
+                      color={filter === status ? 'white' : navTextSecondary}
+                      borderColor={filter === status ? 'accent.400' : borderColor}
+                      borderWidth={1}
+                      onClick={() => setFilter(status)}
+                      borderRadius="full"
+                      px={3}
+                      _hover={{ bg: filter === status ? 'accent.400' : 'brand.100', color: navTextPrimary }}
+                    >
+                      {status}
+                    </Button>
+                  ))}
+                </HStack>
               </Box>
+              <Text fontSize="xs" color={mutedColor} whiteSpace="nowrap">
+                {leadsCount.toLocaleString()} leads
+                {filter && filter !== 'All' ? ` • ${filter}` : ''}
+                {searchQuery?.trim() ? ` • “${searchQuery.trim()}”` : ''}
+              </Text>
+            </Flex>
+          </Stack>
+        </Container>
+      </Box>
+
+      <Drawer isOpen={isNavOpen} placement="right" onClose={closeNav}>
+        <DrawerOverlay />
+        <DrawerContent bg={modalBg}>
+          <DrawerHeader borderBottomWidth="1px" borderColor={borderColor} color={navTextPrimary}>
+            Menu
+          </DrawerHeader>
+          <DrawerBody>
+            <Stack spacing={2} mt={2}>
+              {navItems.map(({ view, label, icon }) => (
+                <Button
+                  key={view}
+                  variant="ghost"
+                  justifyContent="flex-start"
+                  leftIcon={<Icon as={icon} color={accentText} />}
+                  onClick={() => {
+                    setModalView(view);
+                    closeNav();
+                  }}
+                >
+                  {label}
+                </Button>
+              ))}
+            </Stack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
+      <Box
+        w="100%"
+        // Ensure content starts below the two sticky bars (nav + command bar)
+        // so the command bar doesn't obstruct the form/leads sections.
+        pt={{ base: 28, md: 32 }}
+        pb={{ base: 6, md: 10 }}
+      >
+        <Container maxW="7xl">
+          <Stack spacing={10} w="100%">
+              
 
               <Box
                 bg={cardBg}
@@ -422,6 +535,85 @@ function App({ onLogout }) {
                     aria-label="Toggle lead list"
                   />
                 </Stack>
+
+                {/* Pipeline strip */}
+                <Box
+                  mb={6}
+                  p={{ base: 3, md: 4 }}
+                  borderRadius="xl"
+                  border="1px solid"
+                  borderColor={borderColor}
+                  bg={useColorModeValue('white', 'black')}
+                >
+                  <Flex
+                    gap={3}
+                    direction={{ base: 'column', lg: 'row' }}
+                    align={{ base: 'stretch', lg: 'center' }}
+                    justify="space-between"
+                  >
+                    <SimpleGrid columns={{ base: 2, md: 3, lg: 6 }} spacing={3} flex="1">
+                      {[
+                        { key: 'All', label: 'All', count: total, tint: useColorModeValue('brand.50', 'brand.900') },
+                        { key: 'New', label: 'New', count: newLeads, tint: useColorModeValue('blue.50', 'blue.900') },
+                        { key: 'Answered', label: 'Answered', count: answered, tint: useColorModeValue('teal.50', 'teal.900') },
+                        { key: 'Qualified', label: 'Qualified', count: qualified, tint: useColorModeValue('green.50', 'green.900') },
+                        { key: 'Scheduled', label: 'Scheduled', count: scheduled, tint: useColorModeValue('purple.50', 'purple.900') },
+                        { key: 'Unqualified', label: 'Unqualified', count: unqualified, tint: useColorModeValue('red.50', 'red.900') },
+                      ].map((s) => {
+                        const isActive = filter === s.key;
+                        return (
+                          <Button
+                            key={s.key}
+                            onClick={() => setFilter(s.key)}
+                            variant="outline"
+                            p={3}
+                            h="auto"
+                            justifyContent="flex-start"
+                            borderRadius="lg"
+                            borderColor={isActive ? 'accent.400' : borderColor}
+                            bg={isActive ? 'accent.50' : s.tint}
+                            _hover={{ borderColor: 'accent.400' }}
+                            textAlign="left"
+                          >
+                            <VStack align="start" spacing={0.5} w="100%">
+                              <Text fontSize="xs" color={mutedColor} letterSpacing="0.02em">
+                                {s.label}
+                              </Text>
+                              <HStack justify="space-between" w="100%">
+                                <Text fontSize="lg" fontWeight="bold" color={navTextPrimary}>
+                                  {Number(s.count || 0).toLocaleString()}
+                                </Text>
+                                <Text fontSize="xs" color={mutedColor}>
+                                  {safePct(s.count || 0, total)}%
+                                </Text>
+                              </HStack>
+                            </VStack>
+                          </Button>
+                        );
+                      })}
+                    </SimpleGrid>
+
+                    <HStack
+                      spacing={6}
+                      justify={{ base: 'flex-start', lg: 'flex-end' }}
+                      flexWrap="wrap"
+                    >
+                      <VStack align="start" spacing={0}>
+                        <Text fontSize="xs" color={mutedColor}>Answer rate</Text>
+                        <Text fontSize="sm" fontWeight="semibold" color={navTextPrimary}>{answeredRate}%</Text>
+                      </VStack>
+                      <VStack align="start" spacing={0}>
+                        <Text fontSize="xs" color={mutedColor}>Qualification</Text>
+                        <Text fontSize="sm" fontWeight="semibold" color={navTextPrimary}>{qualifiedRate}%</Text>
+                      </VStack>
+                      <VStack align="start" spacing={0}>
+                        <Text fontSize="xs" color={mutedColor}>Schedule rate</Text>
+                        <Text fontSize="sm" fontWeight="semibold" color={navTextPrimary}>{scheduledRate}%</Text>
+                      </VStack>
+                    </HStack>
+                  </Flex>
+                </Box>
+
                 <Collapse in={showLeads}>
                   <LeadList
                     leads={leads}
@@ -430,6 +622,14 @@ function App({ onLogout }) {
                     filter={filter}
                     searchQuery={searchQuery}
                     socket={socketRef.current}
+                    onResetFilters={() => {
+                      setFilter('All');
+                      setSearchQuery('');
+                    }}
+                    onAddLead={() => {
+                      setShowForm(true);
+                      setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+                    }}
                   />
                 </Collapse>
                 {!showLeads && (
@@ -454,8 +654,9 @@ function App({ onLogout }) {
                   </Box>
                 )}
               </Box>
-        </Stack>
-      </Container>
+          </Stack>
+        </Container>
+      </Box>
 
       <Footer appName="Lead Caller" />
 
@@ -555,7 +756,7 @@ function App({ onLogout }) {
                               _hover={{ bg: dashboardCardHoverBg }}>
                               <HStack justify="space-between">
                                 <Box>
-                                  <Text fontWeight="semibold">{l.name || '—'}</Text>
+                                  <Text fontWeight="semibold">{`${l.firstName} ${l.lastName}`  || '—'}</Text>
                                   <Text fontSize="sm" color={dashboardPhoneColor}>{l.phone || ''}</Text>
                                 </Box>
                                 <VStack spacing={0} align="end">

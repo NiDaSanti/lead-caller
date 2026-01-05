@@ -42,6 +42,26 @@ const theme = extendTheme({
       900: '#134E4A',
     },
   },
+  radii: {
+    xl: '1rem',
+    '2xl': '1.25rem',
+  },
+  shadows: {
+    // Consistent surface shadows across the app
+    surface: '0 10px 30px rgba(15, 23, 42, 0.10)',
+    surfaceDark: '0 12px 34px rgba(0, 0, 0, 0.45)',
+  },
+  semanticTokens: {
+    colors: {
+      surface: { default: 'white', _dark: 'brand.900' },
+      surfaceMuted: { default: 'brand.50', _dark: 'brand.800' },
+      surfaceBorder: { default: 'brand.200', _dark: 'brand.700' },
+      textMuted: { default: 'brand.600', _dark: 'brand.300' },
+    },
+    shadows: {
+      surface: { default: 'surface', _dark: 'surfaceDark' },
+    },
+  },
   fonts: {
     heading: 'Roboto, sans-serif',
     body: 'Roboto, sans-serif',
@@ -56,6 +76,17 @@ const theme = extendTheme({
     }),
   },
   components: {
+    Card: {
+      baseStyle: {
+        container: {
+          borderRadius: '2xl',
+          border: '1px solid',
+          borderColor: 'surfaceBorder',
+          bg: 'surface',
+          boxShadow: 'surface',
+        },
+      },
+    },
     Button: {
       baseStyle: {
         borderRadius: 'md',
@@ -111,12 +142,12 @@ const theme = extendTheme({
       variants: {
         filled: {
           field: {
-            bg: 'white',
+            bg: 'surface',
             _dark: {
               bg: 'brand.800',
             },
             border: '1px solid',
-            borderColor: 'brand.200',
+            borderColor: 'surfaceBorder',
             _hover: {
               borderColor: 'brand.300',
             },
@@ -138,12 +169,12 @@ const theme = extendTheme({
       },
       variants: {
         filled: {
-          bg: 'white',
+          bg: 'surface',
           _dark: {
             bg: 'brand.800',
           },
           border: '1px solid',
-          borderColor: 'brand.200',
+          borderColor: 'surfaceBorder',
           _hover: {
             borderColor: 'brand.300',
           },

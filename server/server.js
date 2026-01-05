@@ -4,6 +4,8 @@ import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import helmet from 'helmet';
 import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 
@@ -16,6 +18,7 @@ import schedulerRoutes from './routes/schedulerRoutes.js';
 import authRoutes from './routes/auth.js';
 import { startScheduler } from './services/callScheduler.js';
 import { initLeadStore } from './services/leadStore.js';
+import { ensureCsrfCookie, requireCsrf } from './middleware/csrf.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +33,12 @@ const app = express();
 const server = http.createServer(app);
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+// If deployed behind Render/Heroku/etc (TLS terminates at proxy), this is required
+// for secure cookies and correct protocol detection.
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 const defaultOrigins = isProduction
   ? []
   : ['http://localhost:5173'];
@@ -54,10 +63,30 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 
 // ✅ Middleware (ensure order)
+app.use(
+  helmet({
+    // We can tighten CSP later once we inventory all external assets.
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(cors(corsOptions));
 app.use(cookieParser());
+// ✅ Compress API responses (helps bandwidth + memory for large payloads like leads)
+app.use(
+  compression({
+    // Respect explicit opt-out
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) return false;
+      return compression.filter(req, res);
+    },
+  })
+);
 app.use(express.json()); // Parses application/json
 app.use(express.urlencoded({ extended: true })); // Parses application/x-www-form-urlencoded
+
+// CSRF (double-submit cookie): ensure token cookie exists for browser clients.
+app.use(ensureCsrfCookie);
 
 // ✅ Attach Socket.IO to app for access in routes/controllers
 app.set('io', io);
@@ -65,9 +94,11 @@ app.set('io', io);
 // ✅ Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads/webhook', webhookRoutes);
-app.use('/api/leads', leadsRoutes);
-app.use('/api/actions', actionsRoutes);
-app.use('/api/phone', phoneRoutes);
+// Require CSRF for state-changing requests on authenticated API routes.
+// (Webhooks are excluded because they are called by Twilio.)
+app.use('/api/leads', requireCsrf, leadsRoutes);
+app.use('/api/actions', requireCsrf, actionsRoutes);
+app.use('/api/phone', requireCsrf, phoneRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.use('/api/scheduler', schedulerRoutes);
 

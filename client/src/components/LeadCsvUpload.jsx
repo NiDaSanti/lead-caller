@@ -123,8 +123,8 @@ export default function LeadCsvUpload({ onNewLead }) {
     });
   };
 
-  const containerBg = useColorModeValue('brand.50', 'brand.800');
-  const borderColor = useColorModeValue('brand.200', 'brand.700');
+  const containerBg = useColorModeValue('surfaceMuted', 'surfaceMuted');
+  const borderColor = useColorModeValue('surfaceBorder', 'surfaceBorder');
 
   return (
     <Box
@@ -146,7 +146,7 @@ export default function LeadCsvUpload({ onNewLead }) {
           Upload a CSV to add leads.
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }} spacing={4} w="full">
-          <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} bg={useColorModeValue('white', 'brand.900')} />
+          <Input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} bg={useColorModeValue('surface', 'surface')} />
           <Button type="submit" colorScheme="accent" borderRadius="full">
             Upload
           </Button>

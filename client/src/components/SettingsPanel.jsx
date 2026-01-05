@@ -127,7 +127,7 @@ export default function SettingsPanel({ showForm, setShowForm, showLeads, setSho
               <FormLabel>Compact list view</FormLabel>
               <HStack>
                 <Switch isChecked={compactView} onChange={(e) => setCompactView(e.target.checked)} />
-                <Text fontSize="sm" color="gray">Tighter list</Text>
+                <Text fontSize="sm" color={useColorModeValue('textMuted', 'textMuted')}>Tighter list</Text>
               </HStack>
             </FormControl>
             <FormControl>
@@ -166,7 +166,7 @@ export default function SettingsPanel({ showForm, setShowForm, showLeads, setSho
             </HStack>
             <HStack justify="space-between">
               <Text>Import / Export</Text>
-              <Text fontSize="sm" color="gray">Save settings to a file</Text>
+              <Text fontSize="sm" color={useColorModeValue('textMuted', 'textMuted')}>Save settings to a file</Text>
             </HStack>
           </VStack>
         </Box>

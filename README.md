@@ -2,11 +2,192 @@
 
 A full-stack app to manage leads and run AI-assisted phone calls.
 
+**Creator:** Nick Santiago  \
+**Last updated:** 2026-01-04
+
 - **Client:** React + Vite + Chakra UI (`/client`)
 - **Server:** Node + Express (`/server`)
 - **Storage:** JSON files on disk (per-environment) under `server/data/*`
 
 > This README focuses on what you need to deploy successfully and how to run the system locally.
+
+## File location (this doc)
+
+- `README.md` (repo root)
+
+---
+
+## Live deployment: step-by-step (Render server + Netlify client)
+
+This is the recommended “go live” runbook for production.
+
+### Before you start (accounts + decisions)
+
+1) **Create/verify accounts**
+
+- Twilio (Voice enabled)
+- OpenAI
+
+2) **Decide on data durability** (important)
+
+This app stores leads in JSON files on disk.
+
+- If your host uses **ephemeral disk**, leads can reset on redeploy.
+- For production durability on Render, add a **Render Disk** and point `LEADS_FILE`/`SCHEDULER_FILE` to the mounted disk path.
+- Long term: consider moving to a database if you need durability + concurrency guarantees.
+
+3) **Pick admin auth method**
+
+- Use `ADMIN_PASSWORD` (simple) **or** `ADMIN_PASSWORD_HASH` (recommended).
+
+### Step 1 — Prepare production configuration locally (recommended)
+
+1) Copy the production env example:
+
+- `.env.production.example` → create your own `.env.production` (keep it private; don’t commit it)
+
+2) Fill in required values:
+
+- `NODE_ENV=production`
+- `OPENAI_API_KEY`
+- `TWILIO_SID`
+- `TWILIO_AUTH`
+- `TWILIO_PHONE_PROD` (E.164, example `+15551234567`)
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD` **or** `ADMIN_PASSWORD_HASH`
+
+3) Generate an admin SHA-256 hash (optional, recommended):
+
+```bash
+node -e "console.log(require('crypto').createHash('sha256').update('yourpassword').digest('hex'))"
+```
+
+### Step 2 — Validate deployment config (locally)
+
+The server includes a deployment readiness checker.
+
+- Script file: `server/scripts/checkDeployment.js`
+- Run it like:
+
+```bash
+cd server
+npm run check:deploy -- --env production
+```
+
+You can also pass a custom env file:
+
+```bash
+cd server
+npm run check:deploy -- --env production --env-file ../.env.production
+```
+
+### Step 3 — Deploy the server to Render
+
+1) Create a new **Web Service** in Render
+
+- Connect your GitHub repo
+- **Root directory:** `server`
+
+2) Set build + start commands
+
+- **Build Command:** `npm install`
+- **Start Command:** `node server.js`
+
+3) Set Render environment variables (Render → Environment)
+
+Minimum recommended set:
+
+- `NODE_ENV=production`
+- `SERVER_BASE_URL=https://<your-render-service>.onrender.com`
+
+Auth:
+
+- `ADMIN_USERNAME=...`
+- `ADMIN_PASSWORD=...` **or** `ADMIN_PASSWORD_HASH=...`
+
+Twilio:
+
+- `TWILIO_SID=...`
+- `TWILIO_AUTH=...`
+- `TWILIO_PHONE_PROD=+15551234567`
+
+OpenAI:
+
+- `OPENAI_API_KEY=...`
+
+Data paths
+
+- `LEADS_FILE=server/data/prod/leads.json`
+- `SCHEDULER_FILE=server/data/prod/scheduler.json`
+
+> If you add a Render Disk, point the file paths above to the disk’s mount path.
+
+4) Set CORS origins (after Netlify is created)
+
+- `CORS_ORIGINS=https://<your-netlify-site>.netlify.app`
+
+### Step 4 — Configure Twilio webhooks (required for production calling)
+
+Twilio must call back into your server via public URLs.
+
+In Twilio Console → Phone Numbers → (your number) → Voice configuration:
+
+- **Voice URL:** `https://<your-render-service>.onrender.com/api/phone/voice`
+- **Status callback:** `https://<your-render-service>.onrender.com/api/phone/status-callback`
+
+Save changes.
+
+### Step 5 — Deploy the client to Netlify
+
+1) Create a new site in Netlify (from Git)
+
+- **Base directory:** `client`
+- **Build command:** `npm run build`
+- **Publish directory:** `dist`
+
+2) Set the production API base URL
+
+In Netlify → Site configuration → Environment variables:
+
+- `VITE_API_BASE_URL=https://<your-render-service>.onrender.com`
+
+Redeploy after setting the env var.
+
+3) SPA routing (avoid refresh 404s)
+
+- File: `client/public/_redirects`
+- Contents:
+
+```text
+/*    /index.html   200
+```
+
+### Step 6 — Go-live verification checklist (post deploy)
+
+1) UI works:
+
+- Open the Netlify site
+- Log in with your admin credentials
+
+2) API works (in browser / network panel):
+
+- `GET <render>/api/auth/session`
+- `GET <render>/api/leads` (after login)
+
+3) Calling works:
+
+- Place a test call
+- In Twilio Console → Debugger / Monitor, verify webhook requests are **2xx**
+
+4) Persistence check (file-based storage):
+
+- Add a lead
+- Restart/redeploy server
+- Confirm the lead still exists
+
+If it resets, you’re on ephemeral disk → add persistent disk or move to a DB.
+
+---
 
 ## What you need to deploy successfully
 
