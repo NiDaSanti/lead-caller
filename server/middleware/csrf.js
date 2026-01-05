@@ -15,7 +15,8 @@ export function getCsrfCookieOptions(req) {
   return {
     httpOnly: false,
     secure: isProduction,
-    sameSite: isProduction ? 'lax' : 'lax',
+    // Must match auth cookie policy for cross-site requests (Netlify -> Render)
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
   };
 }

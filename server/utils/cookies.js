@@ -12,7 +12,9 @@ export function getCookieOptions(req) {
   return {
     httpOnly: true,
     secure,
-    sameSite: isProduction ? 'lax' : 'lax',
+    // In production, the frontend is typically on a different origin (Netlify)
+    // than the API (Render). Cross-site cookies require SameSite=None + Secure.
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
     maxAge: maxAgeMs,
     // You can set `domain` if you need cross-subdomain cookies.
