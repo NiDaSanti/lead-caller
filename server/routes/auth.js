@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import { generateToken, registerToken, unregisterToken } from '../middleware/auth.js';
+import { activeTokens } from '../middleware/tokenStore.js';
 import { getCookieOptions } from '../utils/cookies.js';
 import { generateCsrfToken, getCsrfCookieOptions } from '../middleware/csrf.js';
 
@@ -61,14 +62,29 @@ router.post('/logout', (req, res) => {
   const headerToken = authHeader.split(' ')[1];
   if (headerToken) unregisterToken(headerToken);
 
-  res.clearCookie('auth', { path: '/' });
-  res.clearCookie('csrf', { path: '/' });
+  // Clear cookies using the same options that were used to set them.
+  // In particular, production cookies are SameSite=None; Secure, and browsers
+  // may refuse to clear if those attributes don't match.
+  const cookieOptions = getCookieOptions(req);
+  res.clearCookie('auth', {
+    path: cookieOptions.path || '/',
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+  });
+  const csrfOptions = getCsrfCookieOptions(req);
+  res.clearCookie('csrf', {
+    path: csrfOptions.path || '/',
+    secure: csrfOptions.secure,
+    sameSite: csrfOptions.sameSite,
+  });
   res.json({ success: true });
 });
 
 router.get('/session', (req, res) => {
   const cookieToken = req.cookies?.auth;
-  const authenticated = !!cookieToken;
+  // Treat session as authenticated only if the token is both present and active.
+  // This prevents stale cookies from re-authenticating the UI after logout.
+  const authenticated = !!cookieToken && activeTokens.has(cookieToken);
   res.json({ authenticated });
 });
 
