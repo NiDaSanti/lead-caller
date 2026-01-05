@@ -111,11 +111,25 @@ const theme = extendTheme({
             bg: 'brand.100',
             borderColor: 'brand.400',
           },
+          _dark: {
+            borderColor: 'brand.600',
+            color: 'brand.100',
+            _hover: {
+              bg: 'brand.800',
+              borderColor: 'brand.500',
+            },
+          },
         },
         ghost: {
           color: 'brand.700',
           _hover: {
             bg: 'brand.100',
+          },
+          _dark: {
+            color: 'brand.100',
+            _hover: {
+              bg: 'brand.800',
+            },
           },
         },
       },

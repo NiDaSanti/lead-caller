@@ -73,11 +73,11 @@ export default function LeadCard({ lead, onUpdateLead, onDeleteLead, scrollRef, 
   const contactPanelBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100');
   const outlineBorder = useColorModeValue('brand.200', 'brand.600');
   const outlineColor = useColorModeValue('brand.700', 'highlight.100');
-  const outlineHoverBg = useColorModeValue('brand.50', 'whiteAlpha.300');
+  const outlineHoverBg = useColorModeValue('brand.50', 'brand.800');
   const reportCardBg = useColorModeValue('surface', 'surface');
   const reportShadow = useColorModeValue('surface', 'surface');
   const deleteColor = useColorModeValue('accent.600', 'accent.200');
-  const deleteHoverBg = useColorModeValue('accent.50', 'whiteAlpha.300');
+  const deleteHoverBg = useColorModeValue('accent.50', 'brand.800');
   const badgeColor = ({
     Qualified: 'highlight',
     Scheduled: 'accent',

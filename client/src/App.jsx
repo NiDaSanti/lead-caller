@@ -75,7 +75,7 @@ function App({ onLogout }) {
   const navBg = useColorModeValue("rgba(255,255,255,0.9)", "black");
   const navTextPrimary = useColorModeValue("brand.900", "brand.50");
   const navTextSecondary = useColorModeValue("brand.600", "brand.200");
-  const navButtonHover = useColorModeValue("brand.100", "whiteAlpha.200");
+  const navButtonHover = useColorModeValue("brand.100", "brand.800");
   const appShellBg = useColorModeValue('gray.50', 'gray.800');
   const avatarBadgeBg = useColorModeValue('accent.100', 'accent.700');
   const searchBg = useColorModeValue('white', 'brand.900');
@@ -86,6 +86,30 @@ function App({ onLogout }) {
   const dashboardDateColor = useColorModeValue('brand.500', 'brand.300');
 
   const [brand500] = useToken('colors', ['brand.500']);
+
+  // Pipeline (status strip) colors: hooks must run at component top-level.
+  const pipelineBg = useColorModeValue('white', 'black');
+  const pipelineStageTints = useColorModeValue(
+    {
+      All: 'brand.50',
+      New: 'blue.50',
+      Answered: 'teal.50',
+      Qualified: 'green.50',
+      Scheduled: 'purple.50',
+      Unqualified: 'red.50',
+    },
+    {
+      All: 'brand.900',
+      New: 'blue.900',
+      Answered: 'teal.900',
+      Qualified: 'green.900',
+      Scheduled: 'purple.900',
+      Unqualified: 'red.900',
+    }
+  );
+  const pipelineActiveBg = useColorModeValue('accent.50', 'brand.800');
+  const pipelineActiveText = useColorModeValue(navTextPrimary, 'brand.50');
+  const pipelineActiveMuted = useColorModeValue(mutedColor, 'brand.200');
 
   const [leads, setLeads] = useState([]);
   const [showForm, setShowForm] = useState(() => localStorage.getItem("showForm") !== "false");
@@ -543,7 +567,7 @@ function App({ onLogout }) {
                   borderRadius="xl"
                   border="1px solid"
                   borderColor={borderColor}
-                  bg={useColorModeValue('white', 'black')}
+                  bg={pipelineBg}
                 >
                   <Flex
                     gap={3}
@@ -553,12 +577,12 @@ function App({ onLogout }) {
                   >
                     <SimpleGrid columns={{ base: 2, md: 3, lg: 6 }} spacing={3} flex="1">
                       {[
-                        { key: 'All', label: 'All', count: total, tint: useColorModeValue('brand.50', 'brand.900') },
-                        { key: 'New', label: 'New', count: newLeads, tint: useColorModeValue('blue.50', 'blue.900') },
-                        { key: 'Answered', label: 'Answered', count: answered, tint: useColorModeValue('teal.50', 'teal.900') },
-                        { key: 'Qualified', label: 'Qualified', count: qualified, tint: useColorModeValue('green.50', 'green.900') },
-                        { key: 'Scheduled', label: 'Scheduled', count: scheduled, tint: useColorModeValue('purple.50', 'purple.900') },
-                        { key: 'Unqualified', label: 'Unqualified', count: unqualified, tint: useColorModeValue('red.50', 'red.900') },
+                        { key: 'All', label: 'All', count: total, tint: pipelineStageTints.All },
+                        { key: 'New', label: 'New', count: newLeads, tint: pipelineStageTints.New },
+                        { key: 'Answered', label: 'Answered', count: answered, tint: pipelineStageTints.Answered },
+                        { key: 'Qualified', label: 'Qualified', count: qualified, tint: pipelineStageTints.Qualified },
+                        { key: 'Scheduled', label: 'Scheduled', count: scheduled, tint: pipelineStageTints.Scheduled },
+                        { key: 'Unqualified', label: 'Unqualified', count: unqualified, tint: pipelineStageTints.Unqualified },
                       ].map((s) => {
                         const isActive = filter === s.key;
                         return (
@@ -571,19 +595,19 @@ function App({ onLogout }) {
                             justifyContent="flex-start"
                             borderRadius="lg"
                             borderColor={isActive ? 'accent.400' : borderColor}
-                            bg={isActive ? 'accent.50' : s.tint}
+                            bg={isActive ? pipelineActiveBg : s.tint}
                             _hover={{ borderColor: 'accent.400' }}
                             textAlign="left"
                           >
                             <VStack align="start" spacing={0.5} w="100%">
-                              <Text fontSize="xs" color={mutedColor} letterSpacing="0.02em">
+                              <Text fontSize="xs" color={isActive ? pipelineActiveMuted : mutedColor} letterSpacing="0.02em">
                                 {s.label}
                               </Text>
                               <HStack justify="space-between" w="100%">
-                                <Text fontSize="lg" fontWeight="bold" color={navTextPrimary}>
+                                <Text fontSize="lg" fontWeight="bold" color={isActive ? pipelineActiveText : navTextPrimary}>
                                   {Number(s.count || 0).toLocaleString()}
                                 </Text>
-                                <Text fontSize="xs" color={mutedColor}>
+                                <Text fontSize="xs" color={isActive ? pipelineActiveMuted : mutedColor}>
                                   {safePct(s.count || 0, total)}%
                                 </Text>
                               </HStack>
