@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { resolveLeadsFilePath } from './dataPaths.js';
 
 export const readDataFile = (filePath) => {
   return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
@@ -10,11 +11,12 @@ export const writeDataFile = (filePath, data) => {
 };
 
 export const backupLeadsFile = () => {
-  const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
-  const leadsPath = process.env.LEADS_FILE
-    ? path.resolve(process.env.LEADS_FILE)
-    : path.join(process.cwd(), `server/data/${env}/leads.json`);
-  const backupDir = path.join(process.cwd(), 'server/data/backups');
+  const leadsPath = resolveLeadsFilePath();
+  // If LEADS_FILE points to a mounted disk, back up next to it.
+  // Otherwise, fall back to the repo's default backups folder.
+  const backupDir = process.env.LEADS_FILE
+    ? path.join(path.dirname(leadsPath), 'backups')
+    : path.join(process.cwd(), 'server/data/backups');
 
   if (!fs.existsSync(backupDir)) {
     fs.mkdirSync(backupDir);

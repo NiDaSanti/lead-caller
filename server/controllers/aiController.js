@@ -3,11 +3,9 @@
 import { getNextAIResponse } from '../services/openaiClients.js';
 import fs from 'fs';
 import path from 'path';
+import { resolveLeadsFilePath } from '../utils/dataPaths.js';
 
-const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
-const leadsPath = process.env.LEADS_FILE
-  ? path.resolve(process.env.LEADS_FILE)
-  : path.join(process.cwd(), `server/data/${env}/leads.json`);
+const leadsPath = resolveLeadsFilePath();
 
 export const handleVoiceScript = async (req, res) => {
   const { leadId } = req.params;

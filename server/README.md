@@ -91,6 +91,28 @@ Set these in Render → Service → Environment:
 - `ADMIN_USERNAME=...`
 - `ADMIN_PASSWORD_HASH=...` (recommended) or `ADMIN_PASSWORD=...`
 
+### ✅ Data persistence (important for multi-device consistency)
+
+By default, the server stores leads in a JSON file on local disk (`server/data/prod/leads.json`).
+On Render, local disk is **ephemeral** and (if you scale instances) **not shared** between instances.
+
+To ensure leads are consistent across devices in production, use **Option A (recommended for now):**
+
+1. Add a **Persistent Disk** to your Render service.
+2. Set the `LEADS_FILE` environment variable to a file on that disk.
+3. Keep the service at **1 instance** (file-based storage is not safe across multiple instances).
+
+Render example:
+
+- Disk mount path: `/var/data`
+- Env var: `LEADS_FILE=/var/data/leads.json`
+
+Notes:
+
+- The server will create the directory/file if needed.
+- Backups (when used) will be written to a `backups/` folder next to `LEADS_FILE`.
+- If you later need multiple instances, migrate to Postgres (planned) instead of file-based JSON.
+
 ### Optional (can be added later)
 
 - Twilio: `TWILIO_SID`, `TWILIO_AUTH`, `TWILIO_PHONE_PROD`

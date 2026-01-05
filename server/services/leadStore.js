@@ -1,13 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { resolveLeadsFilePath } from '../utils/dataPaths.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function defaultLeadsPath() {
-  const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
-  return path.join(__dirname, `../data/${env}/leads.json`);
+  return resolveLeadsFilePath();
 }
 
 function normalizePhone(phone) {
@@ -21,7 +21,7 @@ function leadIdKey(id) {
 
 export class LeadStore {
   constructor({ filePath, flushDelayMs = 400 } = {}) {
-    this.filePath = filePath || (process.env.LEADS_FILE ? path.resolve(process.env.LEADS_FILE) : defaultLeadsPath());
+    this.filePath = filePath || defaultLeadsPath();
     this.flushDelayMs = flushDelayMs;
 
     this._loaded = false;

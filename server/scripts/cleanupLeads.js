@@ -1,14 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { resolveLeadsFilePath } from '../utils/dataPaths.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const env = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
-const leadsFile = process.env.LEADS_FILE
-  ? path.resolve(process.env.LEADS_FILE)
-  : path.join(__dirname, `../data/${env}/leads.json`);
+const leadsFile = resolveLeadsFilePath();
 
 const isRealResponse = (resp) =>
   typeof resp.q === 'string' &&
