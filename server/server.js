@@ -19,18 +19,28 @@ import authRoutes from './routes/auth.js';
 import { startScheduler } from './services/callScheduler.js';
 import { initLeadStore } from './services/leadStore.js';
 import { ensureCsrfCookie, requireCsrf } from './middleware/csrf.js';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ Load environment variables
-// In production (Render/Netlify/etc), environment variables are provided by the platform.
-// We should not depend on a local .env.production file being present.
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config({ path: path.join(__dirname, '..', '.env.development') });
+// - Local dev: load repo-root .env.development
+// - Production:
+//   - If repo-root .env.production exists (local prod run), load it
+//   - Otherwise rely on platform-provided env vars (Render)
+const repoRoot = path.join(__dirname, '..');
+const devEnvPath = path.join(repoRoot, '.env.development');
+const prodEnvPath = path.join(repoRoot, '.env.production');
+
+if (process.env.NODE_ENV === 'production') {
+  const usingProdFile = fs.existsSync(prodEnvPath);
+  dotenv.config(usingProdFile ? { path: prodEnvPath } : undefined);
+  console.log(`🔧 Env: production (${usingProdFile ? 'loaded .env.production' : 'platform env'})`);
 } else {
-  // Allow local prod runs if a file exists, but don't require it.
-  dotenv.config();
+  const usingDevFile = fs.existsSync(devEnvPath);
+  dotenv.config(usingDevFile ? { path: devEnvPath } : undefined);
+  console.log(`🔧 Env: development (${usingDevFile ? 'loaded .env.development' : 'process env'})`);
 }
 
 const app = express();
