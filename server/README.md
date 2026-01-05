@@ -72,6 +72,37 @@ The script loads your `.env` file (pass a custom one with `--env-file path/to/.e
 
 Address any reported errors before deploying to ensure automated calls and AI responses work end-to-end.
 
+## Deploying (Render)
+
+This backend is ready to deploy to **Render** even if you haven't configured Twilio/OpenAI yet.
+
+### Render settings
+
+- **Root directory:** `server`
+- **Build command:** `npm install`
+- **Start command:** `npm start`
+
+### Required environment variables (minimum)
+
+Set these in Render → Service → Environment:
+
+- `NODE_ENV=production`
+- `CORS_ORIGINS=https://<your-netlify-site>.netlify.app`
+- `ADMIN_USERNAME=...`
+- `ADMIN_PASSWORD_HASH=...` (recommended) or `ADMIN_PASSWORD=...`
+
+### Optional (can be added later)
+
+- Twilio: `TWILIO_SID`, `TWILIO_AUTH`, `TWILIO_PHONE_PROD`
+- OpenAI: `OPENAI_API_KEY`
+- If/when you enable Twilio webhooks: `SERVER_BASE_URL=https://<your-render-service>.onrender.com`
+
+### Health check
+
+After deploy, verify:
+
+- `GET /api/health` returns `{ ok: true }`
+
 ### OpenAI setup
 
 1. Create an account at [OpenAI](https://platform.openai.com/).

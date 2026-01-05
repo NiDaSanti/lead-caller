@@ -1,0 +1,29 @@
+# Netlify configuration
+# - Builds the Vite client
+# - Proxies `/api/*` and `/socket.io/*` to the Render-hosted server
+
+[build]
+  base = "client"
+  command = "npm run build"
+  publish = "dist"
+
+# Set this in Netlify UI (recommended): Settings -> Environment variables
+# VITE_API_BASE_URL=https://<your-render-service>.onrender.com
+
+[[redirects]]
+  from = "/api/*"
+  to = ":VITE_API_BASE_URL/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/socket.io/*"
+  to = ":VITE_API_BASE_URL/socket.io/:splat"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

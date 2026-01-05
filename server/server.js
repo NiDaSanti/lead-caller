@@ -23,11 +23,15 @@ import { ensureCsrfCookie, requireCsrf } from './middleware/csrf.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Load environment variables based on NODE_ENV
-const envFile = process.env.NODE_ENV === 'production'
-  ? '.env.production'
-  : '.env.development';
-dotenv.config({ path: path.join(__dirname, '..', envFile) });
+// ✅ Load environment variables
+// In production (Render/Netlify/etc), environment variables are provided by the platform.
+// We should not depend on a local .env.production file being present.
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '..', '.env.development') });
+} else {
+  // Allow local prod runs if a file exists, but don't require it.
+  dotenv.config();
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -101,6 +105,11 @@ app.use('/api/actions', requireCsrf, actionsRoutes);
 app.use('/api/phone', requireCsrf, phoneRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.use('/api/scheduler', schedulerRoutes);
+
+// ✅ Health check (Render uses this for deploy verification)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ ok: true });
+});
 
 // ✅ Start scheduled jobs
 startScheduler();

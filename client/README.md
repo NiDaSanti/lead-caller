@@ -121,6 +121,29 @@ Common endpoints:
 - `PUT /api/leads/:id` — update lead
 - `POST /api/leads/bulk` — bulk insert
 
+## Deploying (Netlify)
+
+This frontend is ready to deploy to **Netlify** as a static Vite build.
+
+### Netlify settings
+
+- **Base directory:** `client`
+- **Build command:** `npm run build`
+- **Publish directory:** `dist`
+
+### Point the frontend at Render
+
+In Netlify → Site settings → Environment variables, set:
+
+- `VITE_API_BASE_URL=https://<your-render-service>.onrender.com`
+
+The app uses cookie-based auth + CSRF. In production, this requires your Render API to allow your Netlify origin via `CORS_ORIGINS`.
+
+### SPA routing
+
+This project includes a Netlify SPA redirect in `public/_redirects`.
+If you deploy from the repo root, you can also use the provided `netlify.toml`.
+
 ## CSV upload format
 
 The first row must contain these headers:
